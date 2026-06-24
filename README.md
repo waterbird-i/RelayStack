@@ -30,11 +30,21 @@ brief.
 
 Build a skill, not a CLI.
 
-Current implementation keeps handoff as the main demo path and adds two small
+Current implementation keeps handoff as the main demo path and adds small
 workflow entry skills around attractor docs:
 
 ```text
 skills/
+├── rs/
+│   └── SKILL.md
+├── rs-onboard/
+│   └── SKILL.md
+├── rs-req/
+│   └── SKILL.md
+├── rs-arch/
+│   └── SKILL.md
+├── rs-roadmap/
+│   └── SKILL.md
 ├── rs-handoff/
 │   ├── SKILL.md
 │   └── scripts/generate_snapshot.py
@@ -43,6 +53,15 @@ skills/
 └── rs-issue/
     └── SKILL.md
 ```
+
+`rs` is the root entry. Use it when you are not sure which RelayStack skill
+should handle a request.
+
+`rs-onboard` connects a repository to the attractor doc layout.
+
+`rs-req`, `rs-arch`, and `rs-roadmap` maintain requirements, architecture, and
+large-work planning without copying CodeStable's full process archive into the
+team repository.
 
 `rs-handoff` reads the current workspace context:
 

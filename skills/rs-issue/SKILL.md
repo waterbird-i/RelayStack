@@ -51,5 +51,7 @@ Keep these outside the team repository by default:
 - Do not create `.codestable/issues/` records in the team repository.
 - Do not hide a behavior or architecture change only in the private notes.
 - Do not broaden the fix into a new feature. Open a feature path instead.
+- If the fix changes expected behavior, update requirements through `rs-req`.
+- If the fix changes a stable boundary, update architecture through `rs-arch`.
 - Do not update attractor docs with guesses. Only write stable facts.
 - Keep validation scoped. Do not run full TypeScript checks unless the user asks.

@@ -22,10 +22,20 @@ RelayStack 是一个以 skill 形式落地的 AI 编程工作流增强层。
 
 构建一个 skill，而不是 CLI。
 
-当前实现保留 handoff 作为主要演示路径，并补充两个围绕吸引子文档工作的轻量入口：
+当前实现保留 handoff 作为主要演示路径，并补充围绕吸引子文档工作的轻量入口：
 
 ```text
 skills/
+├── rs/
+│   └── SKILL.md
+├── rs-onboard/
+│   └── SKILL.md
+├── rs-req/
+│   └── SKILL.md
+├── rs-arch/
+│   └── SKILL.md
+├── rs-roadmap/
+│   └── SKILL.md
 ├── rs-handoff/
 │   ├── SKILL.md
 │   └── scripts/generate_snapshot.py
@@ -34,6 +44,12 @@ skills/
 └── rs-issue/
     └── SKILL.md
 ```
+
+`rs` 是统一根入口。不知道该用哪个 RelayStack skill 时就喊它。
+
+`rs-onboard` 负责把仓库接入吸引子文档结构。
+
+`rs-req`、`rs-arch`、`rs-roadmap` 分别维护需求、架构和大需求拆解，不把 CodeStable 的全过程档案搬进团队仓库。
 
 `rs-handoff` 会读取当前工作区上下文：
 

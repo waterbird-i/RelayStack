@@ -22,15 +22,17 @@ updates only the durable attractor docs that future sessions must read.
    - what should be built
    - why it matters now
    - which existing design or architecture it touches
+   - whether `rs-req`, `rs-arch`, or `rs-roadmap` should run first
 3. If the request is still unclear, keep brainstorming in the user's personal
    project notes, not in the team repository.
-4. Implement the smallest complete slice.
-5. After implementation, update only the affected attractor docs:
+4. If the request is too large for one complete slice, route to `rs-roadmap`.
+5. Implement the smallest complete slice.
+6. After implementation, update only the affected attractor docs:
    - `docs/backlog/`: status, owner, next action, verification
    - `docs/requirements/`: settled behavior or acceptance criteria
    - `docs/design/`: final app behavior and user flow
    - `docs/architecture/`: real structure, boundaries, or contracts
-6. Use `rs-handoff` when another person or agent needs to continue.
+7. Use `rs-handoff` when another person or agent needs to continue.
 
 ## Personal Project Notes
 
