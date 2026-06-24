@@ -1,6 +1,8 @@
 ---
 name: rs-brainstorm
 description: RelayStack discussion entry for unclear ideas. Triage to rs-feat-design, a personal feature brainstorm note, or rs-roadmap.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Brainstorm

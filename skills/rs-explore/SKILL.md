@@ -1,6 +1,8 @@
 ---
 name: rs-explore
 description: Explore code or docs to answer a focused question and preserve reusable evidence.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Explore

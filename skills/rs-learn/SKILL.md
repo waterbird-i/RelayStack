@@ -1,11 +1,20 @@
 ---
 name: rs-learn
 description: Capture a pitfall or good practice discovered during RelayStack work.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Learn
 
 Use this skill when a feature, issue, or exploration produced reusable learning.
+
+## Do Not Use When
+
+- The learning is now a settled rule, constraint, or decision; use `rs-decide`.
+- The detail is only useful for one incident; keep it in personal notes or
+  `rs-handoff`.
+- The lesson has not been verified; use `rs-explore` first.
 
 ## Destination
 

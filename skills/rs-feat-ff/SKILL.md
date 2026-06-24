@@ -1,11 +1,20 @@
 ---
 name: rs-feat-ff
 description: Fast RelayStack feature path for tiny changes that do not need a design phase.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Feat FF
 
 Use this skill when the request is small, clear, and low risk.
+
+## Do Not Use When
+
+- The scope needs design, new terminology, or contract changes; use
+  `rs-feat-design`.
+- Existing behavior is broken; use `rs-issue`.
+- The task is multi-step or ambiguous; use `rs-feat`.
 
 ## Use When
 

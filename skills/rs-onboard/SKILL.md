@@ -1,6 +1,8 @@
 ---
 name: rs-onboard
 description: Onboard a repository into RelayStack by creating or auditing the five attractor doc directories under docs/.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Onboard

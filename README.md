@@ -156,6 +156,29 @@ collaboration, auto-commit, task management, or full semantic code analysis.
 The first version should stay boring: generate one useful handoff snapshot from
 real project evidence.
 
+## Install Skills
+
+Interactive install lets users choose specific skills or enter `all` to install
+everything:
+
+```bash
+python3 scripts/install_skills.py
+```
+
+Common non-interactive commands:
+
+```bash
+# Install all skills into $CODEX_HOME/skills or ~/.codex/skills
+python3 scripts/install_skills.py --all
+
+# Install by index. Use --list first to inspect ordering.
+python3 scripts/install_skills.py --list
+python3 scripts/install_skills.py --select 1,3-5
+```
+
+Existing target skill folders are skipped by default. Use `--force` to replace
+them.
+
 ## Run the MVP
 
 From the workspace root:

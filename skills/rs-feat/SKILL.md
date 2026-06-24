@@ -1,6 +1,8 @@
 ---
 name: rs-feat
 description: Start and guide a RelayStack feature change. Use when adding a new capability and the team repository should converge on docs/context, docs/backlog, docs/requirements, docs/design, and docs/architecture instead of storing full process archives.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Feat
@@ -9,6 +11,12 @@ Use this skill when the request adds a new capability.
 
 RelayStack feature work keeps the heavy process outside the team repository and
 updates only the durable attractor docs that future sessions must read.
+
+## Do Not Use When
+
+- The request is tiny, clear, and low risk; use `rs-feat-ff`.
+- Existing behavior is broken; use `rs-issue`.
+- The work is too large for one feature slice; use `rs-roadmap`.
 
 ## Workflow
 

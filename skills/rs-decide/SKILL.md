@@ -1,6 +1,8 @@
 ---
 name: rs-decide
 description: Record an already-made RelayStack technical decision, constraint, or convention.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Decide
@@ -9,6 +11,13 @@ Use this skill when a decision is already made.
 
 Decisions are durable attractor facts. They belong in team docs when they affect
 future contributors.
+
+## Do Not Use When
+
+- The point is a reusable pitfall or practice, but not a settled decision; use
+  `rs-learn`.
+- The decision is still being debated; use `rs-brainstorm`.
+- The evidence is missing; use `rs-explore` first.
 
 ## Destination
 

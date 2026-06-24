@@ -1,6 +1,8 @@
 ---
 name: rs-feat-design
 description: Draft a small feature design note as the single input for implementation, while keeping stable facts aligned with RelayStack attractor docs.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Feat Design

@@ -1,6 +1,8 @@
 ---
 name: rs-req
 description: Maintain RelayStack requirements attractor docs under docs/requirements/.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Req

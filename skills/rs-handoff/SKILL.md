@@ -1,6 +1,8 @@
 ---
 name: rs-handoff
 description: Generate RelayStack handoff snapshots for AI coding work. Use when a person or agent needs to hand off current workspace state, changed files, project context, blockers, risks, next steps, and validation evidence to the next owner.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Handoff

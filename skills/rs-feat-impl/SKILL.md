@@ -1,6 +1,8 @@
 ---
 name: rs-feat-impl
 description: Implement a feature according to an approved RelayStack design note.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Feat Impl
@@ -17,6 +19,25 @@ Use this skill when `{slug}-design.md` is approved.
 5. Keep the diff as small as possible.
 6. Run the smallest checks that prove the slice works.
 7. Summarize changed files and checks.
+
+## Final Output
+
+```markdown
+Changed Files:
+- ...
+
+Checks:
+- ...
+
+Docs Updated:
+- ...
+
+Skipped:
+- ...
+
+Next Skill:
+- ...
+```
 
 ## Rules
 

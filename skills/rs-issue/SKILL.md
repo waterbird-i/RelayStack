@@ -1,6 +1,8 @@
 ---
 name: rs-issue
 description: Fix a RelayStack issue while preserving root cause notes privately and updating only durable team attractor docs after the fix.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Issue
@@ -11,6 +13,12 @@ The fix should leave two kinds of memory:
 
 - private process memory in the user's personal project notes
 - durable team truth in the attractor docs
+
+## Do Not Use When
+
+- The root cause and fix direction are already confirmed; use `rs-issue-fix`.
+- The problem is a new capability request; use `rs-feat`.
+- The only need is to capture a reproducible report; use `rs-issue-report`.
 
 ## Workflow
 

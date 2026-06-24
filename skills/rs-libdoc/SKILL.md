@@ -1,11 +1,20 @@
 ---
 name: rs-libdoc
 description: Write source-of-truth reference documentation for public APIs, commands, or reusable components.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Libdoc
 
 Use this skill for reference docs: "what does this public surface expose?"
+
+## Do Not Use When
+
+- The reader wants step-by-step task guidance; use `rs-guide`.
+- The surface is private or unstable; use `rs-explore` first.
+- The content is a project convention rather than a public surface; use
+  `rs-decide`.
 
 ## Destination
 

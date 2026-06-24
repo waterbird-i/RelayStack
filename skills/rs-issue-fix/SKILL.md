@@ -1,6 +1,8 @@
 ---
 name: rs-issue-fix
 description: Apply a confirmed issue fix, verify it, and update durable RelayStack attractor docs.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Issue Fix
@@ -20,6 +22,31 @@ Use this skill when the root cause and fix direction are confirmed.
    - `docs/requirements/`: clarified expected behavior
    - `docs/design/`: changed supported behavior
    - `docs/architecture/`: stable boundary or contract exposed by the fix
+
+## Do Not Use When
+
+- Root cause is unclear; use `rs-issue-analyze`.
+- Expected behavior is missing; use `rs-req`.
+- The problem is actually a new capability gap; use `rs-feat`.
+
+## Final Output
+
+```markdown
+Changed Files:
+- ...
+
+Checks:
+- ...
+
+Docs Updated:
+- ...
+
+Skipped:
+- ...
+
+Next Skill:
+- ...
+```
 
 ## Rules
 

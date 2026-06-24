@@ -1,6 +1,8 @@
 ---
 name: rs-issue-report
 description: Turn a fuzzy problem report into a reproducible RelayStack issue report.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Issue Report

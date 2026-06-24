@@ -1,6 +1,8 @@
 ---
 name: rs-feat-accept
 description: Validate feature implementation against the approved design and update durable RelayStack attractor docs.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Feat Accept
@@ -20,6 +22,25 @@ Use this skill after feature implementation.
 5. Put detailed acceptance notes in personal project notes or `rs-handoff`.
 6. Suggest `rs-learn`, `rs-trick`, `rs-decide`, `rs-guide`, or `rs-libdoc` only
    when the completed work created durable knowledge.
+
+## Final Output
+
+```markdown
+Acceptance:
+- ...
+
+Checks:
+- ...
+
+Docs Updated:
+- ...
+
+Skipped:
+- ...
+
+Next Skill:
+- ...
+```
 
 ## Rules
 

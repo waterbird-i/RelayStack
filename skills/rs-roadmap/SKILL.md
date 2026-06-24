@@ -1,6 +1,8 @@
 ---
 name: rs-roadmap
 description: Plan RelayStack work that is too large for one feature, using docs/backlog as the team-facing planning attractor.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Roadmap

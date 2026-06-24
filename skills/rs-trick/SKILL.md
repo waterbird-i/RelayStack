@@ -1,6 +1,8 @@
 ---
 name: rs-trick
 description: Capture a reusable programming pattern, library usage, or technical recipe for RelayStack work.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS Trick

@@ -1,6 +1,8 @@
 ---
 name: rs
 description: RelayStack root entry. Use when the user says rs, asks which RelayStack skill to use, wants the system overview, or gives an open-ended request that should be routed to an rs-* skill.
+version: "0.1.0"
+updated: 2026-06-24
 ---
 
 # RS
