@@ -39,16 +39,44 @@ skills/
 │   └── SKILL.md
 ├── rs-onboard/
 │   └── SKILL.md
+├── rs-brainstorm/
+│   └── SKILL.md
 ├── rs-req/
 │   └── SKILL.md
 ├── rs-arch/
 │   └── SKILL.md
 ├── rs-roadmap/
 │   └── SKILL.md
+├── rs-explore/
+│   └── SKILL.md
+├── rs-learn/
+│   └── SKILL.md
+├── rs-trick/
+│   └── SKILL.md
+├── rs-decide/
+│   └── SKILL.md
+├── rs-guide/
+│   └── SKILL.md
+├── rs-libdoc/
+│   └── SKILL.md
 ├── rs-handoff/
 │   ├── SKILL.md
 │   └── scripts/generate_snapshot.py
 ├── rs-feat/
+│   └── SKILL.md
+├── rs-feat-design/
+│   └── SKILL.md
+├── rs-feat-impl/
+│   └── SKILL.md
+├── rs-feat-accept/
+│   └── SKILL.md
+├── rs-feat-ff/
+│   └── SKILL.md
+├── rs-issue-report/
+│   └── SKILL.md
+├── rs-issue-analyze/
+│   └── SKILL.md
+├── rs-issue-fix/
 │   └── SKILL.md
 └── rs-issue/
     └── SKILL.md
@@ -62,6 +90,12 @@ should handle a request.
 `rs-req`, `rs-arch`, and `rs-roadmap` maintain requirements, architecture, and
 large-work planning without copying CodeStable's full process archive into the
 team repository.
+
+`rs-brainstorm` handles unclear ideas. `rs-feat-*` and `rs-issue-*` provide
+stage-specific feature and issue workflows. `rs-learn`, `rs-trick`,
+`rs-decide`, `rs-explore`, `rs-guide`, and `rs-libdoc` capture durable lessons,
+recipes, decisions, evidence, and public docs only when they belong in the
+attractor docs.
 
 `rs-handoff` reads the current workspace context:
 

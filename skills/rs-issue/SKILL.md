@@ -35,6 +35,16 @@ The fix should leave two kinds of memory:
    - `docs/architecture/`: root cause that exposes a stable boundary or contract
 9. Use `rs-handoff` when the fix needs to be handed to another owner.
 
+## Routes
+
+| Current state | Route |
+|---|---|
+| issue is not yet reproducible | `rs-issue-report` |
+| report exists, root cause unclear | `rs-issue-analyze` |
+| root cause and fix are confirmed | `rs-issue-fix` |
+| fix is complete and needs handoff | `rs-handoff` |
+| problem is actually a new capability | `rs-feat` |
+
 ## Personal Project Notes
 
 Keep these outside the team repository by default:

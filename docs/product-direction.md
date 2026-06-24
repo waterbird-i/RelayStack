@@ -59,11 +59,13 @@ The skill should collect only cheap, local evidence:
 - `git diff --stat`
 - `git diff --name-only`
 - `git log --oneline -n 5`
-- `.codestable/attention.md`, if present
-- `.codestable/features/**`, if present
-- `.codestable/issues/**`, if present
-- `.codestable/roadmap/**`, if present
+- `docs/context/**`, if present
+- `docs/backlog/**`, if present
+- `docs/requirements/**`, if present
+- `docs/design/**`, if present
+- `docs/architecture/**`, if present
 - Visible agent task records or sub-agent summaries, if the environment exposes them
+- Personal project notes, if the user explicitly points to them
 
 Missing sources should not fail the skill. The snapshot should say `未发现`.
 
@@ -106,10 +108,12 @@ Suggested template:
 - 风险：
 - 需要用户确认：
 
-## 6. CodeStable 上下文
-- 相关 feature：
-- 相关 issue：
-- 相关 roadmap：
+## 6. Attractor Docs 上下文
+- context：
+- backlog：
+- requirements：
+- design：
+- architecture：
 - 关键注意事项：
 
 ## 7. Agent 交接信息
@@ -140,7 +144,7 @@ The MVP should not include:
 - Account or permission model
 - Real-time collaboration
 - Auto-committing Git changes
-- Auto-editing `.codestable`
+- Auto-editing personal process archives
 - Full semantic code analysis
 - Task management system
 - Hard dependency on an LLM API

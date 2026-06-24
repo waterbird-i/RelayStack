@@ -30,16 +30,44 @@ skills/
 │   └── SKILL.md
 ├── rs-onboard/
 │   └── SKILL.md
+├── rs-brainstorm/
+│   └── SKILL.md
 ├── rs-req/
 │   └── SKILL.md
 ├── rs-arch/
 │   └── SKILL.md
 ├── rs-roadmap/
 │   └── SKILL.md
+├── rs-explore/
+│   └── SKILL.md
+├── rs-learn/
+│   └── SKILL.md
+├── rs-trick/
+│   └── SKILL.md
+├── rs-decide/
+│   └── SKILL.md
+├── rs-guide/
+│   └── SKILL.md
+├── rs-libdoc/
+│   └── SKILL.md
 ├── rs-handoff/
 │   ├── SKILL.md
 │   └── scripts/generate_snapshot.py
 ├── rs-feat/
+│   └── SKILL.md
+├── rs-feat-design/
+│   └── SKILL.md
+├── rs-feat-impl/
+│   └── SKILL.md
+├── rs-feat-accept/
+│   └── SKILL.md
+├── rs-feat-ff/
+│   └── SKILL.md
+├── rs-issue-report/
+│   └── SKILL.md
+├── rs-issue-analyze/
+│   └── SKILL.md
+├── rs-issue-fix/
 │   └── SKILL.md
 └── rs-issue/
     └── SKILL.md
@@ -50,6 +78,8 @@ skills/
 `rs-onboard` 负责把仓库接入吸引子文档结构。
 
 `rs-req`、`rs-arch`、`rs-roadmap` 分别维护需求、架构和大需求拆解，不把 CodeStable 的全过程档案搬进团队仓库。
+
+`rs-brainstorm` 处理模糊想法。`rs-feat-*` 和 `rs-issue-*` 提供阶段化的新特性与问题修复流程。`rs-learn`、`rs-trick`、`rs-decide`、`rs-explore`、`rs-guide`、`rs-libdoc` 只在内容值得长期复用时更新吸引子文档。
 
 `rs-handoff` 会读取当前工作区上下文：
 

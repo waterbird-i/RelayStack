@@ -34,6 +34,17 @@ updates only the durable attractor docs that future sessions must read.
    - `docs/architecture/`: real structure, boundaries, or contracts
 7. Use `rs-handoff` when another person or agent needs to continue.
 
+## Routes
+
+| Current state | Route |
+|---|---|
+| idea is fuzzy | `rs-brainstorm` |
+| clear feature, needs design | `rs-feat-design` |
+| approved design exists | `rs-feat-impl` |
+| implementation is done | `rs-feat-accept` |
+| tiny, clear, low-risk change | `rs-feat-ff` |
+| too large for one feature | `rs-roadmap` |
+
 ## Personal Project Notes
 
 Detailed process records belong in the user's personal project directory when
