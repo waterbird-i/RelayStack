@@ -16,14 +16,18 @@ It does not implement work. It only routes.
 
 Before answering:
 
-1. Check whether these attractor docs exist:
+1. Verify paths before routing. Use real filesystem evidence, not memory or
+   names in older notes.
+2. Check whether these attractor docs exist:
    - `docs/context/`
    - `docs/backlog/`
    - `docs/requirements/`
    - `docs/design/`
    - `docs/architecture/`
-2. If they are missing, route to `rs-onboard`.
-3. Read the user's request and pick one skill from the routing table.
+3. Check whether `.codestable` exists. If it exists, treat it as legacy or
+   personal process memory, not as team attractor docs.
+4. If the attractor docs are missing, route to `rs-onboard`.
+5. Read the user's request and pick one skill from the routing table.
 
 ## System Overview
 
@@ -77,3 +81,5 @@ If two routes both seem plausible, ask one short question instead of guessing.
 - Do not create files from this root entry.
 - Do not route feature work into `rs-issue`, or issue work into `rs-feat`.
 - If a request is too large for one feature, route to `rs-roadmap`.
+- If the user asks only for an audit or judgment, do not route to a writer that
+  creates files until the user confirms.

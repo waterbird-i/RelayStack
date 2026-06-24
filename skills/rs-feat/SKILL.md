@@ -18,6 +18,10 @@ updates only the durable attractor docs that future sessions must read.
 - Existing behavior is broken; use `rs-issue`.
 - The work is too large for one feature slice; use `rs-roadmap`.
 
+Cross-module impact alone does not make work a roadmap. If one coherent
+user-facing behavior needs API, type, permission, and doc changes, route to
+`rs-feat-design` first.
+
 ## Workflow
 
 1. Read the attractor docs before implementation:
@@ -51,7 +55,7 @@ updates only the durable attractor docs that future sessions must read.
 | approved design exists | `rs-feat-impl` |
 | implementation is done | `rs-feat-accept` |
 | tiny, clear, low-risk change | `rs-feat-ff` |
-| too large for one feature | `rs-roadmap` |
+| multiple independently deliverable slices or dependency ordering | `rs-roadmap` |
 
 ## Personal Project Notes
 

@@ -1,0 +1,2 @@
+{"event":"schema","version":1,"metrics":["passed","elapsed_seconds","total_tokens","cost_usd","steps_after_handoff","repeated_known_info"]}
+

@@ -4,103 +4,54 @@
 
 # RelayStack
 
-RelayStack 是一个以 skill 形式落地的 AI 编程工作流增强层。
-它通过 handoff snapshot 协议，把 agent 的工作变成可交接、可验证、可复用的证据。
+RelayStack 是一套以 skill 形式落地的 AI 辅助开发交接协议。
+它把散落在聊天、Git 状态、项目文档和 agent 记录里的上下文，整理成一份
+Markdown handoff snapshot，让下一个人或下一个 agent 可以继续工作。
 
-它不是另一个 agent 编排层，也不是工作流平台。MVP 是一个 Codex 风格的 skill，用来把当前开发状态转换成 handoff snapshot，让另一个人或 agent 可以继续工作。
+它不是 agent 编排器、任务系统、Web 应用或工作流平台。第一版刻意保持很小：
+安装一组 repo-local skills，运行一个 snapshot 生成器，然后证明下一个 owner
+不读完整历史会话也能接着做。
 
-## 产品方向
+## 为什么需要它
 
-> 让 AI agent 的工作可交接、可验证、可复用。
+AI coding agent 在单次会话里很能干。真正容易断的是交接：
 
-现代 AI 编程工具让 agent 更有能力，但团队仍然需要有边界、可追踪、可评审的交接。RelayStack 嵌入 AI 编程工作流，把当前协作状态转换成下一个 owner 可以直接行动的快照。
+- 决策留在聊天里，没有进入项目
+- diff 只能说明改了什么，解释不了为什么改
+- 并行 agent 容易写入范围重叠，但没有明确边界
+- 下一个 owner 看不到阻塞、风险和验证状态
+- 项目知识会衰减，导致同类错误反复出现
 
-当前需求和 hackathon 叙事见 [docs/product-direction.md](docs/product-direction.md)。
-创意简介见 [docs/creative-brief.md](docs/creative-brief.md)。
+RelayStack 把“交接是否可继续”变成核心产品面。
 
-## MVP
+## 设计哲学
 
-构建一个 skill，而不是 CLI。
+程序员是软件编码中的**在环对象**。程序员可以对实现层黑盒不了解，
+但对整体实现必须有所把控，必要时可深入。
 
-当前实现保留 handoff 作为主要演示路径，并补充围绕吸引子文档工作的轻量入口：
+RelayStack 围绕这个判断设计：
 
-```text
-skills/
-├── rs/
-│   └── SKILL.md
-├── rs-onboard/
-│   └── SKILL.md
-├── rs-brainstorm/
-│   └── SKILL.md
-├── rs-req/
-│   └── SKILL.md
-├── rs-arch/
-│   └── SKILL.md
-├── rs-roadmap/
-│   └── SKILL.md
-├── rs-explore/
-│   └── SKILL.md
-├── rs-learn/
-│   └── SKILL.md
-├── rs-trick/
-│   └── SKILL.md
-├── rs-decide/
-│   └── SKILL.md
-├── rs-guide/
-│   └── SKILL.md
-├── rs-libdoc/
-│   └── SKILL.md
-├── rs-handoff/
-│   ├── SKILL.md
-│   └── scripts/generate_snapshot.py
-├── rs-feat/
-│   └── SKILL.md
-├── rs-feat-design/
-│   └── SKILL.md
-├── rs-feat-impl/
-│   └── SKILL.md
-├── rs-feat-accept/
-│   └── SKILL.md
-├── rs-feat-ff/
-│   └── SKILL.md
-├── rs-issue-report/
-│   └── SKILL.md
-├── rs-issue-analyze/
-│   └── SKILL.md
-├── rs-issue-fix/
-│   └── SKILL.md
-└── rs-issue/
-    └── SKILL.md
-```
+- AI 负责执行，但软件方向由人负责。
+- 工作流产物要让决策可追溯，而不是替代人的判断。
+- 项目文档应该成为稳定事实的吸引子，而不是记录每一步混乱过程的流水账。
+- 交接要保留证据、风险和下一步动作。
+- 少量稳定项目记忆，比没人读的大型过程档案更有用。
 
-`rs` 是统一根入口。不知道该用哪个 RelayStack skill 时就喊它。
-
-`rs-onboard` 负责把仓库接入吸引子文档结构。
-
-`rs-req`、`rs-arch`、`rs-roadmap` 分别维护需求、架构和大需求拆解，不把 CodeStable 的全过程档案搬进团队仓库。
-
-`rs-brainstorm` 处理模糊想法。`rs-feat-*` 和 `rs-issue-*` 提供阶段化的新特性与问题修复流程。`rs-learn`、`rs-trick`、`rs-decide`、`rs-explore`、`rs-guide`、`rs-libdoc` 只在内容值得长期复用时更新吸引子文档。
-
-`rs-handoff` 会读取当前工作区上下文：
-
-- Git 状态、已改文件、diff 摘要和最近提交
-- 存在时读取项目 notes
-- 可用时读取 agent task records 或对话上下文
-- 手动交接字段，例如目标、下一步、阻塞点和 owner
-
-它会写入：
+## 它怎么工作
 
 ```text
+当前工作状态
+├── 手动字段：目标、阶段、owner、阻塞、风险、下一步
+├── 本地 Git 证据：status、diff 摘要、改动文件、最近提交
+├── 稳定项目文档：context、backlog、requirements、design、architecture
+└── 可选 agent 记录：worker 结论、reviewer 结论、冲突说明
+    ↓
 handoff/snapshot-<timestamp>.md
+    ↓
+下一个人或 agent 继续工作
 ```
 
-`rs-feat` 是开发新能力的入口。编码前先读项目吸引子文档；实现后只更新未来会复用的团队稳定事实。
-
-`rs-issue` 是 issue 修复入口。详细根因过程优先沉淀到个人 project 目录；团队仓库只更新稳定的行为、设计、架构、backlog 和验证事实。
-
-## 吸引子文档
-
-RelayStack 不把 CodeStable 的 feature / issue 全过程记录搬进团队仓库。团队协作仓库只维护少量稳定 owner docs：
+RelayStack 用少量 owner docs 作为长期稳定团队事实的吸引子：
 
 ```text
 docs/context/
@@ -110,59 +61,80 @@ docs/design/
 docs/architecture/
 ```
 
-这些目录只写稳定事实。brainstorm、临时 plan、子代理记录、详细 fix-note、验证草稿默认放个人 project 目录；需要换人接手时，再用 handoff snapshot 汇总。
+临时计划、重过程记录和 agent 草稿在变成稳定事实前，不需要塞进团队仓库。
+需要换人接手时，再通过 handoff snapshot 汇总。
 
-## 成功指标
+## 设计实体
 
-核心指标是 handoff success rate：
+| 实体 | 用途 |
+|---|---|
+| Context | 稳定项目规则、事实来源和本地约定 |
+| Backlog | 优先级、待办和下一步动作 |
+| Requirements | 能力目标、用户可见行为和产品约束 |
+| Design | 特性行为、owner docs 和面向实现的关键决定 |
+| Architecture | 当前技术结构、边界和集成点 |
+| Roadmap | 把单个 feature 接不住的大目标拆小 |
+| Feature | 新能力从设计、实现到验收的阶段化路径 |
+| Issue | 问题从报告、根因分析到定点修复的路径 |
+| Knowledge | 可复用的经验、技巧、决策和代码探索证据 |
+| Handoff Snapshot | 让下一个 owner 安全继续工作的交接产物 |
+
+## 工作流
 
 ```text
-handoff success rate = correctly answered handoff questions / total handoff questions
+接入仓库      rs-onboard
+模糊想法      rs-brainstorm → rs-feat / rs-roadmap
+大型工作      rs-roadmap → 更小的 feature pass
+新增能力      rs-feat → rs-feat-design → rs-feat-impl → rs-feat-accept
+轻量特性      rs-feat-ff
+问题修复      rs-issue-report → rs-issue-analyze → rs-issue-fix
+知识沉淀      rs-learn / rs-trick / rs-decide / rs-explore
+对外文档      rs-guide / rs-libdoc
+工作交接      rs-handoff
 ```
 
-Demo 应该证明：一个新的人或新 agent 可以阅读 snapshot，并在 5 分钟内继续下一步。
+## Handoff Snapshot
 
-## 范围保护
+`rs-handoff` 会生成：
 
-MVP 不包含 Web 应用、数据库、账号系统、实时协作、自动提交、任务管理或完整语义代码分析。
-
-第一版应保持朴素：基于真实项目证据生成一份有用的 handoff snapshot。
-
-## 安装 skills
-
-交互安装时可以选择要安装的 skill，也可以输入 `all` 全选：
-
-```bash
-python3 scripts/install_skills.py
+```text
+handoff/snapshot-<timestamp>.md
 ```
 
-常用非交互命令：
+这份 snapshot 回答 7 个问题：
+
+1. 当前目标是什么？
+2. 已经完成了什么？
+3. 哪些文件被改过？
+4. 为什么这样推进？
+5. 有哪些阻塞或风险？
+6. 下一步做什么？
+7. 下一个 owner 怎么验证完成？
+
+当附加多个 agent records 时，snapshot 还会生成 `Agent 并行边界`，记录写入范围、
+采纳状态、显式冲突、验证结果和文件范围重叠警告。
+
+## 快速开始
+
+安装全部 skills 到 `$CODEX_HOME/skills` 或 `~/.codex/skills`：
 
 ```bash
-# 全选安装到默认 Codex skill 目录：$CODEX_HOME/skills 或 ~/.codex/skills
 python3 scripts/install_skills.py --all
-
-# 只安装指定编号，先用 --list 查看顺序
-python3 scripts/install_skills.py --list
-python3 scripts/install_skills.py --select 1,3-5
 ```
 
-目标 skill 已存在时默认跳过。需要覆盖时显式加 `--force`。
-
-## 运行 MVP
-
-在工作区根目录执行：
+在工作区根目录生成一份 snapshot：
 
 ```bash
 python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --task "RelayStack MVP" \
   --goal "Generate one useful handoff snapshot from real project evidence" \
   --stage "MVP implementation" \
+  --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
   --validation "Read the snapshot and answer the handoff questions"
 ```
 
-可以附加可选的 Agent records：
+可以附加 agent records：
 
 ```bash
 python3 skills/rs-handoff/scripts/generate_snapshot.py \
@@ -170,4 +142,63 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --agent-record path/to/reviewer-b.md
 ```
 
-当附加多个 records 时，snapshot 会包含 `Agent 并行边界` 章节，记录写入范围、采纳状态、显式冲突、验证结果，以及文件范围重叠警告。
+轻量自检：
+
+```bash
+python3 scripts/install_skills.py --self-test
+python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
+```
+
+## 技能总览
+
+不知道该用哪个 RelayStack skill 时，先用 `rs`。它只负责路由到最小可用入口。
+
+| 分组 | 技能 | 用途 |
+|---|---|---|
+| 接入 | `rs-onboard` | 把新仓库或已有零散文档的仓库接入 owner-doc 结构 |
+| 需求 & 架构 | `rs-req` | 整理或更新稳定能力需求 |
+|  | `rs-arch` | 补齐、更新或检查架构文档 |
+| 路线图 | `rs-roadmap` | 把模糊大目标拆成可推进的 feature pass |
+| 讨论入口 | `rs-brainstorm` | 想法模糊时分诊到 design、feature 或 roadmap |
+| 特性流程 | `rs-feat` | 新特性子流程入口 |
+|  | `rs-feat-design` | 起草后续实现应遵循的 design |
+|  | `rs-feat-impl` | 按已确认 design 的推进顺序写代码 |
+|  | `rs-feat-accept` | 对照 design 核对实现，并更新稳定文档 |
+|  | `rs-feat-ff` | 小而清晰的特性直通车 |
+| 问题流程 | `rs-issue` | 已有行为出问题时的入口 |
+|  | `rs-issue-report` | 把疑似 bug 落成可复现 report |
+|  | `rs-issue-analyze` | 找根因、评估风险、给修复方案 |
+|  | `rs-issue-fix` | 定点修复并记录验证结果 |
+| 知识沉淀 | `rs-learn` | 沉淀可复用经验 |
+|  | `rs-trick` | 沉淀可复用编程模式或库用法 |
+|  | `rs-decide` | 记录已拍板的技术决策和长期约束 |
+| 探索 & 文档 | `rs-explore` | 定向代码探索，并沉淀证据 |
+|  | `rs-guide` / `rs-libdoc` | 写对外指南或 API / 库参考文档 |
+| 交接 | `rs-handoff` | 生成给下一个人或 agent 的 handoff snapshot |
+
+## 与其他工具对比
+
+| 工具 | 更擅长 | RelayStack 的差异 |
+|---|---|---|
+| Superpower | 用 skills 和可复用能力增强 agent 能做什么 | 给工作增加交接契约：证据、边界、风险、下一步和验证 |
+| Trellis | 用 spec、task、workflow notes 和 continuity logs 组织项目工作区 | 更小：少量稳定 owner docs 加一份 snapshot，不扩展成任务系统 |
+| OpenSpec | 从明确 spec 出发驱动变更 | 把 spec 当作输入之一，再把当前工作状态打包成可继续的交接证据 |
+
+需要增强 agent 能力时用 Superpower。需要更完整的项目工作区约定时用 Trellis。
+主要缺口是 spec-first 变更定义时用 OpenSpec。主要缺口是交接时，用 RelayStack：
+说清楚改了什么、为什么改、风险在哪、下一个 owner 怎么继续。
+
+## 成功指标
+
+```text
+handoff success rate = correctly answered handoff questions / total handoff questions
+```
+
+Demo 成功的标准是：一个新的人或新 agent 只读 snapshot，就能在 5 分钟内继续下一步。
+
+## 范围保护
+
+RelayStack 不包含 Web UI、数据库、账号系统、实时协作、自动提交、任务管理、
+完整语义代码分析，也不硬依赖 LLM API。
+
+只有当一份有用的 snapshot 不够用时，再增加平台化能力。

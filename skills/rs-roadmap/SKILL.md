@@ -9,6 +9,10 @@ updated: 2026-06-24
 
 Use this skill when a request is too large for one `rs-feat` pass.
 
+Do not use it just because a feature touches several modules. A single coherent
+behavior with API, type, permission, and documentation impact should start with
+`rs-feat-design`.
+
 RelayStack does not add a separate roadmap tree by default. Team-facing planning
 lives in `docs/backlog/`, with links to requirements, design, and architecture.
 
@@ -54,3 +58,5 @@ lives in `docs/backlog/`, with links to requirements, design, and architecture.
 - Do not update architecture current-state docs with future target state.
 - Do not split work into tasks that cannot be completed independently.
 - If a slice is ready to implement, route it to `rs-feat`.
+- If the work is one feature with cross-module contracts, route it to
+  `rs-feat-design`, not `rs-roadmap`.

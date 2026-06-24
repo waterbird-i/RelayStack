@@ -4,126 +4,61 @@
 
 # RelayStack
 
-RelayStack is a skill-based workflow enhancement layer for AI coding handoffs.
-It uses a handoff snapshot protocol to make agent work transferable,
-verifiable, and reusable.
+RelayStack is a skill-based handoff protocol for AI-assisted software work.
+It turns scattered chat context, local Git evidence, project docs, and agent
+records into a Markdown handoff snapshot the next person or agent can continue
+from.
 
-It is not another agent orchestration layer or workflow platform. The MVP is a
-Codex-style skill that turns the current development state into a handoff
-snapshot another person or agent can use to continue the work.
+It is not an agent orchestrator, task tracker, web app, or workflow platform.
+The first useful version is deliberately small: install a few repo-local
+skills, run one snapshot generator, and prove that the next owner can keep
+working without reading the whole previous session.
 
-## Product Direction
+## Why It Exists
 
-> Make AI agent work handoff-ready, verifiable, and reusable.
+AI coding agents are good at doing work inside one session. Team delivery
+breaks when that work has to move:
 
-Modern AI coding tools make agents more capable, but teams still need bounded,
-traceable, and reviewable handoffs. RelayStack sits inside the AI coding
-workflow and turns the current collaboration state into a snapshot the next
-owner can act on.
+- decisions live in chat instead of the project
+- changed files do not explain why they changed
+- parallel agents can overlap without an explicit write boundary
+- the next owner cannot see blockers, risks, or validation status
+- project knowledge decays into repeated mistakes
 
-See [docs/product-direction.md](docs/product-direction.md) for the current
-requirements and hackathon narrative.
-See [docs/creative-brief.md](docs/creative-brief.md) for the Chinese creative
-brief.
+RelayStack makes the handoff itself the product surface.
 
-## MVP
+## Design Philosophy
 
-Build a skill, not a CLI.
+The programmer is the in-loop owner of software delivery. They can treat parts
+of the implementation as a black box, but they must keep control of intent,
+boundaries, quality, and validation. When the system behaves strangely, they
+must be able to dive deeper.
 
-Current implementation keeps handoff as the main demo path and adds small
-workflow entry skills around attractor docs:
+RelayStack is built around that stance:
 
-```text
-skills/
-├── rs/
-│   └── SKILL.md
-├── rs-onboard/
-│   └── SKILL.md
-├── rs-brainstorm/
-│   └── SKILL.md
-├── rs-req/
-│   └── SKILL.md
-├── rs-arch/
-│   └── SKILL.md
-├── rs-roadmap/
-│   └── SKILL.md
-├── rs-explore/
-│   └── SKILL.md
-├── rs-learn/
-│   └── SKILL.md
-├── rs-trick/
-│   └── SKILL.md
-├── rs-decide/
-│   └── SKILL.md
-├── rs-guide/
-│   └── SKILL.md
-├── rs-libdoc/
-│   └── SKILL.md
-├── rs-handoff/
-│   ├── SKILL.md
-│   └── scripts/generate_snapshot.py
-├── rs-feat/
-│   └── SKILL.md
-├── rs-feat-design/
-│   └── SKILL.md
-├── rs-feat-impl/
-│   └── SKILL.md
-├── rs-feat-accept/
-│   └── SKILL.md
-├── rs-feat-ff/
-│   └── SKILL.md
-├── rs-issue-report/
-│   └── SKILL.md
-├── rs-issue-analyze/
-│   └── SKILL.md
-├── rs-issue-fix/
-│   └── SKILL.md
-└── rs-issue/
-    └── SKILL.md
-```
+- AI executes, but people own the software direction.
+- Workflow artifacts should make decisions traceable, not replace judgment.
+- Project docs should act as attractors for stable facts, not as a transcript
+  of every messy step.
+- Handoffs should preserve evidence, risks, and next actions.
+- The smallest durable project memory is better than a large process archive
+  nobody reads.
 
-`rs` is the root entry. Use it when you are not sure which RelayStack skill
-should handle a request.
-
-`rs-onboard` connects a repository to the attractor doc layout.
-
-`rs-req`, `rs-arch`, and `rs-roadmap` maintain requirements, architecture, and
-large-work planning without copying CodeStable's full process archive into the
-team repository.
-
-`rs-brainstorm` handles unclear ideas. `rs-feat-*` and `rs-issue-*` provide
-stage-specific feature and issue workflows. `rs-learn`, `rs-trick`,
-`rs-decide`, `rs-explore`, `rs-guide`, and `rs-libdoc` capture durable lessons,
-recipes, decisions, evidence, and public docs only when they belong in the
-attractor docs.
-
-`rs-handoff` reads the current workspace context:
-
-- Git status, changed files, diff summary, and recent commits
-- Project notes when present
-- Agent task records or conversation context when available
-- Manual handoff fields such as goal, next step, blocker, and owner
-
-It writes:
+## How It Works
 
 ```text
+current work state
+├── manual fields: goal, stage, owner, blocker, risk, next step
+├── local Git evidence: status, diff summary, changed files, recent commits
+├── stable project docs: context, backlog, requirements, design, architecture
+└── optional agent records: worker notes, reviewer notes, conflict notes
+    ↓
 handoff/snapshot-<timestamp>.md
+    ↓
+next person or agent continues the work
 ```
 
-`rs-feat` is the entry point for new capabilities. Before coding, it
-reads the project attractor docs and, after implementation, updates only the
-durable team truth that future sessions must reuse.
-
-`rs-issue` is the entry point for issue work. It keeps detailed
-root-cause process notes in a personal project area when available, while
-updating team docs only with stable behavior, design, architecture, backlog, and
-verification facts.
-
-## Attractor Docs
-
-RelayStack should not copy CodeStable's full per-feature and per-issue process
-archive into a team repository. Team collaboration should keep converging on a
-small set of durable owner docs:
+RelayStack uses a small set of owner docs as attractors for durable team truth:
 
 ```text
 docs/context/
@@ -133,66 +68,82 @@ docs/design/
 docs/architecture/
 ```
 
-Use these for stable facts. Keep brainstorming, temporary plans, sub-agent
-records, detailed fix notes, and scratch validation in a personal project area
-or in a handoff snapshot when the work needs to move to another owner.
+Temporary planning, heavy process notes, and agent scratch work stay out of the
+team repository until they become stable facts. Put them into a handoff snapshot
+when the work needs to move.
 
-## Success Metric
+## Design Entities
 
-The primary metric is handoff success rate:
+| Entity | Purpose |
+|---|---|
+| Context | Stable project rules, source-of-truth notes, and local conventions |
+| Backlog | Prioritized work and next actions |
+| Requirements | Capability goals, user-visible behavior, and product constraints |
+| Design | Feature behavior, owner docs, and implementation-facing decisions |
+| Architecture | Current technical structure, boundaries, and integration points |
+| Roadmap | Decomposition for work too large for one feature pass |
+| Feature | A staged path for designing, implementing, and accepting new capability |
+| Issue | A root-cause path for reporting, analyzing, and fixing broken behavior |
+| Knowledge | Reusable lessons, recipes, decisions, and code exploration evidence |
+| Handoff Snapshot | The transfer artifact that lets the next owner continue safely |
+
+## Workflows
 
 ```text
-handoff success rate = correctly answered handoff questions / total handoff questions
+adopt repo       rs-onboard
+fuzzy idea       rs-brainstorm → rs-feat / rs-roadmap
+large work       rs-roadmap → smaller feature passes
+new capability   rs-feat → rs-feat-design → rs-feat-impl → rs-feat-accept
+fast feature     rs-feat-ff
+broken behavior  rs-issue-report → rs-issue-analyze → rs-issue-fix
+knowledge        rs-learn / rs-trick / rs-decide / rs-explore
+public docs      rs-guide / rs-libdoc
+handoff          rs-handoff
 ```
 
-The demo should prove that a new person or new agent can read the snapshot and
-continue the next step within 5 minutes.
+## Handoff Snapshot
 
-## Scope Guard
+`rs-handoff` generates:
 
-MVP does not include a web app, database, account system, real-time
-collaboration, auto-commit, task management, or full semantic code analysis.
-
-The first version should stay boring: generate one useful handoff snapshot from
-real project evidence.
-
-## Install Skills
-
-Interactive install lets users choose specific skills or enter `all` to install
-everything:
-
-```bash
-python3 scripts/install_skills.py
+```text
+handoff/snapshot-<timestamp>.md
 ```
 
-Common non-interactive commands:
+The snapshot answers:
+
+1. What is the current goal?
+2. What has already been done?
+3. Which files changed?
+4. Why did the work move this way?
+5. What is blocked or risky?
+6. What should happen next?
+7. How should the next owner validate completion?
+
+When multiple agent records are attached, the snapshot also includes an
+`Agent parallel boundary` section covering write scopes, adoption state,
+explicit conflicts, validation, and overlapping file-scope warnings.
+
+## Quick Start
+
+Install all skills into `$CODEX_HOME/skills` or `~/.codex/skills`:
 
 ```bash
-# Install all skills into $CODEX_HOME/skills or ~/.codex/skills
 python3 scripts/install_skills.py --all
-
-# Install by index. Use --list first to inspect ordering.
-python3 scripts/install_skills.py --list
-python3 scripts/install_skills.py --select 1,3-5
 ```
 
-Existing target skill folders are skipped by default. Use `--force` to replace
-them.
-
-## Run the MVP
-
-From the workspace root:
+Generate a snapshot from the workspace root:
 
 ```bash
 python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --task "RelayStack MVP" \
   --goal "Generate one useful handoff snapshot from real project evidence" \
   --stage "MVP implementation" \
+  --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
   --validation "Read the snapshot and answer the handoff questions"
 ```
 
-Optional Agent records can be attached:
+Attach optional agent records:
 
 ```bash
 python3 skills/rs-handoff/scripts/generate_snapshot.py \
@@ -200,6 +151,67 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --agent-record path/to/reviewer-b.md
 ```
 
-When multiple records are attached, the snapshot includes an `Agent 并行边界`
-section with write scopes, adoption state, explicit conflicts, verification, and
-overlapping file-scope warnings.
+Useful checks:
+
+```bash
+python3 scripts/install_skills.py --self-test
+python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
+```
+
+## Skill Overview
+
+Use `rs` when you are not sure which RelayStack skill should handle a request.
+It routes to the smallest useful entry point.
+
+| Group | Skill | Purpose |
+|---|---|---|
+| Adoption | `rs-onboard` | Adopt the owner-doc layout in a new or existing repository |
+| Requirements & Architecture | `rs-req` | Capture or update stable capability requirements |
+|  | `rs-arch` | Backfill, update, or check architecture docs |
+| Roadmap | `rs-roadmap` | Split a large goal into smaller feature passes |
+| Discussion Entry | `rs-brainstorm` | Triage a fuzzy idea into design, feature, or roadmap work |
+| Feature Flow | `rs-feat` | Entry point for new capability work |
+|  | `rs-feat-design` | Draft the design that later implementation should follow |
+|  | `rs-feat-impl` | Implement according to the approved design order |
+|  | `rs-feat-accept` | Check the implementation against design and update durable docs |
+|  | `rs-feat-ff` | Fast path for tiny clear features |
+| Issue Flow | `rs-issue` | Entry point for broken behavior |
+|  | `rs-issue-report` | Turn a suspected bug into a reproducible report |
+|  | `rs-issue-analyze` | Find root cause, assess risk, and propose a fix |
+|  | `rs-issue-fix` | Apply a confirmed fix and record validation |
+| Knowledge | `rs-learn` | Capture reusable lessons from work already done |
+|  | `rs-trick` | Capture reusable coding recipes or library usage |
+|  | `rs-decide` | Record settled technical decisions and long-term constraints |
+| Exploration & Docs | `rs-explore` | Preserve focused code exploration evidence |
+|  | `rs-guide` / `rs-libdoc` | Write task-oriented guides or API/reference docs |
+| Handoff | `rs-handoff` | Generate a snapshot for the next person or agent |
+
+## Compared With
+
+| Tool | Best at | RelayStack differs by |
+|---|---|---|
+| Superpower | Expanding what an agent can do through skills and reusable capabilities | Adding a handoff contract around the work: evidence, boundaries, risks, next step, and validation |
+| Trellis | Keeping a structured project workspace with specs, tasks, workflow notes, and continuity logs | Staying smaller: a few stable owner docs plus one snapshot artifact, without becoming a task system |
+| OpenSpec | Driving changes from explicit specs | Treating specs as one input, then packaging the current work state so another owner can continue safely |
+
+Use Superpower when the agent needs more capability. Use Trellis when the team
+wants a broader workspace convention. Use OpenSpec when the main gap is
+spec-first change definition. Use RelayStack when the main gap is handoff:
+what changed, why, what is risky, and how the next owner continues.
+
+## Success Metric
+
+```text
+handoff success rate = correctly answered handoff questions / total handoff questions
+```
+
+The demo succeeds when a new person or new agent can read only the snapshot and
+continue the next step within 5 minutes.
+
+## Scope Guard
+
+RelayStack does not include a web UI, database, account system, real-time
+collaboration, auto-commit, task management, full semantic code analysis, or a
+hard dependency on an LLM API.
+
+Add platform pieces only when one useful snapshot stops being enough.
