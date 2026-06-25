@@ -1,0 +1,16 @@
+diff --git a/src/ratelimit/token_bucket.py b/src/ratelimit/token_bucket.py
+index 7c0081a..30397ec 100644
+--- a/src/ratelimit/token_bucket.py
++++ b/src/ratelimit/token_bucket.py
+@@ -6,9 +6,9 @@ class TokenBucket:
+         self.updated_at = now
+ 
+     def allow(self, cost=1, now=0.0):
+-        elapsed = int(now - self.updated_at)
++        elapsed = max(0.0, now - self.updated_at)
+         self.tokens = min(self.capacity, self.tokens + elapsed * self.rate_per_second)
+-        self.updated_at = now
++        self.updated_at = max(self.updated_at, now)
+         if self.tokens >= cost:
+             self.tokens -= cost
+             return True

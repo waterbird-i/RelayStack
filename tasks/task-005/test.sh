@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 - <<'PY'
-from pathlib import Path
+printf '# From file\n' > fixture.md
 
-text = Path("src/components/icode/Markdown/index.tsx").read_text(encoding="utf-8")
+file_output="$(node bin/marked.js fixture.md)"
+stdin_output="$(printf '# From stdin\n' | node bin/marked.js)"
 
-assert "useCurrentUserName" not in text
-assert "enableFrontMatterPreview" not in text
-assert "parseMarkdownFrontMatter(content)" in text
-assert "MarkdownFrontMatter" in text
-assert "bodyContent" in text
-PY
+test "$file_output" = '<h1>From file</h1>'
+test "$stdin_output" = '<h1>From stdin</h1>'
 

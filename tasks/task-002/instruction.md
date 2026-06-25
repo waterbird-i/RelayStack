@@ -1,15 +1,16 @@
-# 收敛 comatemobile 路径判断
+# malformed URI 不应打断中间件
 
-真实来源：`comate-stack-fe` commit `b9a5078e76`。
+公开来源：[vitejs/vite#22714](https://github.com/vitejs/vite/pull/22714)。
 
-目标：避免普通评审文件路径中出现 `comatemobile` 字符串时，被误判成移动端入口。
+目标：内存文件中间件对 `req.url` 调用 `decodeURIComponent`。当 URL 是 malformed
+URI 时会抛 `URIError`，导致请求链路崩溃。请让这类请求安全跳过该中间件。
 
 要求：
 
-1. 在 `src/utils/comatemobile/url.ts` 提供共享函数 `isComateMobilePath`。
-2. 路径只允许精确匹配 `/devops/icode/comatemobile` 或它的子路径。
-3. `src/index.tsx` 使用共享函数，不再直接 `includes('comatemobile')`。
-4. `ensureHiddenFrameworkHeaderInCurrentUrl` 也复用共享函数。
+1. 修改 `packages/vite/src/node/server/middlewares/servePublicMiddleware.js`。
+2. malformed URL 不应抛异常。
+3. malformed URL 应调用 `next()`。
+4. 正常 URL 仍然能命中内存文件并调用 `res.end(content)`。
 
 完成后运行：
 

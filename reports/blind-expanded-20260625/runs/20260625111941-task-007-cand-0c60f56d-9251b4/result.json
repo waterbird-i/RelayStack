@@ -1,0 +1,16 @@
+{
+  "agent_returncode": 0,
+  "cost_usd": null,
+  "elapsed_seconds": 128.072,
+  "passed": false,
+  "repeated_known_info": true,
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_generated": false,
+  "steps_after_handoff": 5,
+  "task": "task-007",
+  "test_returncode": 1,
+  "timestamp": "2026-06-25T11:19:41",
+  "total_tokens": 428911,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-007-zg74zrns"
+}

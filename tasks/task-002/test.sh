@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 - <<'PY'
-from pathlib import Path
+node - <<'JS'
+const assert = require('assert');
+const { serveMemoryFiles } = require('./packages/vite/src/node/server/middlewares/servePublicMiddleware');
 
-url = Path("src/utils/comatemobile/url.ts").read_text(encoding="utf-8")
-index = Path("src/index.tsx").read_text(encoding="utf-8")
+let nextCalls = 0;
+const middleware = serveMemoryFiles(new Map([['/asset.txt', 'hello']]));
 
-assert "COMATE_MOBILE_PATH_PATTERN" in url
-assert "isComateMobilePath" in url
-assert "/devops/icode/comatemobile" in url
-assert "(?:/|$)" in url
-assert "isComateMobilePath()" in index
-assert ".includes('/comatemobile')" not in url + index
-assert ".includes('comatemobile')" not in url + index
-PY
+assert.doesNotThrow(() => middleware({ url: '/%E0%A4%A' }, { end() {} }, () => { nextCalls += 1; }));
+assert.strictEqual(nextCalls, 1);
+
+let body = '';
+middleware({ url: '/asset.txt' }, { end(value) { body = value; } }, () => { nextCalls += 1; });
+assert.strictEqual(body, 'hello');
+assert.strictEqual(nextCalls, 1);
+JS
 

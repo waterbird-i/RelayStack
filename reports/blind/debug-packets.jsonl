@@ -1,0 +1,10 @@
+{"pair_id":"pair-001","task":"task-001","candidate_id":"cand-a","passed":true,"elapsed_seconds":63.528,"total_tokens":276203,"context_packet_summary":"provided target entry, root-cause hint, validation command"}
+{"pair_id":"pair-001","task":"task-001","candidate_id":"cand-b","passed":true,"elapsed_seconds":79.847,"total_tokens":383173,"context_packet_summary":"none"}
+{"pair_id":"pair-002","task":"task-002","candidate_id":"cand-a","passed":true,"elapsed_seconds":84.214,"total_tokens":288050,"context_packet_summary":"none"}
+{"pair_id":"pair-002","task":"task-002","candidate_id":"cand-b","passed":true,"elapsed_seconds":77.581,"total_tokens":289888,"context_packet_summary":"provided target entry, root-cause hint, validation command"}
+{"pair_id":"pair-003","task":"task-003","candidate_id":"cand-a","passed":true,"elapsed_seconds":70.487,"total_tokens":280089,"context_packet_summary":"provided target entry, root-cause hint, validation command"}
+{"pair_id":"pair-003","task":"task-003","candidate_id":"cand-b","passed":true,"elapsed_seconds":101.619,"total_tokens":346883,"context_packet_summary":"none"}
+{"pair_id":"pair-004","task":"task-004","candidate_id":"cand-a","passed":true,"elapsed_seconds":118.501,"total_tokens":553913,"context_packet_summary":"none"}
+{"pair_id":"pair-004","task":"task-004","candidate_id":"cand-b","passed":true,"elapsed_seconds":71.322,"total_tokens":361406,"context_packet_summary":"provided target entry, root-cause hint, validation command"}
+{"pair_id":"pair-005","task":"task-005","candidate_id":"cand-a","passed":true,"elapsed_seconds":77.638,"total_tokens":291074,"context_packet_summary":"provided target entry, root-cause hint, validation command"}
+{"pair_id":"pair-005","task":"task-005","candidate_id":"cand-b","passed":true,"elapsed_seconds":82.784,"total_tokens":348217,"context_packet_summary":"none"}

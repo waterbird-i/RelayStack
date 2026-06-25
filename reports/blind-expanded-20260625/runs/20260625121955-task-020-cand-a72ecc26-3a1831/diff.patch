@@ -1,0 +1,77 @@
+diff --git a/src/ci/junit_summary.py b/src/ci/junit_summary.py
+index 6498d58..0bca83d 100644
+--- a/src/ci/junit_summary.py
++++ b/src/ci/junit_summary.py
+@@ -1,14 +1,63 @@
+ import xml.etree.ElementTree as ET
+ 
+ 
+-def summarize(xml_text):
+-    root = ET.fromstring(xml_text)
+-    suite = root if root.tag == "testsuite" else root.find("testsuite")
+-    if suite is None:
+-        return {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
++FIELDS = ("tests", "failures", "errors", "skipped")
++
++
++def _tag(element):
++    return element.tag.rsplit("}", 1)[-1]
++
++
++def _direct_children(element, tag):
++    return [child for child in element if _tag(child) == tag]
++
++
++def _suite_children(element):
++    return [child for child in element if _tag(child) in {"testsuite", "testsuites"}]
++
++
++def _empty_summary():
++    return {field: 0 for field in FIELDS}
++
++
++def _case_summary(testcases):
+     return {
+-        "tests": int(suite.attrib.get("tests", 0)),
+-        "failures": int(suite.attrib.get("failures", 0)),
+-        "errors": int(suite.attrib.get("errors", 0)),
+-        "skipped": int(suite.attrib.get("skipped", 0)),
++        "tests": len(testcases),
++        "failures": sum(len(_direct_children(case, "failure")) for case in testcases),
++        "errors": sum(len(_direct_children(case, "error")) for case in testcases),
++        "skipped": sum(len(_direct_children(case, "skipped")) for case in testcases),
+     }
++
++
++def _add_summary(left, right):
++    for field in FIELDS:
++        left[field] += right[field]
++    return left
++
++
++def _node_summary(node):
++    child_suites = _suite_children(node)
++    testcase_summary = _case_summary(_direct_children(node, "testcase"))
++    if child_suites:
++        total = testcase_summary
++        for child in child_suites:
++            _add_summary(total, _node_summary(child))
++        return total
++
++    if _tag(node) == "testsuites":
++        return {
++            field: int(node.attrib[field]) if field in node.attrib else 0
++            for field in FIELDS
++        }
++
++    return {
++        field: int(node.attrib[field]) if field in node.attrib else testcase_summary[field]
++        for field in FIELDS
++    }
++
++
++def summarize(xml_text):
++    root = ET.fromstring(xml_text)
++    if _tag(root) not in {"testsuite", "testsuites"}:
++        return _empty_summary()
++    return _node_summary(root)

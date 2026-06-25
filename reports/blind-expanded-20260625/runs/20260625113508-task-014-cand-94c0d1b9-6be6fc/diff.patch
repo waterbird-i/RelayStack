@@ -1,0 +1,25 @@
+diff --git a/src/pagination/cursor_page.py b/src/pagination/cursor_page.py
+index 1e84c12..1d0f61e 100644
+--- a/src/pagination/cursor_page.py
++++ b/src/pagination/cursor_page.py
+@@ -1,6 +1,16 @@
+ def page(items, cursor=None, limit=2):
+-    start = int(cursor or 0)
+-    ordered = sorted(items, key=lambda item: (-item["created_at"], item["id"]))
+-    batch = ordered[start:start + limit]
+-    next_cursor = str(start + limit) if start + limit < len(ordered) else None
++    if limit <= 0:
++        return [], None
++
++    ordered = sorted(items, key=lambda item: (item["created_at"], item["id"]), reverse=True)
++    if cursor is not None:
++        cursor_key = tuple(cursor)
++        ordered = [
++            item
++            for item in ordered
++            if (item["created_at"], item["id"]) < cursor_key
++        ]
++
++    batch = ordered[:limit]
++    next_cursor = (batch[-1]["created_at"], batch[-1]["id"]) if len(ordered) > limit else None
+     return batch, next_cursor

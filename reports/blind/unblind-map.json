@@ -1,0 +1,22 @@
+{
+  "pair-001": {
+    "cand-a": "rs_handoff",
+    "cand-b": "no_handoff"
+  },
+  "pair-002": {
+    "cand-a": "no_handoff",
+    "cand-b": "rs_handoff"
+  },
+  "pair-003": {
+    "cand-a": "rs_handoff",
+    "cand-b": "no_handoff"
+  },
+  "pair-004": {
+    "cand-a": "no_handoff",
+    "cand-b": "rs_handoff"
+  },
+  "pair-005": {
+    "cand-a": "rs_handoff",
+    "cand-b": "no_handoff"
+  }
+}

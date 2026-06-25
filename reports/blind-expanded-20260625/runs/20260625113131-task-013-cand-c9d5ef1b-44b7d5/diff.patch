@@ -1,0 +1,31 @@
+diff --git a/src/flags/feature_flags.py b/src/flags/feature_flags.py
+index ed27b06..3e64065 100644
+--- a/src/flags/feature_flags.py
++++ b/src/flags/feature_flags.py
+@@ -1,5 +1,24 @@
+ def is_enabled(flags, name, default=False, env=None):
+     env = env or {}
+     env_key = "FEATURE_" + name.upper()
+-    value = env.get(env_key) or flags.get(name) or default
+-    return bool(value)
++    env_values = {
++        "true": True,
++        "1": True,
++        "yes": True,
++        "on": True,
++        "false": False,
++        "0": False,
++        "no": False,
++        "off": False,
++    }
++
++    if env_key in env:
++        value = env[env_key]
++        if isinstance(value, str):
++            value = env_values.get(value.strip().lower(), value)
++        return bool(value)
++
++    if name in flags:
++        return bool(flags[name])
++
++    return bool(default)

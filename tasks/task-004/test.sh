@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 - <<'PY'
-from pathlib import Path
+node - <<'JS'
+const assert = require('assert');
+const { getOptimizeDeps } = require('./packages/router-dev/vite/optimizeDeps');
 
-header = Path("src/mcp/Skills/SkillDetail/SquareDetail/SkillHeader.tsx").read_text(encoding="utf-8")
-actions = Path("src/mcp/Skills/SkillDetail/SquareDetail/SkillHeaderActions.tsx").read_text(encoding="utf-8")
+const missing = getOptimizeDeps(() => {
+  throw new Error('not found');
+});
+assert.deepStrictEqual(missing.include, ['react']);
 
-assert "checkDraftScannerResult" in header
-assert "SkillStatus.PUBLISHING" in actions
-assert "key: 'publish'" in actions
-PY
+const present = getOptimizeDeps(name => `/node_modules/${name}/index.js`);
+assert.deepStrictEqual(present.include, ['react', '@mdx-js/mdx', 'vite-tsconfig-paths']);
+JS
 

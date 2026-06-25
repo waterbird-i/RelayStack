@@ -1,0 +1,52 @@
+diff --git a/src/ci/junit_summary.py b/src/ci/junit_summary.py
+index 6498d58..3885829 100644
+--- a/src/ci/junit_summary.py
++++ b/src/ci/junit_summary.py
+@@ -1,14 +1,38 @@
+ import xml.etree.ElementTree as ET
+ 
+ 
++EMPTY_SUMMARY = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
++CHILD_TAGS = {"failures": "failure", "errors": "error", "skipped": "skipped"}
++SUITE_TAGS = {"testsuite", "testsuites"}
++
++
++def _tag_name(node):
++    return node.tag.rsplit("}", 1)[-1]
++
++
++def _count_children(testcase, tag):
++    return sum(1 for child in testcase if _tag_name(child) == tag)
++
++
++def _count(node, key):
++    if key in node.attrib:
++        return int(node.attrib[key])
++
++    total = 0
++    for child in node:
++        name = _tag_name(child)
++        if name in SUITE_TAGS:
++            total += _count(child, key)
++        elif name == "testcase":
++            if key == "tests":
++                total += 1
++            else:
++                total += _count_children(child, CHILD_TAGS[key])
++    return total
++
++
+ def summarize(xml_text):
+     root = ET.fromstring(xml_text)
+-    suite = root if root.tag == "testsuite" else root.find("testsuite")
+-    if suite is None:
+-        return {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+-    return {
+-        "tests": int(suite.attrib.get("tests", 0)),
+-        "failures": int(suite.attrib.get("failures", 0)),
+-        "errors": int(suite.attrib.get("errors", 0)),
+-        "skipped": int(suite.attrib.get("skipped", 0)),
+-    }
++    if _tag_name(root) not in SUITE_TAGS:
++        return EMPTY_SUMMARY.copy()
++    return {key: _count(root, key) for key in EMPTY_SUMMARY}

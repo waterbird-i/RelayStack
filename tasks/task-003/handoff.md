@@ -1,7 +1,7 @@
 # 已知信息
 
-- 相关文件是 `SkillHeaderActions.tsx` 和 `QuickInstallDropdown.styles.ts`。
-- 已有按钮组件支持 `disabled` 和 `disabledReason`。
-- 不需要新增弹窗或权限模型。
-- 正常空间的分享行为必须保持不变。
+- 只需要改 `src/listParser.js`。
+- 旧正则要求 marker 后有一个或多个非空字符。
+- 空列表项是合法边界，不应该把后续普通段落合并进列表项。
+- 不需要实现完整 CommonMark，只修这个边界。
 

@@ -1,0 +1,35 @@
+diff --git a/src/archive/safeExtract.js b/src/archive/safeExtract.js
+index 885ac26..cbee503 100644
+--- a/src/archive/safeExtract.js
++++ b/src/archive/safeExtract.js
+@@ -2,12 +2,24 @@ const path = require('path');
+ 
+ function planExtraction(entries, destination) {
+   const base = path.resolve(destination);
+-  return entries
+-    .map((entry) => ({
+-      name: entry.name,
+-      target: path.resolve(base, entry.name),
+-    }))
+-    .filter((entry) => entry.target.startsWith(base));
++  return entries.map((entry) => {
++    const name = entry.name;
++    const target = path.resolve(base, name);
++    const relative = path.relative(base, target);
++
++    if (
++      path.isAbsolute(name) ||
++      path.win32.isAbsolute(name) ||
++      name.split(/[\\/]+/).includes('..') ||
++      relative === '..' ||
++      relative.startsWith(`..${path.sep}`) ||
++      path.isAbsolute(relative)
++    ) {
++      throw new Error('unsafe path');
++    }
++
++    return { name, target };
++  });
+ }
+ 
+ module.exports = { planExtraction };

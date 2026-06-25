@@ -1,0 +1,34 @@
+diff --git a/src/pagination/cursor_page.py b/src/pagination/cursor_page.py
+index 1e84c12..b535d7f 100644
+--- a/src/pagination/cursor_page.py
++++ b/src/pagination/cursor_page.py
+@@ -1,6 +1,26 @@
++import json
++
++
+ def page(items, cursor=None, limit=2):
+-    start = int(cursor or 0)
+-    ordered = sorted(items, key=lambda item: (-item["created_at"], item["id"]))
++    ordered = sorted(items, key=lambda item: (item["created_at"], item["id"]), reverse=True)
++
++    if cursor is None:
++        start = 0
++    else:
++        cursor_created_at, cursor_id = json.loads(cursor)
++        start = next(
++            (
++                index
++                for index, item in enumerate(ordered)
++                if (item["created_at"], item["id"]) < (cursor_created_at, cursor_id)
++            ),
++            len(ordered),
++        )
++
+     batch = ordered[start:start + limit]
+-    next_cursor = str(start + limit) if start + limit < len(ordered) else None
++    next_cursor = (
++        json.dumps([batch[-1]["created_at"], batch[-1]["id"]])
++        if batch and start + limit < len(ordered)
++        else None
++    )
+     return batch, next_cursor

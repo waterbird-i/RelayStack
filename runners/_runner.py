@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -17,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "reports" / "results.jsonl"
 GENERATOR = ROOT / "skills" / "rs-handoff" / "scripts" / "generate_snapshot.py"
+BENCHMARK_FILES = {"agent-metrics.json", "prompt.md"}
 
 
 def read_text(path: Path) -> str:
@@ -91,8 +93,18 @@ def make_handoff(task_dir: Path, workdir: Path) -> Path:
 
 def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, Path | None]:
     instruction = read_text(task_dir / "instruction.md")
+    metrics_note = "\n".join(
+        [
+            "",
+            "## Benchmark metrics",
+            "完成修改和验证后，写入 `$RS_BENCH_METRICS` 指向的 JSON 文件：",
+            '{"steps_after_handoff": <number>, "repeated_known_info": <true|false>}',
+            "steps_after_handoff 统计你开始执行后用于理解/修改/验证的主要动作数。",
+            "repeated_known_info 表示你是否重复探索了 prompt 或 handoff 已明确给出的文件/事实。",
+        ]
+    )
     if runner_name == "no_handoff":
-        return instruction, None
+        return instruction + metrics_note, None
 
     snapshot = make_handoff(task_dir, workdir)
     task_handoff = read_text(task_dir / "handoff.md").strip()
@@ -106,6 +118,7 @@ def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, 
             task_handoff or "未提供",
             "## instruction.md",
             instruction,
+            metrics_note,
         ]
     )
     return prompt, snapshot
@@ -151,7 +164,143 @@ def append_result(result: dict[str, object], report_path: Path) -> None:
         stream.write(json.dumps(result, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def run_task(task_dir: Path, runner_name: str, agent_cmd: str, report_path: Path, keep_workdir: bool) -> dict[str, object]:
+def append_jsonl(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def candidate_id(seed: str, runner_name: str, task_name: str) -> str:
+    digest = hashlib.sha1(f"{seed}:{runner_name}:{task_name}".encode("utf-8")).hexdigest()
+    return f"cand-{digest[:8]}"
+
+
+def run_id(pair_id: str, candidate: str) -> str:
+    stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    suffix = hashlib.sha1(f"{stamp}:{pair_id}:{candidate}:{time.monotonic()}".encode("utf-8")).hexdigest()[:6]
+    return f"{stamp}-{safe_name(pair_id)}-{safe_name(candidate)}-{suffix}"
+
+
+def safe_name(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_.-]+", "-", value).strip("-") or "unknown"
+
+
+def init_diff_baseline(workdir: Path) -> None:
+    ensure_git_repo(workdir)
+    run(["git", "add", "-A"], workdir)
+
+
+def code_change_lines(workdir: Path) -> list[str]:
+    tracked = run(["git", "diff", "--name-status"], workdir).stdout.splitlines()
+    untracked = run(["git", "ls-files", "--others", "--exclude-standard"], workdir).stdout.splitlines()
+    lines = tracked + [f"A\t{path}" for path in untracked]
+    return [
+        line
+        for line in lines
+        if line and not any(line.endswith(f"\t{name}") or line == name for name in BENCHMARK_FILES)
+    ]
+
+
+def output_summary(output: str, returncode: int) -> dict[str, object]:
+    lines = output.splitlines()
+    return {
+        "returncode": returncode,
+        "line_count": len(lines),
+        "tail": "\n".join(lines[-20:]),
+    }
+
+
+def write_blind_artifacts(
+    blind_dir: Path,
+    pair_id: str,
+    candidate: str,
+    runner_name: str,
+    result: dict[str, object],
+    agent_output: str,
+    test_output: str,
+    workdir: Path,
+    prompt_path: Path,
+    snapshot: Path | None,
+    seed: str,
+) -> None:
+    current_run_id = run_id(pair_id, candidate)
+    artifact_dir = blind_dir / "runs" / current_run_id
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "agent-output.txt").write_text(agent_output, encoding="utf-8")
+    (artifact_dir / "test-output.txt").write_text(test_output, encoding="utf-8")
+    (artifact_dir / "result.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    shutil.copyfile(prompt_path, artifact_dir / "prompt.md")
+    if snapshot and snapshot.exists():
+        shutil.copyfile(snapshot, artifact_dir / "snapshot.md")
+
+    diff_lines = code_change_lines(workdir)
+    (artifact_dir / "diff-summary.txt").write_text("\n".join(diff_lines) + ("\n" if diff_lines else ""), encoding="utf-8")
+    (artifact_dir / "diff.patch").write_text(run(["git", "diff"], workdir).stdout, encoding="utf-8")
+
+    raw = dict(result)
+    raw.update(
+        {
+            "run_id": current_run_id,
+            "pair_id": pair_id,
+            "candidate_id": candidate,
+            "seed": seed,
+            "runner": runner_name,
+            "artifact_dir": str(artifact_dir),
+        }
+    )
+    append_jsonl(blind_dir / "raw-runs.jsonl", raw)
+
+    packet = {
+        "pair_id": pair_id,
+        "candidate_id": candidate,
+        "run_id": current_run_id,
+        "seed": seed,
+        "task": result["task"],
+        "passed": result["passed"],
+        "elapsed_seconds": result["elapsed_seconds"],
+        "total_tokens": result["total_tokens"],
+        "cost_usd": result["cost_usd"],
+        "agent_returncode": result["agent_returncode"],
+        "test_returncode": result["test_returncode"],
+        "steps_after_handoff": result["steps_after_handoff"],
+        "repeated_known_info": result["repeated_known_info"],
+        "diff_summary": diff_lines,
+        "test_summary": output_summary(test_output, result["test_returncode"]),
+        "transcript_summary": output_summary(agent_output, result["agent_returncode"]),
+        "redactions": ["runner_name", "group_name", "prompt_branding", "workdir"],
+    }
+    append_jsonl(blind_dir / "packets.jsonl", packet)
+
+    debug_packet = dict(packet)
+    debug_packet["context_packet_summary"] = (
+        "provided target entry, root-cause hint, validation command"
+        if snapshot is not None
+        else "none"
+    )
+    append_jsonl(blind_dir / "debug-packets.jsonl", debug_packet)
+
+    map_path = blind_dir / "unblind-map.json"
+    try:
+        unblind = json.loads(map_path.read_text(encoding="utf-8")) if map_path.exists() else {}
+    except json.JSONDecodeError:
+        unblind = {}
+    unblind.setdefault(pair_id, {})[candidate] = {"runner": runner_name, "run_id": current_run_id}
+    map_path.write_text(json.dumps(unblind, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def run_task(
+    task_dir: Path,
+    runner_name: str,
+    agent_cmd: str,
+    report_path: Path,
+    keep_workdir: bool,
+    blind_dir: Path | None,
+    seed: str,
+    pair_id_arg: str | None,
+) -> dict[str, object]:
     task_dir = task_dir.resolve()
     started = time.monotonic()
     tmp = tempfile.TemporaryDirectory(prefix=f"rsbench-{task_dir.name}-")
@@ -165,6 +314,8 @@ def run_task(task_dir: Path, runner_name: str, agent_cmd: str, report_path: Path
     prompt_path = workdir / "prompt.md"
     metrics_path = workdir / "agent-metrics.json"
     prompt_path.write_text(prompt, encoding="utf-8")
+    if blind_dir is not None:
+        init_diff_baseline(workdir)
 
     env = os.environ.copy()
     env.update(
@@ -200,6 +351,22 @@ def run_task(task_dir: Path, runner_name: str, agent_cmd: str, report_path: Path
         "workdir": str(workdir) if keep_workdir else None,
     }
     append_result(result, report_path)
+    if blind_dir is not None:
+        pair_id = pair_id_arg or task_dir.name
+        candidate = candidate_id(seed, runner_name, task_dir.name)
+        write_blind_artifacts(
+            blind_dir,
+            pair_id,
+            candidate,
+            runner_name,
+            result,
+            agent.stdout,
+            test.stdout,
+            workdir,
+            prompt_path,
+            snapshot,
+            seed,
+        )
     if not keep_workdir:
         tmp.cleanup()
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
@@ -212,10 +379,22 @@ def main(runner_name: str) -> int:
     parser.add_argument("--agent-cmd", required=True, help="Command that edits the temp repo. Read $RS_BENCH_PROMPT.")
     parser.add_argument("--report", type=Path, default=RESULTS)
     parser.add_argument("--keep-workdir", action="store_true")
+    parser.add_argument("--blind-dir", type=Path, help="Write blind-review packets and artifacts into this directory.")
+    parser.add_argument("--seed", default="0", help="Seed used for stable anonymized candidate ids.")
+    parser.add_argument("--pair-id", help="Override pair id. Best for single-task runs; batch runs default to task name.")
     args = parser.parse_args()
 
     results = [
-        run_task(task, runner_name, args.agent_cmd, args.report, args.keep_workdir)
+        run_task(
+            task,
+            runner_name,
+            args.agent_cmd,
+            args.report,
+            args.keep_workdir,
+            args.blind_dir,
+            args.seed,
+            args.pair_id,
+        )
         for task in args.tasks
     ]
     return 0 if all(result["passed"] for result in results) else 1

@@ -1,0 +1,45 @@
+diff --git a/src/markdown/frontmatter.js b/src/markdown/frontmatter.js
+index bd5762b..46b119a 100644
+--- a/src/markdown/frontmatter.js
++++ b/src/markdown/frontmatter.js
+@@ -10,15 +10,33 @@ function parseMetadata(block) {
+ }
+ 
+ function parseFrontMatter(text) {
+-  const start = text.indexOf('---');
+-  const end = text.indexOf('---', start + 3);
+-  if (start === -1 || end === -1) {
++  const firstLineEnd = text.indexOf('\n');
++  const firstLine = firstLineEnd === -1 ? text : text.slice(0, firstLineEnd).replace(/\r$/, '');
++  if (firstLine !== '---' || firstLineEnd === -1) {
+     return { metadata: {}, body: text };
+   }
+-  return {
+-    metadata: parseMetadata(text.slice(start + 3, end).trim()),
+-    body: text.slice(end + 3).replace(/^\r?\n/, ''),
+-  };
++
++  const metadataStart = firstLineEnd + 1;
++  let lineStart = metadataStart;
++  while (lineStart <= text.length) {
++    const lineEnd = text.indexOf('\n', lineStart);
++    const end = lineEnd === -1 ? text.length : lineEnd;
++    const line = text.slice(lineStart, end).replace(/\r$/, '');
++
++    if (line === '---') {
++      return {
++        metadata: parseMetadata(text.slice(metadataStart, lineStart)),
++        body: text.slice(lineEnd === -1 ? text.length : lineEnd + 1),
++      };
++    }
++
++    if (lineEnd === -1) {
++      break;
++    }
++    lineStart = lineEnd + 1;
++  }
++
++  return { metadata: {}, body: text };
+ }
+ 
+ module.exports = { parseFrontMatter };

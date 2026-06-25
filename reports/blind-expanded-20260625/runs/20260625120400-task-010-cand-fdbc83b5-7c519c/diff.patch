@@ -1,0 +1,34 @@
+diff --git a/src/deps/dependency_order.py b/src/deps/dependency_order.py
+index ec2dfc1..9b8f839 100644
+--- a/src/deps/dependency_order.py
++++ b/src/deps/dependency_order.py
+@@ -1,13 +1,27 @@
+ def resolve_order(graph):
+     visited = set()
++    visiting = {}
++    path = []
+     order = []
+ 
+     def visit(node):
+         if node in visited:
+             return
++        if node in visiting:
++            cycle = path[visiting[node]:] + [node]
++            raise ValueError("Circular dependency detected: " + " -> ".join(map(str, cycle)))
++
++        visiting[node] = len(path)
++        path.append(node)
++
++        try:
++            for dep in graph.get(node, []):
++                visit(dep)
++        finally:
++            path.pop()
++            visiting.pop(node, None)
++
+         visited.add(node)
+-        for dep in graph.get(node, []):
+-            visit(dep)
+         order.append(node)
+ 
+     for node in graph:

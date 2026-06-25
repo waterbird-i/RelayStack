@@ -1,0 +1,16 @@
+{
+  "agent_returncode": 0,
+  "cost_usd": null,
+  "elapsed_seconds": 147.9,
+  "passed": true,
+  "repeated_known_info": false,
+  "runner": "rs_handoff",
+  "snapshot": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-020-eztcz948/handoff/snapshot-benchmark.md",
+  "snapshot_generated": true,
+  "steps_after_handoff": 8,
+  "task": "task-020",
+  "test_returncode": 0,
+  "timestamp": "2026-06-25T12:19:55",
+  "total_tokens": 416374,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-020-eztcz948"
+}

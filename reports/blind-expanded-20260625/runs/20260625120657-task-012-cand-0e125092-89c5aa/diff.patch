@@ -1,0 +1,22 @@
+diff --git a/src/importer/csv_import.py b/src/importer/csv_import.py
+index 5c0ae75..7782855 100644
+--- a/src/importer/csv_import.py
++++ b/src/importer/csv_import.py
+@@ -5,14 +5,14 @@ from io import StringIO
+ def import_users(text):
+     users = []
+     seen = set()
+-    reader = csv.DictReader(StringIO(text))
++    reader = csv.DictReader(StringIO(text.lstrip("\ufeff")))
+     for row in reader:
+-        email = row.get("email", "").strip()
++        email = (row.get("email") or "").strip().lower()
+         if not email or email in seen:
+             continue
+         seen.add(email)
+         users.append({
+             "email": email,
+-            "name": row.get("name", "").strip(),
++            "name": (row.get("name") or "").strip(),
+         })
+     return users

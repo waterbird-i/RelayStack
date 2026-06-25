@@ -1,0 +1,21 @@
+diff --git a/src/config/deep_merge.py b/src/config/deep_merge.py
+index 8b299ba..4b822ef 100644
+--- a/src/config/deep_merge.py
++++ b/src/config/deep_merge.py
+@@ -1,4 +1,14 @@
++from copy import deepcopy
++
++
+ def merge_config(base, override):
+-    result = dict(base)
+-    result.update(override)
++    result = {key: deepcopy(value) for key, value in base.items()}
++
++    for key, override_value in override.items():
++        base_value = base.get(key)
++        if isinstance(base_value, dict) and isinstance(override_value, dict):
++            result[key] = merge_config(base_value, override_value)
++        else:
++            result[key] = deepcopy(override_value)
++
+     return result

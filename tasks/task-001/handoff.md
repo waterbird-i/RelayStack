@@ -1,7 +1,7 @@
 # 已知信息
 
-- 只需要改 `src/components/icode/Markdown/DevOpsMarkdown.tsx`。
-- 已知函数名是 `fixCodeBlockMarkers`。
-- 不需要引入 Markdown 解析库，也不需要改 React 渲染组件。
-- 真实提交只是在现有正则清洗函数里补了一段同行内容围栏改写逻辑。
+- 只需要改 `packages/vite/src/node/server/environmentState.js`。
+- bug 根因是把缓存值本身当作命中判断。
+- `WeakMap.prototype.has` 可以区分“未缓存”和“缓存了 falsy 值”。
+- 不需要新增依赖，也不需要重构缓存结构。
 

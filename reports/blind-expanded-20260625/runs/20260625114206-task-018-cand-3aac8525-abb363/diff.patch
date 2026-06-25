@@ -1,0 +1,16 @@
+diff --git a/src/router/matcher.js b/src/router/matcher.js
+index ad1c02e..9451bd6 100644
+--- a/src/router/matcher.js
++++ b/src/router/matcher.js
+@@ -1,5 +1,10 @@
++function normalizePath(path) {
++  const cleanPath = path.split(/[?#]/)[0];
++  return cleanPath === '/' ? cleanPath : cleanPath.replace(/\/+$/, '');
++}
++
+ function matches(route, requestPath) {
+-  return route === requestPath;
++  return normalizePath(route) === normalizePath(requestPath);
+ }
+ 
+ module.exports = { matches };

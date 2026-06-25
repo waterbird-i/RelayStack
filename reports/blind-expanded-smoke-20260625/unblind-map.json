@@ -1,0 +1,12 @@
+{
+  "task-006": {
+    "cand-362d77f1": {
+      "run_id": "20260625111524-task-006-cand-362d77f1-7484ad",
+      "runner": "rs_handoff"
+    },
+    "cand-d7bcfd62": {
+      "run_id": "20260625111320-task-006-cand-d7bcfd62-80a04c",
+      "runner": "no_handoff"
+    }
+  }
+}

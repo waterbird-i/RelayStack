@@ -1,0 +1,20 @@
+diff --git a/src/http/retryAfter.js b/src/http/retryAfter.js
+index a945a89..049761f 100644
+--- a/src/http/retryAfter.js
++++ b/src/http/retryAfter.js
+@@ -1,8 +1,12 @@
+ function retryAfterMs(header, now = Date.now()) {
+   if (!header) return 0;
+-  const seconds = parseInt(header, 10);
+-  if (!Number.isNaN(seconds)) return seconds * 1000;
+-  return 0;
++  const value = String(header).trim();
++  if (/^\d+$/.test(value)) return Number(value) * 1000;
++
++  const timestamp = Date.parse(value);
++  if (Number.isNaN(timestamp)) return 0;
++
++  return Math.max(0, timestamp - now);
+ }
+ 
+ module.exports = { retryAfterMs };

@@ -1,0 +1,16 @@
+{
+  "agent_returncode": 0,
+  "cost_usd": null,
+  "elapsed_seconds": 91.69,
+  "passed": false,
+  "repeated_known_info": false,
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_generated": false,
+  "steps_after_handoff": 6,
+  "task": "task-016",
+  "test_returncode": 1,
+  "timestamp": "2026-06-25T11:38:29",
+  "total_tokens": 396235,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-016-otvkdrec"
+}

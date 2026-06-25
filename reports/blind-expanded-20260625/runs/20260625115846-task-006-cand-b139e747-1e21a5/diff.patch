@@ -1,0 +1,49 @@
+diff --git a/src/config/dotenv.js b/src/config/dotenv.js
+index ef61e24..60bc5bc 100644
+--- a/src/config/dotenv.js
++++ b/src/config/dotenv.js
+@@ -1,6 +1,25 @@
+ function stripComment(value) {
+-  const index = value.indexOf('#');
+-  return index === -1 ? value.trim() : value.slice(0, index).trim();
++  let quote = null;
++
++  for (let index = 0; index < value.length; index += 1) {
++    const char = value[index];
++
++    if (quote) {
++      if (char === quote) quote = null;
++      continue;
++    }
++
++    if ((char === '"' || char === "'") && index === 0) {
++      quote = char;
++      continue;
++    }
++
++    if (char === '#' && (index === 0 || /\s/.test(value[index - 1]))) {
++      return value.slice(0, index).trim();
++    }
++  }
++
++  return value.trim();
+ }
+ 
+ function unquote(value) {
+@@ -15,9 +34,13 @@ function parseEnv(text) {
+   for (const rawLine of text.split(/\r?\n/)) {
+     const line = rawLine.trim();
+     if (!line || line.startsWith('#')) continue;
+-    const parts = line.split('=');
+-    const key = parts[0].trim();
+-    const value = stripComment((parts[1] || '').trim());
++    const separatorIndex = line.indexOf('=');
++    const key = (
++      separatorIndex === -1 ? line : line.slice(0, separatorIndex)
++    ).trim();
++    const value = stripComment(
++      separatorIndex === -1 ? '' : line.slice(separatorIndex + 1).trim()
++    );
+     env[key] = unquote(value);
+   }
+   return env;

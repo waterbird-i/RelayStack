@@ -1,0 +1,21 @@
+{
+  "name": "relaystack-intro-video",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "still": "remotion still RelayStackIntro --scale=0.25 --frame=300",
+    "render": "remotion render RelayStackIntro out/relaystack-intro.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "latest",
+    "remotion": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest"
+  }
+}

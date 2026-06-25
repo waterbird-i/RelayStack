@@ -1,0 +1,202 @@
+{
+  "task-006": {
+    "cand-6fb91ad6": {
+      "run_id": "20260625111733-task-006-cand-6fb91ad6-e2a655",
+      "runner": "no_handoff"
+    },
+    "cand-b139e747": {
+      "run_id": "20260625115846-task-006-cand-b139e747-1e21a5",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-007": {
+    "cand-0c60f56d": {
+      "run_id": "20260625111941-task-007-cand-0c60f56d-9251b4",
+      "runner": "no_handoff"
+    },
+    "cand-45703465": {
+      "run_id": "20260625120008-task-007-cand-45703465-e2fa0b",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-008": {
+    "cand-1d39983e": {
+      "run_id": "20260625120119-task-008-cand-1d39983e-d7b065",
+      "runner": "rs_handoff"
+    },
+    "cand-e11b82f5": {
+      "run_id": "20260625112122-task-008-cand-e11b82f5-a94518",
+      "runner": "no_handoff"
+    }
+  },
+  "task-009": {
+    "cand-1e1c0728": {
+      "run_id": "20260625120242-task-009-cand-1e1c0728-f556eb",
+      "runner": "rs_handoff"
+    },
+    "cand-ce032e7e": {
+      "run_id": "20260625112243-task-009-cand-ce032e7e-77da75",
+      "runner": "no_handoff"
+    }
+  },
+  "task-010": {
+    "cand-cfc96715": {
+      "run_id": "20260625112454-task-010-cand-cfc96715-6062bd",
+      "runner": "no_handoff"
+    },
+    "cand-fdbc83b5": {
+      "run_id": "20260625120400-task-010-cand-fdbc83b5-7c519c",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-011": {
+    "cand-1a74cb90": {
+      "run_id": "20260625120542-task-011-cand-1a74cb90-d9953b",
+      "runner": "rs_handoff"
+    },
+    "cand-8b2e4562": {
+      "run_id": "20260625112637-task-011-cand-8b2e4562-95b004",
+      "runner": "no_handoff"
+    }
+  },
+  "task-012": {
+    "cand-0e125092": {
+      "run_id": "20260625120657-task-012-cand-0e125092-89c5aa",
+      "runner": "rs_handoff"
+    },
+    "cand-92dfd531": {
+      "run_id": "20260625112902-task-012-cand-92dfd531-14118e",
+      "runner": "no_handoff"
+    }
+  },
+  "task-013": {
+    "cand-4ca7d6bd": {
+      "run_id": "20260625120815-task-013-cand-4ca7d6bd-0b84bb",
+      "runner": "rs_handoff"
+    },
+    "cand-c9d5ef1b": {
+      "run_id": "20260625113131-task-013-cand-c9d5ef1b-44b7d5",
+      "runner": "no_handoff"
+    }
+  },
+  "task-014": {
+    "cand-933989e8": {
+      "run_id": "20260625121034-task-014-cand-933989e8-e0d6f5",
+      "runner": "rs_handoff"
+    },
+    "cand-94c0d1b9": {
+      "run_id": "20260625113508-task-014-cand-94c0d1b9-6be6fc",
+      "runner": "no_handoff"
+    }
+  },
+  "task-015": {
+    "cand-85c7f8fa": {
+      "run_id": "20260625121146-task-015-cand-85c7f8fa-e59b53",
+      "runner": "rs_handoff"
+    },
+    "cand-fe412d6e": {
+      "run_id": "20260625113657-task-015-cand-fe412d6e-0b5825",
+      "runner": "no_handoff"
+    }
+  },
+  "task-016": {
+    "cand-0c02d0e6": {
+      "run_id": "20260625121256-task-016-cand-0c02d0e6-e725e3",
+      "runner": "rs_handoff"
+    },
+    "cand-73b561b3": {
+      "run_id": "20260625113829-task-016-cand-73b561b3-d9f8cb",
+      "runner": "no_handoff"
+    }
+  },
+  "task-017": {
+    "cand-624ad753": {
+      "run_id": "20260625114041-task-017-cand-624ad753-e62a52",
+      "runner": "no_handoff"
+    },
+    "cand-daa5c62c": {
+      "run_id": "20260625121450-task-017-cand-daa5c62c-26f9c0",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-018": {
+    "cand-360abb56": {
+      "run_id": "20260625121554-task-018-cand-360abb56-325831",
+      "runner": "rs_handoff"
+    },
+    "cand-3aac8525": {
+      "run_id": "20260625114206-task-018-cand-3aac8525-abb363",
+      "runner": "no_handoff"
+    }
+  },
+  "task-019": {
+    "cand-2f5e0745": {
+      "run_id": "20260625114408-task-019-cand-2f5e0745-962e99",
+      "runner": "no_handoff"
+    },
+    "cand-d8f358b1": {
+      "run_id": "20260625121727-task-019-cand-d8f358b1-021491",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-020": {
+    "cand-21c43c0e": {
+      "run_id": "20260625114630-task-020-cand-21c43c0e-ce9b42",
+      "runner": "no_handoff"
+    },
+    "cand-a72ecc26": {
+      "run_id": "20260625121955-task-020-cand-a72ecc26-3a1831",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-021": {
+    "cand-fb597323": {
+      "run_id": "20260625122102-task-021-cand-fb597323-b6d675",
+      "runner": "rs_handoff"
+    },
+    "cand-ff994429": {
+      "run_id": "20260625114825-task-021-cand-ff994429-c1ae6e",
+      "runner": "no_handoff"
+    }
+  },
+  "task-022": {
+    "cand-58d132e5": {
+      "run_id": "20260625122222-task-022-cand-58d132e5-3764fc",
+      "runner": "rs_handoff"
+    },
+    "cand-88ef35e6": {
+      "run_id": "20260625115016-task-022-cand-88ef35e6-542d0a",
+      "runner": "no_handoff"
+    }
+  },
+  "task-023": {
+    "cand-40d3aaef": {
+      "run_id": "20260625115138-task-023-cand-40d3aaef-c9eb09",
+      "runner": "no_handoff"
+    },
+    "cand-43033df7": {
+      "run_id": "20260625122340-task-023-cand-43033df7-deb03e",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-024": {
+    "cand-2bd44538": {
+      "run_id": "20260625115414-task-024-cand-2bd44538-6e119f",
+      "runner": "no_handoff"
+    },
+    "cand-f35478eb": {
+      "run_id": "20260625122458-task-024-cand-f35478eb-52c00b",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-025": {
+    "cand-14ef8d6b": {
+      "run_id": "20260625115527-task-025-cand-14ef8d6b-9eb3a1",
+      "runner": "no_handoff"
+    },
+    "cand-2d33660a": {
+      "run_id": "20260625122622-task-025-cand-2d33660a-77eda7",
+      "runner": "rs_handoff"
+    }
+  }
+}

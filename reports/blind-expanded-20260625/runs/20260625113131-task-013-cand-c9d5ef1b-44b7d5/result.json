@@ -1,0 +1,16 @@
+{
+  "agent_returncode": 0,
+  "cost_usd": null,
+  "elapsed_seconds": 148.612,
+  "passed": true,
+  "repeated_known_info": false,
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_generated": false,
+  "steps_after_handoff": 10,
+  "task": "task-013",
+  "test_returncode": 0,
+  "timestamp": "2026-06-25T11:31:31",
+  "total_tokens": 707305,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-013-phwxz_zt"
+}

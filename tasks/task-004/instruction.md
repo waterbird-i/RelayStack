@@ -1,14 +1,16 @@
-# 发布中 Skill 禁止再次发布
+# 可选依赖不存在时不要加入预构建列表
 
-真实来源：`comate-stack-fe` commit `e4e4819872`。
+公开来源：[remix-run/react-router#11861](https://github.com/remix-run/react-router/pull/11861)。
 
-目标：Skill 处于发布中状态时，展示草稿检测结果，并且更多菜单里不再出现“发布”入口。
+目标：工具链配置无条件把可选依赖加入 `optimizeDeps.include`。当当前项目没有安装
+这些可选包时，预构建配置会引用不存在的依赖。
 
 要求：
 
-1. `SkillHeader.tsx` 中的 `SkillStatusTag` 传入 `checkDraftScannerResult`。
-2. `SkillHeaderActions.tsx` 中更多菜单的发布入口排除 `SkillStatus.PUBLISHING`。
-3. 不要影响草稿、已发布和普通可发布状态的其他菜单项。
+1. 修改 `packages/router-dev/vite/optimizeDeps.js`。
+2. 只有 resolver 能解析可选依赖时，才加入 `include`。
+3. resolver 抛错时安全跳过，不影响必需依赖。
+4. 已安装的可选依赖仍然会被加入。
 
 完成后运行：
 

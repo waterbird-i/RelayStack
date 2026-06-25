@@ -1,6 +1,7 @@
 # 已知信息
 
-- 相关文件是 `SkillHeader.tsx` 和 `SkillHeaderActions.tsx`。
-- `SkillStatus.PUBLISHING` 已存在，不需要新增枚举。
-- 真实修复只是补 `checkDraftScannerResult` 和把发布中状态加入排除列表。
+- 只需要改 `packages/router-dev/vite/optimizeDeps.js`。
+- `react` 是必需依赖，应始终 include。
+- `@mdx-js/mdx` 和 `vite-tsconfig-paths` 是可选依赖。
+- resolver 抛错表示当前项目不能解析该可选包，跳过即可。
 

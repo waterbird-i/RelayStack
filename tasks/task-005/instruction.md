@@ -1,15 +1,16 @@
-# 移除 Markdown front matter 灰度开关
+# CLI 有文件参数时优先读文件
 
-真实来源：`comate-stack-fe` commit `aecb886378`。
+公开来源：[markedjs/marked#3967](https://github.com/markedjs/marked/pull/3967)。
 
-目标：Markdown front matter 预览对所有用户生效，不再按用户名灰度。
+目标：Markdown CLI 同时支持 stdin 和文件路径。当前实现把第一个用户参数当成 Markdown
+字符串本身，导致 `node bin/marked.js README.md` 不会读取文件内容。
 
 要求：
 
-1. `src/components/icode/Markdown/index.tsx` 不再引用 `useCurrentUserName`。
-2. 移除 `enableFrontMatterPreview` 白名单判断。
-3. 直接对 `content` 调用 `parseMarkdownFrontMatter(content)`。
-4. 保留正文渲染和 front matter 预览组件。
+1. 修改 `bin/marked.js`。
+2. 有文件参数时读取该文件内容。
+3. 没有文件参数时读取 stdin。
+4. 参数处理必须跳过 `node` 和脚本路径，只看用户传入的 argv。
 
 完成后运行：
 

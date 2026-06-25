@@ -1,0 +1,10 @@
+{"pair_id":"pair-001","task":"task-001","candidate_id":"cand-a","runner":"rs_handoff","passed":true,"elapsed_seconds":63.528,"total_tokens":276203,"snapshot_generated":true}
+{"pair_id":"pair-001","task":"task-001","candidate_id":"cand-b","runner":"no_handoff","passed":true,"elapsed_seconds":79.847,"total_tokens":383173,"snapshot_generated":false}
+{"pair_id":"pair-002","task":"task-002","candidate_id":"cand-a","runner":"no_handoff","passed":true,"elapsed_seconds":84.214,"total_tokens":288050,"snapshot_generated":false}
+{"pair_id":"pair-002","task":"task-002","candidate_id":"cand-b","runner":"rs_handoff","passed":true,"elapsed_seconds":77.581,"total_tokens":289888,"snapshot_generated":true}
+{"pair_id":"pair-003","task":"task-003","candidate_id":"cand-a","runner":"rs_handoff","passed":true,"elapsed_seconds":70.487,"total_tokens":280089,"snapshot_generated":true}
+{"pair_id":"pair-003","task":"task-003","candidate_id":"cand-b","runner":"no_handoff","passed":true,"elapsed_seconds":101.619,"total_tokens":346883,"snapshot_generated":false}
+{"pair_id":"pair-004","task":"task-004","candidate_id":"cand-a","runner":"no_handoff","passed":true,"elapsed_seconds":118.501,"total_tokens":553913,"snapshot_generated":false}
+{"pair_id":"pair-004","task":"task-004","candidate_id":"cand-b","runner":"rs_handoff","passed":true,"elapsed_seconds":71.322,"total_tokens":361406,"snapshot_generated":true}
+{"pair_id":"pair-005","task":"task-005","candidate_id":"cand-a","runner":"rs_handoff","passed":true,"elapsed_seconds":77.638,"total_tokens":291074,"snapshot_generated":true}
+{"pair_id":"pair-005","task":"task-005","candidate_id":"cand-b","runner":"no_handoff","passed":true,"elapsed_seconds":82.784,"total_tokens":348217,"snapshot_generated":false}
