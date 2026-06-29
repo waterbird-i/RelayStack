@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "suite_id": "relaystack-scenario-fixtures",
+  "suite_name": "RelayStack scenario fixtures",
+  "provenance_status": "scenario_only",
+  "source_type": "engineering_scenario",
+  "authority": "project_authored_scenario",
+  "source_url": "local:tasks/task-007/instruction.md",
+  "license": "Project-local fixture; no external upstream license claimed",
+  "fixture_notes": "Zip Slip 类归档路径穿越场景题；引用公开漏洞类别但未绑定具体修复 PR。",
+  "test_oracle": "tasks/task-007/test.sh"
+}

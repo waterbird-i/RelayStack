@@ -1,5 +1,6 @@
 # 已知信息
 
+- 已知入口文件：`packages/router-dev/vite/optimizeDeps.js`。
 - 只需要改 `packages/router-dev/vite/optimizeDeps.js`。
 - `react` 是必需依赖，应始终 include。
 - `@mdx-js/mdx` 和 `vite-tsconfig-paths` 是可选依赖。

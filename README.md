@@ -119,9 +119,35 @@ The snapshot answers:
 6. What should happen next?
 7. How should the next owner validate completion?
 
+It also carries three small quality contracts:
+
+- `Evidence Map`: ties key claims to local sources such as Git evidence,
+  project docs, user input, and agent records.
+- `Risk Register`: records the risk, trigger, impact, and mitigation instead
+  of a vague warning.
+- `Next Action Contract`: names the next action, inputs, touched files,
+  validation command, and done signal.
+
 When multiple agent records are attached, the snapshot also includes an
 `Agent parallel boundary` section covering write scopes, adoption state,
 explicit conflicts, validation, and overlapping file-scope warnings.
+
+Agent records can be JSON or Markdown frontmatter. The useful fields are:
+
+```json
+{
+  "agent": "worker_a",
+  "role": "worker",
+  "task": "Implement the snapshot contract",
+  "write_scope": ["skills/rs-handoff/scripts/generate_snapshot.py"],
+  "status": "completed",
+  "adoption": "accepted",
+  "adopted_output": "Evidence Map was kept",
+  "rejected_reason": "No workflow engine added",
+  "conflicts": [],
+  "verification": ["self-test"]
+}
+```
 
 ## Quick Start
 
@@ -199,11 +225,24 @@ wants a broader workspace convention. Use OpenSpec when the main gap is
 spec-first change definition. Use RelayStack when the main gap is handoff:
 what changed, why, what is risky, and how the next owner continues.
 
-## Success Metric
+## Continuation Cost
 
-```text
-handoff success rate = correctly answered handoff questions / total handoff questions
-```
+![RelayStack continuation cost chart](reports/blind-expanded-20260625/assets/continuation-cost.png)
+
+Across the current 25-task benchmark, RelayStack handoff reduced elapsed time
+by `24.1%` and reported tokens by `23.0%`. On the 20-task expanded blind
+review, `rs_handoff` won `53/60` reviewer decisions and reduced repeated
+known-info exploration from `4` to `0`. Pass rate remains supporting evidence:
+`92.0%` without handoff versus `96.0%` with handoff.
+
+The benchmark keeps the value proof narrow:
+
+- `elapsed_seconds`: total continuation time through `test.sh`
+- `total_tokens` / `cost_usd`: reported model usage when available
+- `repeated_known_info` / `repeated_known_files`: whether the agent reopened
+  facts already present in the handoff
+- `continuation_success`: whether the task test passed
+- `handoff_question_score`: optional 0-7 score for the seven handoff questions
 
 The demo succeeds when a new person or new agent can read only the snapshot and
 continue the next step within 5 minutes.

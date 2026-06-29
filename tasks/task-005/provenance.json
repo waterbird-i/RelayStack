@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "suite_id": "relaystack-public-fixtures",
+  "suite_name": "RelayStack public GitHub fixtures",
+  "provenance_status": "verified_public",
+  "source_type": "github_pr",
+  "authority": "public_github_pr",
+  "source_url": "https://github.com/markedjs/marked/pull/3967",
+  "repo_url": "https://github.com/markedjs/marked",
+  "pr_url": "https://github.com/markedjs/marked/pull/3967",
+  "license": "MIT",
+  "license_url": "https://github.com/markedjs/marked/blob/master/LICENSE.md",
+  "fixture_notes": "裁剪为 CLI 文件参数/stdin 优先级 fixture；不包含 Marked 完整仓库。",
+  "test_oracle": "tasks/task-005/test.sh"
+}

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import json
 import textwrap
 from pathlib import Path
 
@@ -1539,6 +1540,11 @@ def write_task(name: str, data: dict[str, object]) -> None:
     initial.mkdir(parents=True)
     (task_dir / "instruction.md").write_text(clean(data["instruction"]), encoding="utf-8")
     (task_dir / "handoff.md").write_text(clean(data["handoff"]), encoding="utf-8")
+    if "provenance" in data:
+        (task_dir / "provenance.json").write_text(
+            json.dumps(data["provenance"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
     for rel_path, content in data["files"].items():
       path = initial / rel_path

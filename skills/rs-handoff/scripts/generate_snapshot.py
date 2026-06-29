@@ -139,6 +139,8 @@ class AgentRecord:
     input: str
     output: str
     conclusion: str
+    adopted_output: str
+    rejected_reason: str
     write_scope: list[str]
     status: str
     adoption: str
@@ -191,6 +193,8 @@ def record_from_data(data: dict[str, object], source_path: Path, warnings: list[
         input=text_value(data, "input"),
         output=text_value(data, "output"),
         conclusion=text_value(data, "conclusion"),
+        adopted_output=text_value(data, "adopted_output"),
+        rejected_reason=text_value(data, "rejected_reason"),
         write_scope=list_value(data.get("write_scope")),
         status=text_value(data, "status", "unknown"),
         adoption=text_value(data, "adoption", "unknown"),
@@ -301,6 +305,8 @@ def agent_record_markdown(records: list[AgentRecord]) -> str:
                     f"- 输入：{record.input}",
                     f"- 输出：{record.output}",
                     f"- 结论：{record.conclusion}",
+                    f"- 已采纳输出：{record.adopted_output}",
+                    f"- 未采纳原因：{record.rejected_reason}",
                     f"- 写入范围：{', '.join(record.write_scope) if record.write_scope else MISSING}",
                     f"- 冲突：{', '.join(record.conflicts) if record.conflicts else MISSING}",
                     f"- 验证：{', '.join(record.verification) if record.verification else MISSING}",
@@ -337,6 +343,8 @@ def boundary_markdown(records: list[AgentRecord]) -> str:
                 f"  - 写入范围：{', '.join(record.write_scope) if record.write_scope else MISSING}",
                 f"  - 状态：{record.status}",
                 f"  - 采纳状态：{record.adoption}",
+                f"  - 已采纳输出：{record.adopted_output}",
+                f"  - 未采纳原因：{record.rejected_reason}",
                 f"  - 显式冲突：{', '.join(record.conflicts) if record.conflicts else MISSING}",
                 f"  - 验证：{', '.join(record.verification) if record.verification else MISSING}",
             ]
@@ -354,6 +362,58 @@ def boundary_markdown(records: list[AgentRecord]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def evidence_map_markdown(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> str:
+    changed_source = "git diff --name-only + git status --short"
+    docs_source = "docs/** + README.md + handoff/** + skills/**"
+    agent_source = "--agent-record" if records else MISSING
+    return "\n".join(
+        [
+            f"- 当前目标：{args.goal}",
+            "  - 证据来源：用户输入 `--goal`",
+            "  - 可信度：高" if args.goal != NOT_PROVIDED else "  - 可信度：未验证",
+            f"- 当前阶段：{args.stage}",
+            "  - 证据来源：用户输入 `--stage`",
+            "  - 可信度：高" if args.stage != NOT_PROVIDED else "  - 可信度：未验证",
+            f"- 主要改动文件：{evidence.changed_files}",
+            f"  - 证据来源：{changed_source}",
+            "  - 可信度：高" if evidence.changed_files != MISSING else "  - 可信度：未验证",
+            f"- 项目上下文：{docs_source}",
+            "  - 证据来源：本地文件系统",
+            "  - 可信度：高",
+            f"- Agent 记录：{agent_source}",
+            "  - 证据来源：本地 agent record 文件" if records else "  - 证据来源：未发现",
+            "  - 可信度：高" if records else "  - 可信度：未验证",
+        ]
+    )
+
+
+def risk_register_markdown(args: argparse.Namespace) -> str:
+    risk = args.risk or MISSING
+    mitigation = args.risk_mitigation or args.next_step
+    if risk == MISSING:
+        mitigation = MISSING
+    return "\n".join(
+        [
+            f"- 风险：{risk}",
+            f"- 触发条件：{args.risk_trigger if risk != MISSING else MISSING}",
+            f"- 影响：{args.risk_impact if risk != MISSING else MISSING}",
+            f"- 缓解动作：{mitigation}",
+        ]
+    )
+
+
+def next_action_contract_markdown(args: argparse.Namespace) -> str:
+    return "\n".join(
+        [
+            f"- 下一步动作：{args.next_step}",
+            f"- 输入：{', '.join(args.next_input) if args.next_input else NOT_PROVIDED}",
+            f"- 触达文件：{', '.join(args.next_file) if args.next_file else NOT_PROVIDED}",
+            f"- 验证命令：{args.validation}",
+            f"- 完成标志：{args.done_when}",
+        ]
+    )
 
 
 def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[AgentRecord]) -> str:
@@ -395,7 +455,16 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 - 风险：{risk}
 - 需要用户确认：{args.needs_confirmation}
 
-## 6. 项目上下文
+## 6. Evidence Map
+{evidence_map_markdown(args, evidence, agent_records)}
+
+## 7. Risk Register
+{risk_register_markdown(args)}
+
+## 8. Next Action Contract
+{next_action_contract_markdown(args)}
+
+## 9. 项目上下文
 - README：
 {code_block(evidence.readme)}
 - docs：
@@ -405,7 +474,7 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 - skills：
 {code_block(evidence.skills)}
 
-## 7. Agent 交接信息
+## 10. Agent 交接信息
 - 参与代理与结论：
 {bullet(args.agent_summary)}
 - Agent records：
@@ -414,12 +483,12 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 {bullet(args.reusable_finding)}
 - 修改原因：{args.why}
 
-## 8. 下一步
+## 11. 下一步
 1. 下一步动作：{args.next_step}
 2. 验证方式：{args.validation}
 3. 完成标志：{args.done_when}
 
-## 9. 复现命令
+## 12. 复现命令
 ```bash
 git status --short
 git diff --stat
@@ -427,7 +496,7 @@ git diff --name-only
 git log --oneline -n 5
 ```
 
-## 10. Agent 并行边界
+## 13. Agent 并行边界
 {boundary_markdown(agent_records)}
 """
 
@@ -453,9 +522,14 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--next-step", default=NOT_PROVIDED)
     p.add_argument("--blocker", default=MISSING)
     p.add_argument("--risk", default=MISSING)
+    p.add_argument("--risk-trigger", default=NOT_PROVIDED)
+    p.add_argument("--risk-impact", default=NOT_PROVIDED)
+    p.add_argument("--risk-mitigation", default=NOT_PROVIDED)
     p.add_argument("--needs-confirmation", default=MISSING)
     p.add_argument("--validation", default=NOT_PROVIDED)
     p.add_argument("--done-when", default=NOT_PROVIDED)
+    p.add_argument("--next-input", action="append", default=[])
+    p.add_argument("--next-file", action="append", default=[])
     p.add_argument("--completed", action="append", default=[])
     p.add_argument("--unfinished", action="append", default=[])
     p.add_argument("--agent-record", action="append", default=[])
@@ -480,6 +554,7 @@ def self_test() -> None:
                     "task": "实现 Agent record 输入",
                     "output": "新增 --agent-record",
                     "conclusion": "可以作为 handoff 证据",
+                    "adopted_output": "保留 agent record schema",
                     "write_scope": ["skills/rs-handoff/scripts/generate_snapshot.py"],
                     "status": "completed",
                     "adoption": "adopted",
@@ -529,6 +604,20 @@ Markdown record 可解析。
                 "读取快照",
                 "--validation",
                 "检查必要章节",
+                "--done-when",
+                "snapshot 包含证据、风险和下一步契约",
+                "--risk",
+                "交接信息不完整",
+                "--risk-trigger",
+                "下一个 owner 只读 snapshot",
+                "--risk-impact",
+                "重复探索或误判状态",
+                "--risk-mitigation",
+                "为关键结论附证据来源",
+                "--next-input",
+                "snapshot-benchmark.md",
+                "--next-file",
+                "skills/rs-handoff/scripts/generate_snapshot.py",
                 "--agent-record",
                 str(json_record),
                 "--agent-record",
@@ -544,13 +633,19 @@ Markdown record 可解析。
         assert output.name == "snapshot-20000101-000000.md"
         assert "# Handoff Snapshot: 测试任务" in text
         assert "## 2. 工作区状态" in text
-        assert "## 6. 项目上下文" in text
+        assert "## 6. Evidence Map" in text
+        assert "## 7. Risk Register" in text
+        assert "## 8. Next Action Contract" in text
+        assert "## 9. 项目上下文" in text
         assert "git status --short" in text
         assert "完成脚本渲染" in text
+        assert "为关键结论附证据来源" in text
+        assert "snapshot 包含证据、风险和下一步契约" in text
         assert "worker_a" in text
         assert "reviewer_a" in text
         assert "记录文件不存在：missing.json" in text
-        assert "## 10. Agent 并行边界" in text
+        assert "已采纳输出" in text
+        assert "## 13. Agent 并行边界" in text
         assert "潜在写入冲突" in text
         assert "reviewer_a, worker_a" in text
 

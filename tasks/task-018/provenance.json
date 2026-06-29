@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "suite_id": "relaystack-scenario-fixtures",
+  "suite_name": "RelayStack scenario fixtures",
+  "provenance_status": "scenario_only",
+  "source_type": "engineering_scenario",
+  "authority": "project_authored_scenario",
+  "source_url": "local:tasks/task-018/instruction.md",
+  "license": "Project-local fixture; no external upstream license claimed",
+  "fixture_notes": "Router path matching 场景题；未绑定具体上游 issue/PR。",
+  "test_oracle": "tasks/task-018/test.sh"
+}

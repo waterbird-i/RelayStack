@@ -19,6 +19,20 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "reports" / "results.jsonl"
 GENERATOR = ROOT / "skills" / "rs-handoff" / "scripts" / "generate_snapshot.py"
 BENCHMARK_FILES = {"agent-metrics.json", "prompt.md"}
+PROVENANCE_FIELDS = [
+    "suite_id",
+    "suite_name",
+    "provenance_status",
+    "source_type",
+    "source_url",
+    "repo_url",
+    "issue_url",
+    "pr_url",
+    "original_commit",
+    "license",
+    "license_url",
+    "citation",
+]
 
 
 def read_text(path: Path) -> str:
@@ -60,9 +74,10 @@ def ensure_git_repo(workdir: Path) -> None:
         run(["git", "init", "-q"], workdir)
 
 
-def make_handoff(task_dir: Path, workdir: Path) -> Path:
+def make_handoff(task_dir: Path, workdir: Path) -> tuple[Path, float, int]:
     ensure_git_repo(workdir)
     handoff_note = read_text(task_dir / "handoff.md").strip() or "未提供"
+    started = time.monotonic()
     result = run(
         [
             sys.executable,
@@ -88,10 +103,11 @@ def make_handoff(task_dir: Path, workdir: Path) -> Path:
     )
     if result.returncode != 0:
         raise SystemExit(result.stdout)
-    return workdir / "handoff" / "snapshot-benchmark.md"
+    snapshot = workdir / "handoff" / "snapshot-benchmark.md"
+    return snapshot, round(time.monotonic() - started, 3), len(read_text(snapshot))
 
 
-def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, Path | None]:
+def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, Path | None, float | None, int | None]:
     instruction = read_text(task_dir / "instruction.md")
     metrics_note = "\n".join(
         [
@@ -101,12 +117,13 @@ def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, 
             '{"steps_after_handoff": <number>, "repeated_known_info": <true|false>}',
             "steps_after_handoff 统计你开始执行后用于理解/修改/验证的主要动作数。",
             "repeated_known_info 表示你是否重复探索了 prompt 或 handoff 已明确给出的文件/事实。",
+            "可选写入 handoff_question_score，范围 0-7，表示 snapshot 回答 7 个交接问题的数量。",
         ]
     )
     if runner_name == "no_handoff":
-        return instruction + metrics_note, None
+        return instruction + metrics_note, None, None, None
 
-    snapshot = make_handoff(task_dir, workdir)
+    snapshot, snapshot_elapsed, snapshot_chars = make_handoff(task_dir, workdir)
     task_handoff = read_text(task_dir / "handoff.md").strip()
     prompt = "\n\n".join(
         [
@@ -121,7 +138,7 @@ def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, 
             metrics_note,
         ]
     )
-    return prompt, snapshot
+    return prompt, snapshot, snapshot_elapsed, snapshot_chars
 
 
 def load_json(path: Path) -> dict[str, object]:
@@ -134,6 +151,14 @@ def load_json(path: Path) -> dict[str, object]:
     return data if isinstance(data, dict) else {}
 
 
+def load_provenance(task_dir: Path) -> dict[str, object]:
+    return load_json(task_dir / "provenance.json")
+
+
+def provenance_fields(provenance: dict[str, object]) -> dict[str, object]:
+    return {field: provenance.get(field) for field in PROVENANCE_FIELDS}
+
+
 def first_number(patterns: list[str], text: str) -> int | float | None:
     for pattern in patterns:
         match = re.search(pattern, text, flags=re.IGNORECASE)
@@ -143,8 +168,112 @@ def first_number(patterns: list[str], text: str) -> int | float | None:
     return None
 
 
-def merged_metrics(agent_output: str, metrics_path: Path) -> dict[str, object]:
+def json_items(agent_output: str) -> list[dict[str, object]]:
+    items = []
+    for line in agent_output.splitlines():
+        if not line.startswith("{"):
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        item = payload.get("item") if isinstance(payload, dict) else None
+        if isinstance(item, dict):
+            items.append(item)
+    return items
+
+
+def command_paths(command: str) -> list[str]:
+    paths: list[str] = []
+    if not re.search(r"\b(cat|sed|nl|head|tail|less|more|rg)\b", command):
+        return paths
+    for quoted in re.findall(r"['\"]([^'\"]+)['\"]", command):
+        path = cleaned_path(quoted)
+        if path:
+            paths.append(path)
+    for raw in re.split(r"\s+", command):
+        path = cleaned_path(raw)
+        if path:
+            paths.append(path)
+    return paths
+
+
+def cleaned_path(raw: str) -> str | None:
+    token = raw.strip().strip("'\";,")
+    if token.startswith(("-", "$", "/")):
+        return None
+    if "/" not in token or not re.search(r"\.[A-Za-z0-9]+$", token):
+        return None
+    return token
+
+
+def output_paths(output: str) -> list[str]:
+    paths = []
+    for line in output.splitlines():
+        text = line.strip()
+        if re.match(r"^[\w./-]+\.(?:js|ts|jsx|tsx|py|sh|md|json|yml|yaml|txt)$", text):
+            paths.append(text)
+    return paths
+
+
+def unique(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result = []
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+    return result
+
+
+def transcript_metrics(agent_output: str) -> dict[str, object]:
+    tool_steps = 0
+    commands_run: list[str] = []
+    opened_files: list[str] = []
+    for item in json_items(agent_output):
+        if item.get("type") not in {"command_execution", "mcp_tool_call", "file_change"}:
+            continue
+        if item.get("status") != "completed":
+            continue
+        tool_steps += 1
+        if item.get("type") != "command_execution":
+            continue
+        command = str(item.get("command", ""))
+        commands_run.append(command)
+        opened_files.extend(command_paths(command))
+        output = item.get("aggregated_output")
+        if isinstance(output, str) and "rg --files" in command:
+            opened_files.extend(output_paths(output))
+    return {
+        "tool_steps": tool_steps,
+        "commands_run": unique(commands_run),
+        "opened_files": unique(opened_files),
+    }
+
+
+def known_entry_files(task_dir: Path) -> list[str]:
+    handoff = read_text(task_dir / "handoff.md")
+    entries: list[str] = []
+    for line in handoff.splitlines():
+        if "已知入口文件" not in line and "入口文件" not in line:
+            continue
+        entries.extend(re.findall(r"`([^`]+)`", line))
+        entries.extend(re.findall(r"[:：]\s*([^。]+)", line))
+    return unique([entry.strip(" `。") for entry in entries if entry.strip(" `。")])
+
+
+def repeated_known_files(opened_files: list[str], known_files: list[str]) -> list[str]:
+    repeated = []
+    for known in known_files:
+        if any(opened == known or opened.endswith("/" + known) for opened in opened_files):
+            repeated.append(known)
+    return repeated
+
+
+def merged_metrics(agent_output: str, metrics_path: Path, task_dir: Path) -> dict[str, object]:
     metrics = load_json(metrics_path)
+    transcript = transcript_metrics(agent_output)
+    metrics.update(transcript)
     metrics.setdefault(
         "total_tokens",
         first_number([r"total[_ ]tokens[\"':= ]+([0-9,]+)", r"tokens[\"':= ]+([0-9,]+)"], agent_output),
@@ -154,7 +283,12 @@ def merged_metrics(agent_output: str, metrics_path: Path) -> dict[str, object]:
         first_number([r"cost[_ ]usd[\"':= $]+([0-9.]+)", r"cost[\"':= $]+([0-9.]+)"], agent_output),
     )
     metrics.setdefault("steps_after_handoff", metrics.get("execution_steps"))
-    metrics.setdefault("repeated_known_info", None)
+    known_files = known_entry_files(task_dir)
+    repeated_files = repeated_known_files(list(transcript["opened_files"]), known_files)
+    metrics["known_entry_files"] = known_files
+    metrics["repeated_known_files"] = repeated_files
+    metrics["auto_repeated_known_info"] = bool(repeated_files) if known_files else None
+    metrics.setdefault("repeated_known_info", metrics["auto_repeated_known_info"])
     return metrics
 
 
@@ -267,11 +401,26 @@ def write_blind_artifacts(
         "test_returncode": result["test_returncode"],
         "steps_after_handoff": result["steps_after_handoff"],
         "repeated_known_info": result["repeated_known_info"],
+        "continuation_success": result["continuation_success"],
+        "handoff_question_score": result["handoff_question_score"],
+        "tool_steps": result["tool_steps"],
+        "opened_files": result["opened_files"],
+        "commands_run": result["commands_run"],
+        "known_entry_files": result["known_entry_files"],
+        "repeated_known_files": result["repeated_known_files"],
+        "auto_repeated_known_info": result["auto_repeated_known_info"],
+        "snapshot_elapsed_seconds": result["snapshot_elapsed_seconds"],
+        "snapshot_chars": result["snapshot_chars"],
         "diff_summary": diff_lines,
         "test_summary": output_summary(test_output, result["test_returncode"]),
         "transcript_summary": output_summary(agent_output, result["agent_returncode"]),
         "redactions": ["runner_name", "group_name", "prompt_branding", "workdir"],
     }
+    provenance = result.get("provenance", {})
+    if not isinstance(provenance, dict):
+        provenance = {}
+    packet.update(provenance_fields(provenance))
+    packet["provenance"] = provenance
     append_jsonl(blind_dir / "packets.jsonl", packet)
 
     debug_packet = dict(packet)
@@ -310,7 +459,8 @@ def run_task(
         workdir = Path(tempfile.mkdtemp(prefix=f"rsbench-{task_dir.name}-"))
 
     copy_initial_repo(task_dir, workdir)
-    prompt, snapshot = build_prompt(task_dir, workdir, runner_name)
+    provenance = load_provenance(task_dir)
+    prompt, snapshot, snapshot_elapsed, snapshot_chars = build_prompt(task_dir, workdir, runner_name)
     prompt_path = workdir / "prompt.md"
     metrics_path = workdir / "agent-metrics.json"
     prompt_path.write_text(prompt, encoding="utf-8")
@@ -332,7 +482,7 @@ def run_task(
     agent = run_shell(agent_cmd, workdir, env)
     test = run(["bash", str(task_dir / "test.sh")], workdir, env)
     elapsed = round(time.monotonic() - started, 3)
-    metrics = merged_metrics(agent.stdout, metrics_path)
+    metrics = merged_metrics(agent.stdout, metrics_path, task_dir)
     passed = test.returncode == 0
     result = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -344,11 +494,23 @@ def run_task(
         "cost_usd": metrics.get("cost_usd"),
         "steps_after_handoff": metrics.get("steps_after_handoff"),
         "repeated_known_info": metrics.get("repeated_known_info"),
+        "continuation_success": passed,
+        "handoff_question_score": metrics.get("handoff_question_score"),
+        "tool_steps": metrics.get("tool_steps"),
+        "opened_files": metrics.get("opened_files"),
+        "commands_run": metrics.get("commands_run"),
+        "known_entry_files": metrics.get("known_entry_files"),
+        "repeated_known_files": metrics.get("repeated_known_files"),
+        "auto_repeated_known_info": metrics.get("auto_repeated_known_info"),
         "agent_returncode": agent.returncode,
         "test_returncode": test.returncode,
         "snapshot_generated": snapshot is not None,
+        "snapshot_elapsed_seconds": snapshot_elapsed,
+        "snapshot_chars": snapshot_chars,
         "snapshot": str(snapshot) if snapshot and keep_workdir else None,
         "workdir": str(workdir) if keep_workdir else None,
+        "provenance": provenance,
+        **provenance_fields(provenance),
     }
     append_result(result, report_path)
     if blind_dir is not None:

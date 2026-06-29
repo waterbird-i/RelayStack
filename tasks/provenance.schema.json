@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "required_fields": [
+    "suite_id",
+    "provenance_status",
+    "source_type",
+    "source_url",
+    "license"
+  ],
+  "recommended_fields": [
+    "suite_name",
+    "authority",
+    "repo_url",
+    "issue_url",
+    "pr_url",
+    "original_commit",
+    "fixture_notes",
+    "test_oracle",
+    "license_url",
+    "citation"
+  ],
+  "provenance_status_values": [
+    "verified_public",
+    "third_party_dataset",
+    "scenario_only",
+    "unknown"
+  ],
+  "source_type_values": [
+    "github_pr",
+    "github_issue",
+    "third_party_dataset",
+    "public_security_advisory",
+    "engineering_scenario"
+  ]
+}

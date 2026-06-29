@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "suite_id": "swe-bench-lite",
+  "suite_name": "SWE-bench Lite",
+  "authority": "third_party_public_benchmark",
+  "status": "adopted_manifest_only",
+  "dataset": {
+    "name": "princeton-nlp/SWE-bench_Lite",
+    "url": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Lite",
+    "homepage": "https://www.swebench.com/",
+    "repository": "https://github.com/SWE-bench/SWE-bench"
+  },
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/SWE-bench/SWE-bench/blob/main/LICENSE"
+  },
+  "citation": {
+    "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+    "url": "https://openreview.net/forum?id=VTF8yNQM66"
+  },
+  "provenance_mapping": {
+    "instance_id": "dataset.instance_id",
+    "repo": "dataset.repo",
+    "base_commit": "dataset.base_commit",
+    "issue_or_problem_statement": "dataset.problem_statement",
+    "test_oracle": "dataset.test_patch",
+    "issue_url": "derive from repo and issue references when present",
+    "pr_url": "derive from repo and pull request references when present"
+  },
+  "report_fields": [
+    "suite_id",
+    "suite_name",
+    "provenance_status",
+    "source_type",
+    "source_url",
+    "repo_url",
+    "issue_url",
+    "pr_url",
+    "original_commit",
+    "license",
+    "license_url",
+    "citation"
+  ],
+  "runner_notes": [
+    "Use the upstream SWE-bench Docker harness for execution.",
+    "RelayStack's local runner can compare handoff/no-handoff prompts, but should not claim SWE-bench scores until it emits upstream-compatible predictions and evaluates them with the official harness."
+  ]
+}

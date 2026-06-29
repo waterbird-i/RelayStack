@@ -22,7 +22,9 @@ local evidence another person or agent can use to continue the work.
    - unfinished work
    - blocker
    - risk
+   - risk trigger, impact, and mitigation when known
    - next step
+   - next inputs and touched files when known
    - validation plan
    - relevant agent or sub-agent summaries
 2. Run the bundled generator from the workspace root.
@@ -38,7 +40,12 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --unfinished "未完成事项" \
   --blocker "阻塞，没有则写未发现" \
   --risk "风险，没有则写未发现" \
+  --risk-trigger "风险触发条件" \
+  --risk-impact "风险影响" \
+  --risk-mitigation "缓解动作" \
   --next-step "下一步动作" \
+  --next-input "下一步输入" \
+  --next-file "下一步触达文件" \
   --validation "验证方式" \
   --agent-summary "参与代理及结论" \
   --agent-record "path/to/worker-a.json" \
@@ -52,11 +59,13 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
 - Keep evidence local and cheap: git status, diff summary, changed files,
   recent commits, and project notes when present.
 - Include enough manual context to answer why the current change exists.
+- Include `Evidence Map`, `Risk Register`, and `Next Action Contract` so the
+  next owner can trace claims, understand risk, and execute the next step.
 - Use `--agent-record` for local Agent / task records. JSON and Markdown are
   supported; missing or invalid files should be rendered as warnings.
 - When multiple records are provided, include `Agent 并行边界`: role, write
-  scope, status, adoption, explicit conflicts, verification, and overlapping
-  write scopes.
+  scope, status, adoption, adopted output, rejected reason, explicit conflicts,
+  verification, and overlapping write scopes.
 
 ## Validation
 

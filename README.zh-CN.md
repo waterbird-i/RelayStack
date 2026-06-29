@@ -111,8 +111,32 @@ handoff/snapshot-<timestamp>.md
 6. 下一步做什么？
 7. 下一个 owner 怎么验证完成？
 
+它还会带上 3 个很小的质量契约：
+
+- `Evidence Map`：把关键结论绑定到本地来源，例如 Git 证据、项目文档、
+  用户输入和 agent record。
+- `Risk Register`：记录风险、触发条件、影响和缓解动作，而不是泛泛写“有风险”。
+- `Next Action Contract`：写清下一步动作、输入、触达文件、验证命令和完成标志。
+
 当附加多个 agent records 时，snapshot 还会生成 `Agent 并行边界`，记录写入范围、
 采纳状态、显式冲突、验证结果和文件范围重叠警告。
+
+Agent record 可以是 JSON，也可以是 Markdown frontmatter。建议字段：
+
+```json
+{
+  "agent": "worker_a",
+  "role": "worker",
+  "task": "实现 snapshot 契约",
+  "write_scope": ["skills/rs-handoff/scripts/generate_snapshot.py"],
+  "status": "completed",
+  "adoption": "accepted",
+  "adopted_output": "保留 Evidence Map",
+  "rejected_reason": "不增加 workflow 引擎",
+  "conflicts": [],
+  "verification": ["self-test"]
+}
+```
 
 ## 快速开始
 
@@ -188,11 +212,22 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 主要缺口是 spec-first 变更定义时用 OpenSpec。主要缺口是交接时，用 RelayStack：
 说清楚改了什么、为什么改、风险在哪、下一个 owner 怎么继续。
 
-## 成功指标
+## 接手成本指标
 
-```text
-handoff success rate = correctly answered handoff questions / total handoff questions
-```
+![RelayStack 接手成本统计图](reports/blind-expanded-20260625/assets/continuation-cost.png)
+
+当前 25 道 benchmark 合并口径下，RelayStack handoff 让总耗时下降 `24.1%`，
+报告 token 下降 `23.0%`。在扩展 20 题盲评中，`rs_handoff` 获得 `53/60`
+个 reviewer 胜场，并把重复探索已知信息从 `4` 次降到 `0` 次。成功率作为支撑信息：
+不用 handoff 是 `92.0%`，使用 handoff 是 `96.0%`。
+
+benchmark 只保留窄口径价值证明：
+
+- `elapsed_seconds`：执行到 `test.sh` 结束的接手耗时
+- `total_tokens` / `cost_usd`：可获得时记录模型用量
+- `repeated_known_info` / `repeated_known_files`：是否重复打开 handoff 已给出的事实
+- `continuation_success`：任务测试是否通过
+- `handoff_question_score`：可选 0-7 分，表示 7 个交接问题回答了几个
 
 Demo 成功的标准是：一个新的人或新 agent 只读 snapshot，就能在 5 分钟内继续下一步。
 

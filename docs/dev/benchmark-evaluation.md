@@ -373,6 +373,10 @@ workdir
    - 足够判断 runner 是否能跑通。
    - 不足以支撑产品级效果宣称。
 
+6. 只有带 `provenance.json` 的任务能作为可审计公开题源。
+   - 没有该文件的任务只能按“场景题”使用。
+   - runner 会把 provenance 写入普通 report 和 blind packets。
+
 
 ## 8. 后续建议
 
@@ -567,4 +571,92 @@ reports/blind/runs/<run_id>/       # prompt、agent output、test output、diff
 python3 scripts/summarize_blind_benchmark.py \
   reports/blind-expanded-20260624 \
   --output reports/blind-expanded-20260624/final.generated.md
+```
+
+
+## 12. 权威题库与 Provenance
+
+RelayStack 现在区分三种题源：
+
+1. `verified_public`
+   - 本仓库裁剪 fixture，但逐题记录公开 PR / issue、上游仓库、许可证和测试 oracle。
+   - 当前 `task-001` 到 `task-005` 已补 `provenance.json`。
+
+2. `third_party_dataset`
+   - 直接采用第三方公开评测集实例，例如 SWE-bench Lite。
+   - 本仓库只保存 suite manifest，不 vendor 大型数据集。
+
+3. `scenario_only`
+   - 只来自工程常见场景或人工合成问题。
+   - 可以用于内部回归，不用于“权威题库”宣传。
+
+任务级 provenance 文件：
+
+```text
+tasks/task-001/provenance.json
+tasks/provenance.schema.json
+```
+
+核心字段：
+
+- `suite_id`
+- `provenance_status`
+- `source_type`
+- `source_url`
+- `repo_url`
+- `issue_url`
+- `pr_url`
+- `original_commit`
+- `license`
+- `license_url`
+- `citation`
+- `fixture_notes`
+- `test_oracle`
+
+runner 报告新增字段：
+
+```text
+provenance
+suite_id
+suite_name
+provenance_status
+source_type
+source_url
+repo_url
+issue_url
+pr_url
+original_commit
+license
+license_url
+citation
+```
+
+这些字段会进入：
+
+- 普通 `--report` JSONL
+- blind `raw-runs.jsonl`
+- blind `packets.jsonl`
+- blind `debug-packets.jsonl`
+- `runs/<run_id>/result.json`
+
+第三方权威 suite manifest：
+
+```text
+suites/authoritative/swe-bench-lite.json
+```
+
+当前采用策略是 `adopted_manifest_only`：
+
+- 用 SWE-bench Lite 作为外部权威目标。
+- 保留上游 dataset、repo、license、citation 和字段映射。
+- 不声称本地 runner 分数等价于 SWE-bench 官方分数。
+- 只有输出 upstream-compatible predictions 并用官方 harness 评估后，才可引用官方
+  SWE-bench 分数。
+
+轻量校验：
+
+```bash
+python3 scripts/validate_provenance.py
+python3 -m py_compile runners/_runner.py scripts/add_benchmark_tasks.py scripts/validate_provenance.py
+git diff --check
 ```
