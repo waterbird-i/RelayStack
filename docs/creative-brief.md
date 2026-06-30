@@ -117,8 +117,8 @@ handoff success rate = correctly answered handoff questions / total handoff ques
 
 ## 8. 500 字以内简版
 
-RelayStack 是一个以 skill 形式落地的 AI 编程工作流增强层，用来解决 AI 编程中的交接断点。当前 AI agent 已经能完成很多开发任务，但上下文常分散在聊天记录、Git diff、任务说明和个人判断里；多人或多 agent 接力时，接手者很难快速知道目标、进度、改动原因、风险和下一步。
+RelayStack 是一组 repo-local skills，也是一套 AI 编程交接协议。它解决的是 AI 编程里最容易断的一环：一段工作从一个人或 agent 交到下一个 owner 时，目标、改动原因、风险、验证状态和下一步常散在聊天、Git diff、临时说明和个人判断里。
 
-RelayStack 会基于本地工作区证据生成 handoff snapshot，记录当前目标、改动范围、已完成和未完成事项、阻塞风险、项目上下文、下一步动作和验证方式；也可以接入本地 AgentRecord，展示多个 agent 的职责、写入范围、采纳状态、冲突和验证结论。
+使用 `rs-handoff` 后，RelayStack 会从本地 Git 证据、项目文档、用户填写的交接字段和可选 AgentRecord 中生成一份 Markdown handoff snapshot。它回答当前目标、已完成事项、改动文件、推进原因、阻塞风险、下一步动作和验证方式；多 agent 参与时，还会列出职责、写入范围、采纳状态、冲突和验证结论。
 
-它面向使用 AI 编程工具的开发者、研发团队、项目负责人和 hackathon 团队。作品亮点是轻量、证据优先、交接导向、并行边界可见，并用 handoff success rate 衡量接手质量。第一版不做平台、数据库或任务系统，只专注生成一份能让下一个人或 agent 继续工作的交接快照。
+它面向使用 AI 编程工具的开发者和研发团队。第一版不做 Web UI、数据库、账号系统或任务系统，只把交接这件事做小做清楚：保留证据，标出边界，写明风险和验证路径，让下一个人或 agent 不读完整历史会话也能继续工作。效果用 handoff success rate 这类交接问题得分来衡量。

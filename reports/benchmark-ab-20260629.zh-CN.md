@@ -20,11 +20,11 @@
 3. 全量 25 题合并看，两组均 24/25 通过。
    `rs_handoff` 总耗时减少 19.3%，总 tokens 减少 3.3%。
 
-4. 权威性需要分层看：
+4. 题源可追溯性需要分层看：
    旧题是 `verified_public`，逐题绑定公开 GitHub PR，许可证明确，
    更适合作为对外展示的说服力样本。
    新题是 `scenario_only`，属于项目自建工程场景题，适合做回归和覆盖面补强，
-   但不能单独声称为第三方权威评测。
+   但不能单独声称为第三方公开评测结果。
 
 ## 总览
 
@@ -37,7 +37,7 @@
 | 全量 `task-001..025` | mixed | `no_handoff` | 25/25 | 96.0% | 5577.041s | 8,175,072 | `task-016` |
 | 全量 `task-001..025` | mixed | `rs_handoff` | 25/25 | 96.0% | 4502.335s | 7,904,651 | `task-016` |
 
-## 题库来源与权威性
+## 题库来源与可追溯性
 
 ### 旧题：公开 PR 题
 
@@ -45,7 +45,7 @@
 - 状态：`verified_public`
 - 来源类型：`github_pr`
 - 许可证：MIT
-- 权威性判断：
+- 可追溯性判断：
   - 有公开上游 PR 链接。
   - 有明确 repo、PR、license 字段。
   - 可追溯性强，适合作为对外说明中的主要证据。
@@ -57,14 +57,14 @@
 - 来源类型：`engineering_scenario`
 - 来源：`local:tasks/task-XXX/instruction.md`
 - 许可证：`Project-local fixture; no external upstream license claimed`
-- 权威性判断：
+- 可追溯性判断：
   - 题目覆盖常见工程缺陷与维护场景，适合做内部回归和能力对比。
-  - 未绑定具体上游 issue/PR，不应单独称为第三方权威题库。
+  - 未绑定具体上游 issue/PR，不应单独称为第三方公开题库。
   - 报告中必须继续保留 `scenario_only` 标注，避免误导。
 
 ### 第三方公开评测集方案
 
-仓库已新增两套第三方权威题源 manifest：
+仓库已新增两套第三方公开评测集 manifest：
 
 ```text
 suites/authoritative/swe-bench-lite.json
@@ -92,9 +92,9 @@ SWE-bench Lite 当前状态是 `adopted_manifest_only`：
 已经记录第三方评测集元数据和字段映射，但本次未运行官方 harness。
 
 Multi-SWE-bench 已进一步完成 1 个 flash 样本的官方 harness A/B。
-该结果用于证明权威链路跑通，不应包装成完整 benchmark 排名。
+该结果只说明官方 harness 链路已跑通，不应包装成完整 benchmark 排名。
 
-## 第三方权威题源盲测状态
+## 第三方公开题源盲测状态
 
 已对 Multi-SWE-bench 跑通 1 个官方 flash 样本：
 
@@ -233,8 +233,8 @@ runner 已在结果中写入以下 provenance 字段：
 - 本地 25 题 suite：`suites/local-25.json`
 - 第三方评测集方案：`suites/authoritative/swe-bench-lite.json`
 - 第三方评测集方案：`suites/authoritative/multi-swe-bench.json`
-- 第三方权威题源 A/B 汇总：`reports/authoritative-ab-20260629.json`
-- 第三方权威题源 A/B 报告：`reports/authoritative-ab-20260629.zh-CN.md`
+- Multi-SWE-bench A/B 汇总：`reports/authoritative-ab-20260629.json`
+- Multi-SWE-bench A/B 报告：`reports/authoritative-ab-20260629.zh-CN.md`
 - Multi-SWE-bench dataset：`reports/multi-swe-one-20260629/dataset.jsonl`
 - Multi-SWE-bench baseline patch JSONL：`reports/multi-swe-one-20260629/baseline.jsonl`
 - Multi-SWE-bench handoff patch JSONL：`reports/multi-swe-one-20260629/relaystack_handoff.jsonl`

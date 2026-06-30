@@ -1,6 +1,6 @@
-# 第三方权威题源 A/B 盲测报告（2026-06-29）
+# Multi-SWE-bench A/B 盲测报告（2026-06-29）
 
-- 权威题源：Multi-SWE-bench
+- 第三方公开题源：Multi-SWE-bench
 - 数据集切片：`ByteDance-Seed/Multi-SWE-bench-flash`
 - suite manifest：`suites/authoritative/multi-swe-bench.json`
 - 本地 25 题分类：`suites/local-25.json`
@@ -20,7 +20,7 @@ relaystack_handoff    1/1 resolved
 
 这 1 个样本不能代表完整 Multi-SWE-bench 分数，但它已经证明：
 
-1. 本地 25 题与第三方权威题源已分离。
+1. 本地 25 题与第三方公开题源已分离。
 2. patch JSONL 生成链路已跑通。
 3. RelayStack handoff 协议可以接到官方 issue-resolving harness 上。
 
@@ -138,7 +138,7 @@ handoff: 只增加 RelayStack handoff 输入，其余验证预算与工具权限
 - `baseline` 也 resolved，但 patch 比官方修复更宽，额外把 `{2,}` 改为 `{3,}`。
 - `relaystack_handoff` patch 更接近官方 fix，只锚定 `indexSitesFixesConfig`
   的 delimiter regex。
-- 这次只跑 1 个样本，结果用于验证权威链路，不应包装成完整 benchmark 排名。
+- 这次只跑 1 个样本，结果只说明官方 harness 链路已跑通，不应包装成完整 benchmark 排名。
 - `multi_swe_bench` 和 `datasets` 依赖安装在 `/private/tmp/multi-swe-bench-deps`，
   通过 `PYTHONPATH` 运行；不是全局 Python 环境安装。
 - 首次运行曾因 Docker Hub 拉取 `node:18` token 超时失败；手动补拉
