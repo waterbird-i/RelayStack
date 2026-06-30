@@ -62,7 +62,7 @@ git show HEAD:skills/rs-roadmap/SKILL.md
 新规则的关键新增点：
 
 - 路由前先验证路径，使用真实文件系统证据。
-- 检查 `.codestable` 是否存在，且把它视为 legacy 或个人过程记忆。
+- 检查 `project` 是否存在，且把它视为 legacy 或个人过程记忆。
 - 用户只要求 audit/judgment 时，不要直接路由到会创建文件的 writer。
 - 跨模块影响本身不等于 `rs-roadmap`。
 - 单一连贯用户可见行为即使涉及 API、type、permission、doc，也应先走 `rs-feat-design`。
@@ -555,7 +555,7 @@ route：rs-feat-design
 
 1. 跨多个模块，但仍是单一 feature。
 2. 用户只要求 audit/judgment，但旧规则可能路由到会写文件的 skill。
-3. `.codestable` 存在但吸引子 docs 不完整，容易误判 onboarding 状态。
+3. `project` 存在但吸引子 docs 不完整，容易误判 onboarding 状态。
 4. 一个问题看似 bug，实则是新增行为请求。
 5. 一个问题看似 feature，实则是已有行为回归。
 

@@ -59,8 +59,8 @@ user-facing behavior needs API, type, permission, and doc changes, route to
 
 ## Personal Project Notes
 
-Detailed process records belong in the user's personal project directory when
-one is provided, such as:
+Detailed feature process records belong in the user's personal project
+directory at `project/features/` when one is provided, such as:
 
 - brainstorm trails
 - draft plans
@@ -74,7 +74,9 @@ repository.
 
 ## Rules
 
-- Do not create `.codestable/features/` records in the team repository.
+- Create feature process records under `project/features/` in the user's
+  personal project directory when available.
+- Do not treat `project/features/` records as team-maintained docs.
 - Do not store full design/checklist/acceptance archives in `docs/`.
 - Do not update attractor docs with guesses. Write `未发现` or ask for the
   missing fact when it blocks safe work.

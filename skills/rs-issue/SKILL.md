@@ -11,7 +11,7 @@ Use this skill when existing behavior is broken, incorrect, or risky.
 
 The fix should leave two kinds of memory:
 
-- private process memory in the user's personal project notes
+- private process memory in the user's personal project `project/issues/`
 - durable team truth in the attractor docs
 
 ## Do Not Use When
@@ -35,7 +35,7 @@ The fix should leave two kinds of memory:
 5. Fix the root cause at the narrowest shared point.
 6. Run the smallest check that would fail if the bug returned.
 7. Record detailed report / analysis / fix-note in the user's personal project
-   directory when one is provided.
+   directory under `project/issues/` when one is provided.
 8. Update only durable team attractor docs:
    - `docs/backlog/`: issue status and verification
    - `docs/requirements/`: changed or clarified expected behavior
@@ -55,7 +55,8 @@ The fix should leave two kinds of memory:
 
 ## Personal Project Notes
 
-Keep these outside the team repository by default:
+Keep these in `project/issues/` inside the user's personal project directory by
+default:
 
 - reproduction transcript
 - failed hypotheses
@@ -66,7 +67,9 @@ Keep these outside the team repository by default:
 
 ## Rules
 
-- Do not create `.codestable/issues/` records in the team repository.
+- Create issue process records under `project/issues/` in the user's personal
+  project directory when available.
+- Do not treat `project/issues/` records as team-maintained docs.
 - Do not hide a behavior or architecture change only in the private notes.
 - Do not broaden the fix into a new feature. Open a feature path instead.
 - If the fix changes expected behavior, update requirements through `rs-req`.

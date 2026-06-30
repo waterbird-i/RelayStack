@@ -13,7 +13,7 @@ hackathon story is sharper:
 
 > RelayStack lets AI agents hand off work, not just finish tasks.
 
-Superpower makes agents more capable. CodeStable gives capable agents memory,
+Superpower makes agents more capable. RelayStable gives capable agents memory,
 boundaries, validation, and reviewability. RelayStack turns the current work
 state into a handoff snapshot the next person or agent can continue from.
 

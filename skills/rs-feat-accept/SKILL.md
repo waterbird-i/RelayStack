@@ -19,7 +19,7 @@ Use this skill after feature implementation.
    - `docs/requirements/`: settled capability behavior
    - `docs/design/`: final user flow or app behavior
    - `docs/architecture/`: real module boundaries or contracts
-5. Put detailed acceptance notes in personal project notes or `rs-handoff`.
+5. Put detailed acceptance notes in `project/features/` or `rs-handoff`.
 6. Suggest `rs-learn`, `rs-trick`, `rs-decide`, `rs-guide`, or `rs-libdoc` only
    when the completed work created durable knowledge.
 

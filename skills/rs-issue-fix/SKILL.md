@@ -16,7 +16,7 @@ Use this skill when the root cause and fix direction are confirmed.
 3. Make the narrowest root-cause fix.
 4. Verify the original reproduction no longer fails.
 5. Run scoped regression checks for the impact area.
-6. Write detailed fix notes to personal project notes when available.
+6. Write detailed fix notes to `project/issues/` when available.
 7. Update durable attractor docs:
    - `docs/backlog/`: issue status and verification
    - `docs/requirements/`: clarified expected behavior

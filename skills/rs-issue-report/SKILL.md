@@ -9,8 +9,9 @@ updated: 2026-06-24
 
 Use this skill to record the problem before root-cause analysis.
 
-The report is process memory. Keep it in personal project notes unless the team
-explicitly tracks issues in `docs/backlog/`.
+The report is process memory. Keep it in `project/issues/` inside the user's
+personal project directory. These records are personal modification history, not
+team-maintained docs.
 
 ## Workflow
 

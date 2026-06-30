@@ -24,7 +24,7 @@ Before answering:
    - `docs/requirements/`
    - `docs/design/`
    - `docs/architecture/`
-3. Check whether `.codestable` exists. If it exists, treat it as legacy or
+3. Check whether `project` exists. If it exists, treat it as legacy or
    personal process memory, not as team attractor docs.
 4. If the attractor docs are missing, route to `rs-onboard`.
 5. Read the user's request and pick one skill from the routing table.
@@ -43,7 +43,7 @@ team repo
 └── docs/architecture/  current technical structure and boundaries
 
 personal project notes
-└── brainstorms, reports, analysis, fix notes, agent records, validation logs
+└── project/features/, project/issues/, agent records, validation logs
 ```
 
 ## Routing Table
