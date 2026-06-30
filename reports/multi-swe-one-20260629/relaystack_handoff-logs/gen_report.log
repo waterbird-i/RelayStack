@@ -1,0 +1,6 @@
+[2026-06-29 21:16:03,244] [gen_report.py] [INFO]: Initialize logger successfully.
+[2026-06-29 21:16:03,244] [gen_report.py] [INFO]: Collecting report tasks...
+[2026-06-29 21:16:03,245] [gen_report.py] [INFO]: Successfully collected 1 tasks.
+[2026-06-29 21:16:03,245] [gen_report.py] [INFO]: Loading dataset...
+[2026-06-29 21:16:03,251] [gen_report.py] [INFO]: Successfully loaded 1 valid datasets from ['reports/multi-swe-one-20260629/dataset.jsonl']
+[2026-06-29 21:16:03,257] [gen_report.py] [INFO]: Successfully generated 1 reports.

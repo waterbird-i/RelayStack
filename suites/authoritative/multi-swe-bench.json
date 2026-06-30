@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "suite_id": "multi-swe-bench",
+  "suite_name": "Multi-SWE-bench",
+  "authority": "third_party_public_benchmark",
+  "status": "adopted_manifest_only",
+  "why_this_fits_relaystack": [
+    "Uses real repository issue-fixing tasks, so the oracle remains external.",
+    "Covers multiple languages, including JavaScript and TypeScript, which is closer to RelayStack's agent handoff demo surface than Python-only SWE-bench Lite.",
+    "RelayStack can wrap each instance with a two-agent handoff protocol without changing the upstream task or test oracle."
+  ],
+  "dataset": {
+    "name": "Multi-SWE-bench",
+    "homepage": "https://multi-swe-bench.github.io/",
+    "repository": "https://github.com/multi-swe-bench/multi-swe-bench",
+    "paper": "https://arxiv.org/abs/2504.02605"
+  },
+  "license": {
+    "name": "See upstream dataset and repository licenses",
+    "url": "https://github.com/multi-swe-bench/multi-swe-bench"
+  },
+  "citation": {
+    "title": "Multi-SWE-bench: A Multilingual Benchmark for Issue Resolving",
+    "url": "https://arxiv.org/abs/2504.02605"
+  },
+  "relaystack_protocol": {
+    "baseline": "One agent receives the upstream problem statement and works from scratch.",
+    "handoff": "Agent A performs bounded exploration and writes a RelayStack snapshot; Agent B receives only the snapshot plus the upstream problem statement and continues.",
+    "oracle": "Use the upstream benchmark evaluation harness and tests.",
+    "extra_metrics": [
+      "elapsed_seconds",
+      "total_tokens",
+      "steps_after_handoff",
+      "repeated_known_info",
+      "handoff_question_score"
+    ]
+  },
+  "provenance_mapping": {
+    "instance_id": "dataset.instance_id",
+    "repo": "dataset.repo",
+    "base_commit": "dataset.base_commit",
+    "issue_or_problem_statement": "dataset.problem_statement",
+    "test_oracle": "dataset.test_patch or upstream evaluation harness",
+    "issue_url": "derive from repo and issue references when present",
+    "pr_url": "derive from repo and pull request references when present"
+  },
+  "report_fields": [
+    "suite_id",
+    "suite_name",
+    "provenance_status",
+    "source_type",
+    "source_url",
+    "repo_url",
+    "issue_url",
+    "pr_url",
+    "original_commit",
+    "license",
+    "license_url",
+    "citation"
+  ],
+  "runner_notes": [
+    "Do not vendor the full dataset into this repository.",
+    "Do not claim an official Multi-SWE-bench score until predictions are evaluated with the upstream harness.",
+    "Keep the existing 25 local tasks as a separate local baseline suite."
+  ]
+}

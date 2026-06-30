@@ -1,0 +1,88 @@
+[2026-06-29 20:57:12,930] [docker_util.py] [INFO]: Start building image `mswebench/darkreader_m_darkreader:base`, working directory is `reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/images/base`
+[2026-06-29 20:57:13,081] [docker_util.py] [INFO]: Step 1/4 : FROM node:18
+[2026-06-29 20:57:13,081] [docker_util.py] [INFO]: 
+[2026-06-29 20:58:28,042] [docker_util.py] [ERROR]: Docker build error: failed to resolve reference "docker.io/library/node:18": failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fnode%3Apull&service=registry.docker.io": context deadline exceeded
+[2026-06-29 20:58:28,042] [docker_util.py] [ERROR]: Unknown build error occurred: Docker build failed: failed to resolve reference "docker.io/library/node:18": failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fnode%3Apull&service=registry.docker.io": context deadline exceeded
+[2026-06-29 21:10:56,829] [docker_util.py] [INFO]: Start building image `mswebench/darkreader_m_darkreader:base`, working directory is `reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/images/base`
+[2026-06-29 21:10:56,961] [docker_util.py] [INFO]: Step 1/4 : FROM node:18
+[2026-06-29 21:10:56,961] [docker_util.py] [INFO]: 
+[2026-06-29 21:10:56,976] [docker_util.py] [INFO]: ---> c6ae79e38498
+[2026-06-29 21:10:56,976] [docker_util.py] [INFO]: Step 2/4 : WORKDIR /home/
+[2026-06-29 21:10:56,976] [docker_util.py] [INFO]: 
+[2026-06-29 21:10:57,354] [docker_util.py] [INFO]: ---> Running in 10fa8c92c721
+[2026-06-29 21:10:58,790] [docker_util.py] [INFO]: ---> Removed intermediate container 10fa8c92c721
+[2026-06-29 21:10:58,790] [docker_util.py] [INFO]: ---> 5591be7cf009
+[2026-06-29 21:10:58,790] [docker_util.py] [INFO]: Step 3/4 : RUN apt update && apt install -y git
+[2026-06-29 21:10:58,790] [docker_util.py] [INFO]: 
+[2026-06-29 21:10:58,816] [docker_util.py] [INFO]: ---> Running in 142f402df11f
+[2026-06-29 21:10:58,891] [docker_util.py] [INFO]: [91m
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+[0m
+[2026-06-29 21:10:59,440] [docker_util.py] [INFO]: Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+[2026-06-29 21:10:59,798] [docker_util.py] [INFO]: Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+[2026-06-29 21:10:59,928] [docker_util.py] [INFO]: Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+[2026-06-29 21:11:00,081] [docker_util.py] [INFO]: Get:4 http://deb.debian.org/debian bookworm/main arm64 Packages [8690 kB]
+[2026-06-29 21:11:02,062] [docker_util.py] [INFO]: Get:5 http://deb.debian.org/debian bookworm-updates/main arm64 Packages [6936 B]
+[2026-06-29 21:11:02,174] [docker_util.py] [INFO]: Get:6 http://deb.debian.org/debian-security bookworm-security/main arm64 Packages [310 kB]
+[2026-06-29 21:11:02,617] [docker_util.py] [INFO]: Fetched 9261 kB in 4s (2495 kB/s)
+Reading package lists...
+[2026-06-29 21:11:02,855] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:02,861] [docker_util.py] [INFO]: Building dependency tree...
+[2026-06-29 21:11:02,932] [docker_util.py] [INFO]: Reading state information...
+[2026-06-29 21:11:02,932] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:02,940] [docker_util.py] [INFO]: 126 packages can be upgraded. Run 'apt list --upgradable' to see them.
+[2026-06-29 21:11:02,941] [docker_util.py] [INFO]: [91m
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+[0m
+[2026-06-29 21:11:02,948] [docker_util.py] [INFO]: Reading package lists...
+[2026-06-29 21:11:03,181] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:03,186] [docker_util.py] [INFO]: Building dependency tree...
+[2026-06-29 21:11:03,255] [docker_util.py] [INFO]: Reading state information...
+[2026-06-29 21:11:03,255] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:03,325] [docker_util.py] [INFO]: The following additional packages will be installed:
+[2026-06-29 21:11:03,325] [docker_util.py] [INFO]: git-man
+[2026-06-29 21:11:03,325] [docker_util.py] [INFO]: Suggested packages:
+  gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-email git-gui
+  gitk gitweb git-cvs git-mediawiki git-svn
+Recommended packages:
+  less
+[2026-06-29 21:11:03,341] [docker_util.py] [INFO]: The following packages will be upgraded:
+[2026-06-29 21:11:03,341] [docker_util.py] [INFO]: git git-man
+[2026-06-29 21:11:03,590] [docker_util.py] [INFO]: 2 upgraded, 0 newly installed, 0 to remove and 124 not upgraded.
+Need to get 9206 kB of archives.
+After this operation, 263 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main arm64 git-man all 1:2.39.5-0+deb12u3 [2053 kB]
+[2026-06-29 21:11:04,398] [docker_util.py] [INFO]: Get:2 http://deb.debian.org/debian bookworm/main arm64 git arm64 1:2.39.5-0+deb12u3 [7153 kB]
+[2026-06-29 21:11:06,456] [docker_util.py] [INFO]: [91mdebconf: delaying package configuration, since apt-utils is not installed
+[0m
+[2026-06-29 21:11:06,469] [docker_util.py] [INFO]: Fetched 9206 kB in 3s (3065 kB/s)
+[2026-06-29 21:11:06,479] [docker_util.py] [INFO]: (Reading database ...
+[2026-06-29 21:11:06,482] [docker_util.py] [INFO]: (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-06-29 21:11:06,483] [docker_util.py] [INFO]: (Reading database ... 70%
+[2026-06-29 21:11:06,484] [docker_util.py] [INFO]: (Reading database ... 75%
+[2026-06-29 21:11:06,485] [docker_util.py] [INFO]: (Reading database ... 80%
+[2026-06-29 21:11:06,485] [docker_util.py] [INFO]: (Reading database ... 85%
+[2026-06-29 21:11:06,486] [docker_util.py] [INFO]: (Reading database ... 90%
+[2026-06-29 21:11:06,487] [docker_util.py] [INFO]: (Reading database ... 95%
+[2026-06-29 21:11:06,488] [docker_util.py] [INFO]: (Reading database ... 100%(Reading database ... 23273 files and directories currently installed.)
+[2026-06-29 21:11:06,489] [docker_util.py] [INFO]: Preparing to unpack .../git-man_1%3a2.39.5-0+deb12u3_all.deb ...
+[2026-06-29 21:11:06,491] [docker_util.py] [INFO]: Unpacking git-man (1:2.39.5-0+deb12u3) over (1:2.39.5-0+deb12u2) ...
+[2026-06-29 21:11:06,664] [docker_util.py] [INFO]: Preparing to unpack .../git_1%3a2.39.5-0+deb12u3_arm64.deb ...
+[2026-06-29 21:11:06,670] [docker_util.py] [INFO]: Unpacking git (1:2.39.5-0+deb12u3) over (1:2.39.5-0+deb12u2) ...
+[2026-06-29 21:11:07,671] [docker_util.py] [INFO]: Setting up git-man (1:2.39.5-0+deb12u3) ...
+[2026-06-29 21:11:07,677] [docker_util.py] [INFO]: Setting up git (1:2.39.5-0+deb12u3) ...
+[2026-06-29 21:11:11,204] [docker_util.py] [INFO]: ---> Removed intermediate container 142f402df11f
+[2026-06-29 21:11:11,204] [docker_util.py] [INFO]: ---> 0fc5b16a4b62
+[2026-06-29 21:11:11,204] [docker_util.py] [INFO]: Step 4/4 : RUN git clone https://github.com/darkreader/darkreader.git /home/darkreader
+[2026-06-29 21:11:11,204] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:11,515] [docker_util.py] [INFO]: ---> Running in 778bec997fa8
+[2026-06-29 21:11:11,599] [docker_util.py] [INFO]: [91mCloning into '/home/darkreader'...
+[0m
+[2026-06-29 21:11:48,221] [docker_util.py] [INFO]: ---> Removed intermediate container 778bec997fa8
+[2026-06-29 21:11:48,222] [docker_util.py] [INFO]: ---> 2a014c22d632
+[2026-06-29 21:11:48,222] [docker_util.py] [INFO]: sha256:2a014c22d6327a020e07e995f9fb0e625f88267096efc1b574348bb0b29f69ce
+[2026-06-29 21:11:48,222] [docker_util.py] [INFO]: Successfully built 2a014c22d632
+[2026-06-29 21:11:48,232] [docker_util.py] [INFO]: Successfully tagged mswebench/darkreader_m_darkreader:base
+[2026-06-29 21:11:48,233] [docker_util.py] [INFO]: image(reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/images/base) build success: mswebench/darkreader_m_darkreader:base

@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "<stdin>", line 14, in <module>
+  File "/private/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-016-xiqqtr8a/src/db/sql_filters.py", line 9, in build_where
+    raise ValueError(f"Unknown filter field: {key}")
+ValueError: Unknown filter field: owner; DROP TABLE jobs
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<stdin>", line 16, in <module>
+AssertionError

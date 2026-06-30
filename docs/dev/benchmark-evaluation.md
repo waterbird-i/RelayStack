@@ -576,17 +576,24 @@ python3 scripts/summarize_blind_benchmark.py \
 
 ## 12. 权威题库与 Provenance
 
-RelayStack 现在区分三种题源：
+RelayStack 现在区分本地 25 题和第三方权威题源：
 
-1. `verified_public`
+1. 本地 25 题：`suites/local-25.json`
+   - `task-001..005` 是 `verified_public`，逐题记录公开 PR、上游仓库、
+     许可证和测试 oracle。
+   - `task-006..025` 是 `scenario_only`，只用于内部回归和 handoff 信号。
+   - 报告中不能把整套 25 题称为第三方权威 benchmark。
+
+2. `verified_public`
    - 本仓库裁剪 fixture，但逐题记录公开 PR / issue、上游仓库、许可证和测试 oracle。
    - 当前 `task-001` 到 `task-005` 已补 `provenance.json`。
 
-2. `third_party_dataset`
-   - 直接采用第三方公开评测集实例，例如 SWE-bench Lite。
+3. `third_party_dataset`
+   - 直接采用第三方公开评测集实例，例如 SWE-bench Lite 或 Multi-SWE-bench。
    - 本仓库只保存 suite manifest，不 vendor 大型数据集。
+   - RelayStack 只加 A/B handoff protocol，不改上游题目和 oracle。
 
-3. `scenario_only`
+4. `scenario_only`
    - 只来自工程常见场景或人工合成问题。
    - 可以用于内部回归，不用于“权威题库”宣传。
 
@@ -643,15 +650,28 @@ citation
 
 ```text
 suites/authoritative/swe-bench-lite.json
+suites/authoritative/multi-swe-bench.json
 ```
 
-当前采用策略是 `adopted_manifest_only`：
+当前采用策略都是 `adopted_manifest_only`：
 
 - 用 SWE-bench Lite 作为外部权威目标。
+- 用 Multi-SWE-bench 作为更贴近 RelayStack 主打场景的外部权威目标：
+  题目仍来自真实软件工程 issue，且覆盖 JavaScript / TypeScript 等多语言仓库。
 - 保留上游 dataset、repo、license、citation 和字段映射。
-- 不声称本地 runner 分数等价于 SWE-bench 官方分数。
+- 不声称本地 runner 分数等价于 SWE-bench 或 Multi-SWE-bench 官方分数。
 - 只有输出 upstream-compatible predictions 并用官方 harness 评估后，才可引用官方
-  SWE-bench 分数。
+  第三方 benchmark 分数。
+
+推荐主方案：
+
+```text
+第三方题源：Multi-SWE-bench
+实验协议：RelayStack A/B handoff wrapper
+baseline：单 agent 从上游 problem statement 开始
+handoff：Agent A 限定探索并写 snapshot，Agent B 只读 snapshot + 上游题目继续
+oracle：上游官方 harness / test patch
+```
 
 轻量校验：
 

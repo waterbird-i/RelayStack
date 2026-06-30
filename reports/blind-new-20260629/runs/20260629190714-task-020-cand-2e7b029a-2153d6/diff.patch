@@ -1,0 +1,38 @@
+diff --git a/src/ci/junit_summary.py b/src/ci/junit_summary.py
+index 6498d58..1aa34a1 100644
+--- a/src/ci/junit_summary.py
++++ b/src/ci/junit_summary.py
+@@ -1,14 +1,24 @@
+ import xml.etree.ElementTree as ET
+ 
+ 
++FIELDS = ("tests", "failures", "errors", "skipped")
++CASE_CHILDREN = {"failures": "failure", "errors": "error", "skipped": "skipped"}
++
++
++def _count_cases(cases, field):
++    if field == "tests":
++        return len(cases)
++    return sum(len(case.findall(CASE_CHILDREN[field])) for case in cases)
++
++
+ def summarize(xml_text):
+     root = ET.fromstring(xml_text)
+-    suite = root if root.tag == "testsuite" else root.find("testsuite")
+-    if suite is None:
+-        return {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+-    return {
+-        "tests": int(suite.attrib.get("tests", 0)),
+-        "failures": int(suite.attrib.get("failures", 0)),
+-        "errors": int(suite.attrib.get("errors", 0)),
+-        "skipped": int(suite.attrib.get("skipped", 0)),
+-    }
++    suites = list(root.iter("testsuite"))
++    leaves = [suite for suite in suites if not suite.findall("testsuite")]
++
++    totals = dict.fromkeys(FIELDS, 0)
++    for suite in leaves:
++        cases = suite.findall("testcase")
++        for field in FIELDS:
++            totals[field] += int(suite.attrib.get(field, _count_cases(cases, field)))
++    return totals

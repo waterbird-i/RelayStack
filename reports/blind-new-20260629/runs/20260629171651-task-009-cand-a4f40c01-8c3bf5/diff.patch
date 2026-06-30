@@ -1,0 +1,20 @@
+diff --git a/src/cache/promiseCache.js b/src/cache/promiseCache.js
+index 0926d18..e6d66c4 100644
+--- a/src/cache/promiseCache.js
++++ b/src/cache/promiseCache.js
+@@ -7,7 +7,14 @@ class PromiseCache {
+     if (this.cache.has(key)) {
+       return this.cache.get(key);
+     }
+-    const promise = Promise.resolve().then(loader);
++    const promise = Promise.resolve()
++      .then(loader)
++      .catch(error => {
++        if (this.cache.get(key) === promise) {
++          this.cache.delete(key);
++        }
++        throw error;
++      });
+     this.cache.set(key, promise);
+     return promise;
+   }

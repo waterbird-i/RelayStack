@@ -1,0 +1,14 @@
+diff --git a/bin/marked.js b/bin/marked.js
+index 7aeecf7..e57d60a 100644
+--- a/bin/marked.js
++++ b/bin/marked.js
+@@ -6,7 +6,8 @@ function render(markdown) {
+ }
+ 
+ function main(argv, stdin) {
+-  const input = argv[2] || stdin;
++  const filePath = argv.slice(2)[0];
++  const input = filePath ? fs.readFileSync(filePath, 'utf8') : stdin;
+   return render(input);
+ }
+ 

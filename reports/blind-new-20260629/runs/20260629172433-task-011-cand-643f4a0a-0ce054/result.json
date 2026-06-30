@@ -1,0 +1,61 @@
+{
+  "agent_returncode": 0,
+  "auto_repeated_known_info": true,
+  "citation": null,
+  "commands_run": [
+    "/bin/zsh -lc \"printf 'RS_BENCH_METRICS=%s\\\\n' \\\"\"'$RS_BENCH_METRICS\"'",
+    "/bin/zsh -lc \"sed -n '1,220p' src/markdown/frontmatter.js\"",
+    "/bin/zsh -lc 'git status --short'",
+    "/bin/zsh -lc 'git diff -- src/markdown/frontmatter.js'",
+    "/bin/zsh -lc 'git diff --check'",
+    "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('assert');\nconst { parseFrontMatter } = require('./src/markdown/frontmatter');\nassert.deepStrictEqual(parseFrontMatter('hello\\\\n---\\\\ntitle: nope'), { metadata: {}, body: 'hello\\\\n---\\\\ntitle: nope' });\nassert.deepStrictEqual(parseFrontMatter('---\\\\ntitle: yes\\\\n---\\\\nbody'), { metadata: { title: 'yes' }, body: 'body' });\nassert.deepStrictEqual(parseFrontMatter('---\\\\r\\\\ntitle: yes\\\\r\\\\n---\\\\r\\\\nbody'), { metadata: { title: 'yes' }, body: 'body' });\nassert.deepStrictEqual(parseFrontMatter('---\\\\ntitle: nope'), { metadata: {}, body: '---\\\\ntitle: nope' });\nNODE\""
+  ],
+  "cost_usd": null,
+  "elapsed_seconds": 243.196,
+  "issue_url": null,
+  "known_entry_files": [
+    "src/markdown/frontmatter.js"
+  ],
+  "license": "Project-local fixture; no external upstream license claimed",
+  "license_url": null,
+  "opened_files": [
+    "src/markdown/frontmatter.js"
+  ],
+  "original_commit": null,
+  "passed": true,
+  "pr_url": null,
+  "provenance": {
+    "authority": "project_authored_scenario",
+    "fixture_notes": "Markdown front matter 解析边界场景题；未绑定具体上游 issue/PR。",
+    "license": "Project-local fixture; no external upstream license claimed",
+    "provenance_status": "scenario_only",
+    "schema_version": 1,
+    "source_type": "engineering_scenario",
+    "source_url": "local:tasks/task-011/instruction.md",
+    "suite_id": "relaystack-scenario-fixtures",
+    "suite_name": "RelayStack scenario fixtures",
+    "test_oracle": "tasks/task-011/test.sh"
+  },
+  "provenance_status": "scenario_only",
+  "repeated_known_files": [
+    "src/markdown/frontmatter.js"
+  ],
+  "repeated_known_info": false,
+  "repo_url": null,
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_chars": null,
+  "snapshot_elapsed_seconds": null,
+  "snapshot_generated": false,
+  "source_type": "engineering_scenario",
+  "source_url": "local:tasks/task-011/instruction.md",
+  "steps_after_handoff": 6,
+  "suite_id": "relaystack-scenario-fixtures",
+  "suite_name": "RelayStack scenario fixtures",
+  "task": "task-011",
+  "test_returncode": 0,
+  "timestamp": "2026-06-29T17:24:33",
+  "tool_steps": 9,
+  "total_tokens": 308248,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-011-2b44n40o"
+}

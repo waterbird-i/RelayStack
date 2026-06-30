@@ -1,0 +1,37 @@
+diff --git a/src/deploy/reconciler.js b/src/deploy/reconciler.js
+index e93e05a..76afb61 100644
+--- a/src/deploy/reconciler.js
++++ b/src/deploy/reconciler.js
+@@ -1,17 +1,24 @@
+ function diffServices(desired, current) {
+   const changes = [];
+-  const max = Math.max(desired.length, current.length);
+-  for (let index = 0; index < max; index += 1) {
+-    const next = desired[index];
+-    const old = current[index];
+-    if (next && !old) {
++
++  const currentByName = new Map(current.map(service => [service.name, service]));
++  const desiredByName = new Map(desired.map(service => [service.name, service]));
++
++  for (const next of desired) {
++    const old = currentByName.get(next.name);
++    if (!old) {
+       changes.push({ type: 'create', name: next.name });
+-    } else if (!next && old) {
+-      changes.push({ type: 'delete', name: old.name });
+-    } else if (JSON.stringify(next) !== JSON.stringify(old)) {
++    } else if (next.image !== old.image || next.replicas !== old.replicas) {
+       changes.push({ type: 'update', name: next.name, before: old, after: next });
+     }
+   }
++
++  for (const old of current) {
++    if (!desiredByName.has(old.name)) {
++      changes.push({ type: 'delete', name: old.name });
++    }
++  }
++
+   return changes;
+ }
+ 

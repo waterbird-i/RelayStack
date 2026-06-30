@@ -1,0 +1,52 @@
+{
+  "task-001": {
+    "cand-0ecd1151": {
+      "run_id": "20260629165133-task-001-cand-0ecd1151-ecc193",
+      "runner": "rs_handoff"
+    },
+    "cand-b11a4742": {
+      "run_id": "20260629162549-task-001-cand-b11a4742-c421d3",
+      "runner": "no_handoff"
+    }
+  },
+  "task-002": {
+    "cand-9e2e0239": {
+      "run_id": "20260629165408-task-002-cand-9e2e0239-b08910",
+      "runner": "rs_handoff"
+    },
+    "cand-f1e97db0": {
+      "run_id": "20260629163106-task-002-cand-f1e97db0-c63a1c",
+      "runner": "no_handoff"
+    }
+  },
+  "task-003": {
+    "cand-89db6769": {
+      "run_id": "20260629163545-task-003-cand-89db6769-fe91b9",
+      "runner": "no_handoff"
+    },
+    "cand-920d6bf3": {
+      "run_id": "20260629165636-task-003-cand-920d6bf3-db3195",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-004": {
+    "cand-10ede8dc": {
+      "run_id": "20260629164126-task-004-cand-10ede8dc-89518e",
+      "runner": "no_handoff"
+    },
+    "cand-6f403c68": {
+      "run_id": "20260629165917-task-004-cand-6f403c68-41f7c1",
+      "runner": "rs_handoff"
+    }
+  },
+  "task-005": {
+    "cand-36a88a81": {
+      "run_id": "20260629164726-task-005-cand-36a88a81-af37a2",
+      "runner": "no_handoff"
+    },
+    "cand-c115e1ca": {
+      "run_id": "20260629170200-task-005-cand-c115e1ca-7a911e",
+      "runner": "rs_handoff"
+    }
+  }
+}

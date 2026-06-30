@@ -1,0 +1,28 @@
+diff --git a/src/deps/dependency_order.py b/src/deps/dependency_order.py
+index ec2dfc1..e99b877 100644
+--- a/src/deps/dependency_order.py
++++ b/src/deps/dependency_order.py
+@@ -1,13 +1,22 @@
+ def resolve_order(graph):
++    visiting = set()
+     visited = set()
+     order = []
++    path = []
+ 
+     def visit(node):
++        if node in visiting:
++            cycle = path[path.index(node):] + [node]
++            raise ValueError("Cycle detected: " + " -> ".join(map(str, cycle)))
+         if node in visited:
+             return
+-        visited.add(node)
++        visiting.add(node)
++        path.append(node)
+         for dep in graph.get(node, []):
+             visit(dep)
++        path.pop()
++        visiting.remove(node)
++        visited.add(node)
+         order.append(node)
+ 
+     for node in graph:

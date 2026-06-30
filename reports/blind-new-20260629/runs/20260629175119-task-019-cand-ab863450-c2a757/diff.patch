@@ -1,0 +1,29 @@
+diff --git a/src/migrations/planner.js b/src/migrations/planner.js
+index 7885601..32d801b 100644
+--- a/src/migrations/planner.js
++++ b/src/migrations/planner.js
+@@ -1,5 +1,23 @@
+ function planMigrations(files) {
+-  return files.slice().sort();
++  const seen = new Set();
++
++  return files
++    .map(file => {
++      const match = file.match(/^(\d+)_.+\.sql$/);
++      if (!match) {
++        throw new Error('invalid migration name');
++      }
++
++      const version = Number(match[1]);
++      if (seen.has(version)) {
++        throw new Error('duplicate migration version');
++      }
++      seen.add(version);
++
++      return { file, version };
++    })
++    .sort((a, b) => a.version - b.version)
++    .map(migration => migration.file);
+ }
+ 
+ module.exports = { planMigrations };

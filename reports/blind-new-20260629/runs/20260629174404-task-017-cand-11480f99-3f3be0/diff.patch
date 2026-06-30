@@ -1,0 +1,39 @@
+diff --git a/src/logging/redactor.py b/src/logging/redactor.py
+index 7ed1cb8..0a5019f 100644
+--- a/src/logging/redactor.py
++++ b/src/logging/redactor.py
+@@ -1,12 +1,32 @@
++from urllib.parse import unquote_plus, urlsplit, urlunsplit
++
++
+ SECRET_HEADERS = {"authorization", "cookie", "x-api-key"}
++SECRET_QUERY_PARAMS = {"token", "password", "secret"}
++REDACTED = "<redacted>"
+ 
+ 
+ def redact_headers(headers):
+     return {
+-        key: ("<redacted>" if key in SECRET_HEADERS else value)
++        key: (REDACTED if key.lower() in SECRET_HEADERS else value)
+         for key, value in headers.items()
+     }
+ 
+ 
+ def redact_url(url):
+-    return url
++    parts = urlsplit(url)
++    if not parts.query:
++        return url
++
++    query = "&".join(
++        _redact_query_param(param)
++        for param in parts.query.split("&")
++    )
++    return urlunsplit(parts._replace(query=query))
++
++
++def _redact_query_param(param):
++    key, _, _ = param.partition("=")
++    if unquote_plus(key).lower() in SECRET_QUERY_PARAMS:
++        return f"{key}={REDACTED}"
++    return param

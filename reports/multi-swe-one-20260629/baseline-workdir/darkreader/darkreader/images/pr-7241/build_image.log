@@ -1,0 +1,83 @@
+[2026-06-29 21:11:48,249] [docker_util.py] [INFO]: Start building image `mswebench/darkreader_m_darkreader:pr-7241`, working directory is `reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/images/pr-7241`
+[2026-06-29 21:11:48,553] [docker_util.py] [INFO]: Step 1/9 : FROM mswebench/darkreader_m_darkreader:base
+[2026-06-29 21:11:48,554] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:48,556] [docker_util.py] [INFO]: ---> 2a014c22d632
+[2026-06-29 21:11:48,556] [docker_util.py] [INFO]: Step 2/9 : COPY fix.patch /home/
+[2026-06-29 21:11:48,556] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:49,775] [docker_util.py] [INFO]: ---> 4014ee7f4bf7
+[2026-06-29 21:11:49,775] [docker_util.py] [INFO]: Step 3/9 : COPY test.patch /home/
+[2026-06-29 21:11:49,775] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:50,495] [docker_util.py] [INFO]: ---> 00436c2afb62
+[2026-06-29 21:11:50,495] [docker_util.py] [INFO]: Step 4/9 : COPY check_git_changes.sh /home/
+[2026-06-29 21:11:50,495] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:51,202] [docker_util.py] [INFO]: ---> fd4dd2483ebe
+[2026-06-29 21:11:51,202] [docker_util.py] [INFO]: Step 5/9 : COPY prepare.sh /home/
+[2026-06-29 21:11:51,202] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:51,961] [docker_util.py] [INFO]: ---> 40ebcc8ef89d
+[2026-06-29 21:11:51,961] [docker_util.py] [INFO]: Step 6/9 : COPY run.sh /home/
+[2026-06-29 21:11:51,962] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:52,846] [docker_util.py] [INFO]: ---> 2b7e441c5740
+[2026-06-29 21:11:52,847] [docker_util.py] [INFO]: Step 7/9 : COPY test-run.sh /home/
+[2026-06-29 21:11:52,847] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:53,827] [docker_util.py] [INFO]: ---> fb91a2960fca
+[2026-06-29 21:11:53,827] [docker_util.py] [INFO]: Step 8/9 : COPY fix-run.sh /home/
+[2026-06-29 21:11:53,827] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:54,594] [docker_util.py] [INFO]: ---> 24d374006329
+[2026-06-29 21:11:54,594] [docker_util.py] [INFO]: Step 9/9 : RUN bash /home/prepare.sh
+[2026-06-29 21:11:54,594] [docker_util.py] [INFO]: 
+[2026-06-29 21:11:54,616] [docker_util.py] [INFO]: ---> Running in 70e2efdf9956
+[2026-06-29 21:11:54,913] [docker_util.py] [INFO]: HEAD is now at 7bed310d Add dynamic theme fixes for hsnstore.* (#15682)
+[2026-06-29 21:11:54,929] [docker_util.py] [INFO]: check_git_changes: No uncommitted changes
+[2026-06-29 21:11:54,971] [docker_util.py] [INFO]: [91mNote: switching to '991883df4d5910851130e3dc0e21fcbce604ea7d'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 991883df Add dark site (#7234)
+[0m
+[2026-06-29 21:11:54,982] [docker_util.py] [INFO]: check_git_changes: No uncommitted changes
+[2026-06-29 21:12:07,825] [docker_util.py] [INFO]: [91mnpm warn deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+[0m
+[2026-06-29 21:12:19,293] [docker_util.py] [INFO]: [91mnpm warn deprecated har-validator@5.1.5: this library is no longer supported
+[0m
+[2026-06-29 21:12:21,704] [docker_util.py] [INFO]: [91mnpm warn deprecated event-to-promise@0.8.0: Use promise-toolbox/fromEvent instead
+[0m
+[2026-06-29 21:12:41,340] [docker_util.py] [INFO]: [91mnpm warn deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+[0m
+[2026-06-29 21:14:37,752] [docker_util.py] [INFO]: added 1070 packages, and audited 1071 packages in 3m
+
+118 packages are looking for funding
+  run `npm fund` for details
+[2026-06-29 21:14:37,794] [docker_util.py] [INFO]: 84 vulnerabilities (14 low, 23 moderate, 36 high, 11 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[2026-06-29 21:14:37,794] [docker_util.py] [INFO]: [91mnpm notice
+npm notice New major version of npm available! 10.8.2 -> 11.17.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.17.0
+npm notice To update run: npm install -g npm@11.17.0
+npm notice
+[0m
+[2026-06-29 21:14:47,144] [docker_util.py] [INFO]: ---> Removed intermediate container 70e2efdf9956
+[2026-06-29 21:14:47,144] [docker_util.py] [INFO]: ---> 34c4ed6332aa
+[2026-06-29 21:14:47,144] [docker_util.py] [INFO]: sha256:34c4ed6332aaf302401cb68621b69398f3c37fd31a95cf3f64f2299c75304820
+[2026-06-29 21:14:47,148] [docker_util.py] [INFO]: Successfully built 34c4ed6332aa
+[2026-06-29 21:14:47,153] [docker_util.py] [INFO]: Successfully tagged mswebench/darkreader_m_darkreader:pr-7241
+[2026-06-29 21:14:47,153] [docker_util.py] [INFO]: image(reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/images/pr-7241) build success: mswebench/darkreader_m_darkreader:pr-7241

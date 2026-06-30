@@ -1,0 +1,15 @@
+[2026-06-29 21:00:07,093] [gen_report.py] [INFO]: Initialize logger successfully.
+[2026-06-29 21:00:07,094] [gen_report.py] [INFO]: Collecting report tasks...
+[2026-06-29 21:00:07,094] [gen_report.py] [INFO]: Successfully collected 1 tasks.
+[2026-06-29 21:00:07,094] [gen_report.py] [INFO]: Loading dataset...
+[2026-06-29 21:00:07,101] [gen_report.py] [INFO]: Successfully loaded 1 valid datasets from ['reports/multi-swe-one-20260629/dataset.jsonl']
+[2026-06-29 21:00:07,102] [gen_report.py] [INFO]: Successfully generated 0 reports.
+[2026-06-29 21:00:07,103] [gen_report.py] [ERROR]: Failed to generate 1 reports.
+[2026-06-29 21:00:07,103] [gen_report.py] [ERROR]: Failed task list:
+[2026-06-29 21:00:07,103] [gen_report.py] [ERROR]:   - darkreader/darkreader:pr-7241: Fix patch run log file not found: reports/multi-swe-one-20260629/baseline-workdir/darkreader/darkreader/evals/pr-7241/fix-patch-run.log
+[2026-06-29 21:14:57,003] [gen_report.py] [INFO]: Initialize logger successfully.
+[2026-06-29 21:14:57,003] [gen_report.py] [INFO]: Collecting report tasks...
+[2026-06-29 21:14:57,004] [gen_report.py] [INFO]: Successfully collected 1 tasks.
+[2026-06-29 21:14:57,004] [gen_report.py] [INFO]: Loading dataset...
+[2026-06-29 21:14:57,007] [gen_report.py] [INFO]: Successfully loaded 1 valid datasets from ['reports/multi-swe-one-20260629/dataset.jsonl']
+[2026-06-29 21:14:57,013] [gen_report.py] [INFO]: Successfully generated 1 reports.

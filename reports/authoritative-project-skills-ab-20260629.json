@@ -1,0 +1,196 @@
+{
+  "timestamp": "2026-06-29T23:34:14",
+  "check_type": "clean_project_skills_authoritative_handoff_ab",
+  "dataset": "ByteDance-Seed/Multi-SWE-bench-flash",
+  "instance_id": "darkreader__darkreader-7241",
+  "run_dir": "reports/multi-swe-project-skills-20260629",
+  "official_harness_status": "official_evaluated",
+  "protocol_audit": {
+    "clean_baseline": true,
+    "relaystack_handoff_project_only": true,
+    "baseline_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": false,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_project_skill": false
+    },
+    "relaystack_handoff_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": true,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_project_skill": false
+    },
+    "interpretation": "A run is a valid clean ablation only when baseline is no-skill/no-subagent and relaystack_handoff uses only project RelayStack skills without subagents."
+  },
+  "groups": {
+    "baseline": {
+      "agent_returncode": 0,
+      "elapsed_seconds": 347.771,
+      "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/multi-swe-baseline-s09trp67",
+      "codex_home": "/private/tmp/codex-baseline-gybb0b56",
+      "patch_file": "reports/multi-swe-project-skills-20260629/baseline.jsonl",
+      "diff_bytes": 1016,
+      "has_patch": true,
+      "agent_metrics": {
+        "thread_id": "019f1404-614f-7ad2-ae74-6b8683fc66db",
+        "usage": {
+          "input_tokens": 814729,
+          "cached_input_tokens": 661888,
+          "output_tokens": 7501,
+          "reasoning_output_tokens": 3028
+        },
+        "event_counts": {
+          "item.completed:agent_message": 13,
+          "item.started:command_execution": 32,
+          "item.completed:command_execution": 32,
+          "item.started:file_change": 2,
+          "item.completed:file_change": 2
+        },
+        "started_item_counts": {
+          "command_execution": 32,
+          "file_change": 2
+        },
+        "skill_paths": [],
+        "injected_skills": [],
+        "forbidden_markers": {
+          "skill_context": false,
+          "skill_file_read": false,
+          "spawn_agent": false,
+          "global_skill_path": false,
+          "ponytail": false,
+          "typescript_write": false,
+          "non_project_skill": false
+        },
+        "protocol_contaminated": false
+      },
+      "official_harness": {
+        "final_report": "reports/multi-swe-project-skills-20260629/baseline-output/final_report.json",
+        "completed_instances": 1,
+        "resolved_instances": 1,
+        "unresolved_instances": 0,
+        "error_instances": 0,
+        "resolved_ids": [
+          "darkreader/darkreader:pr-7241"
+        ],
+        "unresolved_ids": [],
+        "error_ids": [],
+        "log_path": "reports/multi-swe-project-skills-20260629/baseline-logs/run_evaluation.log"
+      }
+    },
+    "relaystack_handoff": {
+      "agent_returncode": 0,
+      "elapsed_seconds": 282.844,
+      "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/multi-swe-relaystack_handoff-_dqdi2r8",
+      "codex_home": "/private/tmp/codex-relaystack_handoff-k4ydtkw4",
+      "patch_file": "reports/multi-swe-project-skills-20260629/relaystack_handoff.jsonl",
+      "diff_bytes": 565,
+      "has_patch": true,
+      "agent_metrics": {
+        "thread_id": "019f1409-c1cd-7d91-b4cc-a420eb88ddd2",
+        "usage": {
+          "input_tokens": 275515,
+          "cached_input_tokens": 216448,
+          "output_tokens": 5106,
+          "reasoning_output_tokens": 2420
+        },
+        "event_counts": {
+          "item.completed:agent_message": 10,
+          "item.started:command_execution": 16,
+          "item.completed:command_execution": 16,
+          "item.started:file_change": 2,
+          "item.completed:file_change": 2
+        },
+        "started_item_counts": {
+          "command_execution": 16,
+          "file_change": 2
+        },
+        "skill_paths": [
+          "/private/tmp/codex-relaystack_handoff-k4ydtkw4/skills/rs-handoff/SKILL.md",
+          "/private/tmp/codex-relaystack_handoff-k4ydtkw4/skills/rs-issue-fix/SKILL.md"
+        ],
+        "injected_skills": [],
+        "forbidden_markers": {
+          "skill_context": false,
+          "skill_file_read": true,
+          "spawn_agent": false,
+          "global_skill_path": false,
+          "ponytail": false,
+          "typescript_write": false,
+          "non_project_skill": false
+        },
+        "protocol_contaminated": false
+      },
+      "official_harness": {
+        "final_report": "reports/multi-swe-project-skills-20260629/relaystack_handoff-output/final_report.json",
+        "completed_instances": 1,
+        "resolved_instances": 1,
+        "unresolved_instances": 0,
+        "error_instances": 0,
+        "resolved_ids": [
+          "darkreader/darkreader:pr-7241"
+        ],
+        "unresolved_ids": [],
+        "error_ids": [],
+        "log_path": "reports/multi-swe-project-skills-20260629/relaystack_handoff-logs/run_evaluation.log"
+      }
+    }
+  },
+  "comparison_metrics": {
+    "agent_elapsed_delta_seconds": -64.927,
+    "total_tokens_delta": -541609,
+    "input_tokens_delta": -539214,
+    "cached_input_tokens_delta": -445440,
+    "output_tokens_delta": -2395,
+    "reasoning_output_tokens_delta": -608,
+    "patch_bytes_delta": -451,
+    "command_start_delta": -16
+  },
+  "artifacts": [
+    "reports/multi-swe-project-skills-20260629/dataset.jsonl",
+    "reports/multi-swe-project-skills-20260629/baseline.jsonl",
+    "reports/multi-swe-project-skills-20260629/relaystack_handoff.jsonl",
+    "reports/multi-swe-project-skills-20260629/baseline-agent-output.jsonl",
+    "reports/multi-swe-project-skills-20260629/relaystack_handoff-agent-output.jsonl",
+    "reports/multi-swe-project-skills-20260629/summary.json"
+  ],
+  "official_harness_reports": {
+    "baseline": {
+      "final_report": "reports/multi-swe-project-skills-20260629/baseline-output/final_report.json",
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "error_instances": 0,
+      "resolved_ids": [
+        "darkreader/darkreader:pr-7241"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "log_path": "reports/multi-swe-project-skills-20260629/baseline-logs/run_evaluation.log"
+    },
+    "relaystack_handoff": {
+      "final_report": "reports/multi-swe-project-skills-20260629/relaystack_handoff-output/final_report.json",
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "error_instances": 0,
+      "resolved_ids": [
+        "darkreader/darkreader:pr-7241"
+      ],
+      "unresolved_ids": [],
+      "error_ids": [],
+      "log_path": "reports/multi-swe-project-skills-20260629/relaystack_handoff-logs/run_evaluation.log"
+    }
+  },
+  "result_summary": {
+    "baseline_completed": 1,
+    "baseline_resolved": 1,
+    "relaystack_handoff_completed": 1,
+    "relaystack_handoff_resolved": 1
+  }
+}

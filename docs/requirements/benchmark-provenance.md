@@ -22,8 +22,15 @@ Acceptance criteria:
    not vendored dataset copies.
 5. A suite cannot be called authoritative unless it names the upstream dataset,
    license, citation, and per-instance provenance mapping.
+6. The local 25-task suite must be reported separately from third-party
+   authoritative suites.
+7. RelayStack handoff claims on third-party suites must keep the upstream task
+   and oracle unchanged; RelayStack may only add the A/B handoff protocol and
+   extra continuation metrics.
 
 Non-goal:
 
 - Do not reimplement the official SWE-bench Docker harness in the local
   RelayStack runner.
+- Do not claim official third-party benchmark scores from manifest-only
+  adoption.

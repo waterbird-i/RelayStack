@@ -1,0 +1,32 @@
+diff --git a/src/markdown/frontmatter.js b/src/markdown/frontmatter.js
+index bd5762b..0364d90 100644
+--- a/src/markdown/frontmatter.js
++++ b/src/markdown/frontmatter.js
+@@ -10,14 +10,22 @@ function parseMetadata(block) {
+ }
+ 
+ function parseFrontMatter(text) {
+-  const start = text.indexOf('---');
+-  const end = text.indexOf('---', start + 3);
+-  if (start === -1 || end === -1) {
++  if (!text.startsWith('---\n') && !text.startsWith('---\r\n')) {
+     return { metadata: {}, body: text };
+   }
++
++  const bodyStart = text.startsWith('---\r\n') ? 5 : 4;
++  const endMatch = /(?:^|\r?\n)---(?:\r?\n|$)/.exec(text.slice(bodyStart));
++  if (!endMatch) {
++    return { metadata: {}, body: text };
++  }
++
++  const end = bodyStart + endMatch.index;
++  const bodyIndex = end + endMatch[0].length;
++
+   return {
+-    metadata: parseMetadata(text.slice(start + 3, end).trim()),
+-    body: text.slice(end + 3).replace(/^\r?\n/, ''),
++    metadata: parseMetadata(text.slice(bodyStart, end).trim()),
++    body: text.slice(bodyIndex),
+   };
+ }
+ 

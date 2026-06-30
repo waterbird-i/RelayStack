@@ -64,7 +64,14 @@
 
 ### 第三方公开评测集方案
 
-仓库已新增 `suites/authoritative/swe-bench-lite.json` 作为可采用方案：
+仓库已新增两套第三方权威题源 manifest：
+
+```text
+suites/authoritative/swe-bench-lite.json
+suites/authoritative/multi-swe-bench.json
+```
+
+SWE-bench Lite：
 
 - 数据集：`princeton-nlp/SWE-bench_Lite`
 - 主页：https://www.swebench.com/
@@ -73,9 +80,92 @@
 - 论文：https://openreview.net/forum?id=VTF8yNQM66
 - 许可证：MIT
 
-当前状态是 `adopted_manifest_only`：
-已经记录第三方评测集元数据和字段映射，但本次 A/B 没有跑 SWE-bench
-官方 harness。因此本报告不声称取得 SWE-bench 分数。
+Multi-SWE-bench：
+
+- 数据集：`ByteDance-Seed/Multi-SWE-bench`
+- 主页：https://multi-swe-bench.github.io/
+- 仓库：https://github.com/multi-swe-bench/multi-swe-bench
+- 论文：https://arxiv.org/abs/2504.02605
+- 许可证：Apache License 2.0
+
+SWE-bench Lite 当前状态是 `adopted_manifest_only`：
+已经记录第三方评测集元数据和字段映射，但本次未运行官方 harness。
+
+Multi-SWE-bench 已进一步完成 1 个 flash 样本的官方 harness A/B。
+该结果用于证明权威链路跑通，不应包装成完整 benchmark 排名。
+
+## 第三方权威题源盲测状态
+
+已对 Multi-SWE-bench 跑通 1 个官方 flash 样本：
+
+```text
+reports/authoritative-ab-20260629.json
+reports/authoritative-ab-20260629.zh-CN.md
+```
+
+样本：
+
+- instance：`darkreader__darkreader-7241`
+- 仓库：`darkreader/darkreader`
+- issue：https://github.com/darkreader/darkreader/issues/7238
+- PR：https://github.com/darkreader/darkreader/pull/7241
+- base commit：`991883df4d5910851130e3dc0e21fcbce604ea7d`
+- 许可证：MIT
+
+结果：`official_evaluated`。
+
+| 组别 | completed | resolved | unresolved | error |
+| --- | ---: | ---: | ---: | ---: |
+| `baseline` | 1 | 1 | 0 | 0 |
+| `relaystack_handoff` | 1 | 1 | 0 | 0 |
+
+patch JSONL 已生成并被官方 harness 使用：
+
+```text
+reports/multi-swe-one-20260629/baseline.jsonl
+reports/multi-swe-one-20260629/relaystack_handoff.jsonl
+```
+
+官方报告：
+
+```text
+reports/multi-swe-one-20260629/baseline-output/final_report.json
+reports/multi-swe-one-20260629/relaystack_handoff-output/final_report.json
+```
+
+过程与成本指标：
+
+| 组别 | agent 耗时 | total tokens | output tokens | reasoning output | command 启动 | 协作启动 | patch bytes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `baseline` | 460.699s | 1,353,559 | 9,759 | 3,763 | 36 | 3 | 1016 |
+| `relaystack_handoff` | 754.863s | 1,416,911 | 10,606 | 4,136 | 35 | 4 | 548 |
+
+官方 harness 耗时：
+
+- `baseline`：1073.805s，包含首次 Docker 镜像构建。
+- `relaystack_handoff`：3.945s，复用已构建镜像。
+
+这组 harness 耗时不能直接比较 agent 效率；成本比较应优先看 agent
+耗时、tokens、步骤数和 patch 大小。
+
+协议审计：
+
+- 当前 `baseline` 不是 clean baseline。原始事件流显示它加载了 `ponytail`，
+  也启动了 2 个只读 explorer 子代理。
+- `relaystack_handoff` 额外加载 `rs-handoff`、`rs-issue`、`typescript-write`，
+  并执行过 `npm ci --ignore-scripts` 后跑本地 `jest` / `eslint`。
+- 因此本次不能证明“用了 RelayStack 技能导致更慢”。更准确的解释是：
+  handoff 组做了更多流程和验证工作。
+- 若要测纯净技能收益，需要下一轮固定 clean baseline：禁用项目技能、禁用子代理，
+  只给上游 problem statement；handoff 组只增加 handoff 输入，其余预算一致。
+
+补充说明：
+
+- 两组均 resolved，但仅代表 1 个样本。
+- `baseline` patch 更宽，额外改动了另一处 `{2,}` 分隔逻辑。
+- `relaystack_handoff` patch 更接近官方 fix，只改目标 delimiter regex。
+- 首次运行曾因 Docker Hub 拉取 `node:18` token 超时失败；补拉基础镜像后
+  官方 harness 已完成两组评估。
 
 ## 旧题逐题明细
 
@@ -140,7 +230,17 @@ runner 已在结果中写入以下 provenance 字段：
 - 旧题 rs_handoff report：`reports/rs_handoff-real-20260629.jsonl`
 - 新题 no_handoff report：`reports/no_handoff-expanded-20260629.jsonl`
 - 新题 rs_handoff report：`reports/rs_handoff-expanded-20260629.jsonl`
+- 本地 25 题 suite：`suites/local-25.json`
 - 第三方评测集方案：`suites/authoritative/swe-bench-lite.json`
+- 第三方评测集方案：`suites/authoritative/multi-swe-bench.json`
+- 第三方权威题源 A/B 汇总：`reports/authoritative-ab-20260629.json`
+- 第三方权威题源 A/B 报告：`reports/authoritative-ab-20260629.zh-CN.md`
+- Multi-SWE-bench dataset：`reports/multi-swe-one-20260629/dataset.jsonl`
+- Multi-SWE-bench baseline patch JSONL：`reports/multi-swe-one-20260629/baseline.jsonl`
+- Multi-SWE-bench handoff patch JSONL：`reports/multi-swe-one-20260629/relaystack_handoff.jsonl`
+- Multi-SWE-bench 执行汇总：`reports/multi-swe-one-20260629/summary.json`
+- Multi-SWE-bench baseline agent 事件流：`reports/multi-swe-one-20260629/baseline-agent-output.jsonl`
+- Multi-SWE-bench handoff agent 事件流：`reports/multi-swe-one-20260629/relaystack_handoff-agent-output.jsonl`
 
 ## 注意事项
 
@@ -148,5 +248,5 @@ runner 已在结果中写入以下 provenance 字段：
   通过率和耗时不受影响，但 token 汇总会低估这道题。
 - `task-016` 两组均失败，说明它更可能暴露题目难度、oracle 要求或提示设计问题，
   不能作为某一组单独退化的证据。
-- 若需要更强对外说服力，下一步应接入 SWE-bench Lite 官方 harness，
-  生成 upstream-compatible predictions 后再报告 SWE-bench 分数。
+- Multi-SWE-bench 当前只跑 1 个样本。下一步应扩到 3-5 个 flash 样本，
+  并固定样本选择规则、镜像预拉取步骤和重跑策略。

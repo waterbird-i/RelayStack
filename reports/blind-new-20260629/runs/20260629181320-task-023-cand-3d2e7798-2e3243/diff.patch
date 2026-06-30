@@ -1,0 +1,38 @@
+diff --git a/src/semver/caret.js b/src/semver/caret.js
+index 0b0df72..df30256 100644
+--- a/src/semver/caret.js
++++ b/src/semver/caret.js
+@@ -1,7 +1,31 @@
+ function satisfiesCaret(version, range) {
+   if (!range.startsWith('^')) return version === range;
+-  const prefix = range.slice(1).split('.').slice(0, 2).join('.');
+-  return version.startsWith(prefix + '.');
++
++  const base = parseVersion(range.slice(1));
++  const current = parseVersion(version);
++  if (!base || !current) return false;
++
++  const upper =
++    base[0] > 0 ? [base[0] + 1, 0, 0] :
++    base[1] > 0 ? [0, base[1] + 1, 0] :
++    [0, 0, base[2] + 1];
++
++  return compare(current, base) >= 0 && compare(current, upper) < 0;
++}
++
++function parseVersion(value) {
++  const parts = value.split('.');
++  if (parts.length !== 3) return null;
++
++  const nums = parts.map(part => Number(part));
++  return nums.every(num => Number.isInteger(num) && num >= 0) ? nums : null;
++}
++
++function compare(left, right) {
++  for (let i = 0; i < 3; i += 1) {
++    if (left[i] !== right[i]) return left[i] - right[i];
++  }
++  return 0;
+ }
+ 
+ module.exports = { satisfiesCaret };

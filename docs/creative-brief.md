@@ -114,23 +114,8 @@ handoff success rate = correctly answered handoff questions / total handoff ques
 
 把 AI 工作从“看起来完成了”提升到“能证明可交接、可验证、可继续”。
 
-## 8. MVP 边界
 
-当前版本保持轻量，只做一件事：基于本地证据生成有用的 handoff snapshot。
-
-明确不做：
-
-- Web 应用
-- 数据库
-- 账号系统
-- 实时协作
-- 自动提交代码
-- 任务管理系统
-- 完整语义代码分析
-
-这些能力只有在 handoff snapshot 已经被证明有价值后，才值得继续扩展。
-
-## 9. 500 字以内简版
+## 8. 500 字以内简版
 
 RelayStack 是一个以 skill 形式落地的 AI 编程工作流增强层，用来解决 AI 编程中的交接断点。当前 AI agent 已经能完成很多开发任务，但上下文常分散在聊天记录、Git diff、任务说明和个人判断里；多人或多 agent 接力时，接手者很难快速知道目标、进度、改动原因、风险和下一步。
 

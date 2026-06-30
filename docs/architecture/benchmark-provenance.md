@@ -30,9 +30,20 @@ Authoritative third-party suites are tracked separately:
 
 ```text
 suites/authoritative/
-└── swe-bench-lite.json
+├── swe-bench-lite.json
+└── multi-swe-bench.json
 ```
 
 Those manifests declare authority, license, citation, and field mapping. They do
 not make local benchmark runs equivalent to official upstream scores until the
 official harness evaluates compatible predictions.
+
+The local 25-task benchmark is tracked as a local suite:
+
+```text
+suites/local-25.json
+```
+
+It is a mixed baseline: `task-001..005` are public-PR-derived fixtures, while
+`task-006..025` are project-authored scenarios. Reports must not merge this
+local suite into third-party authoritative results.

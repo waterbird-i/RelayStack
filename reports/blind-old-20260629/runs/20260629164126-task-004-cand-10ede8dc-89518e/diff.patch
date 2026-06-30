@@ -1,0 +1,24 @@
+diff --git a/packages/router-dev/vite/optimizeDeps.js b/packages/router-dev/vite/optimizeDeps.js
+index 09d8a94..ebefca8 100644
+--- a/packages/router-dev/vite/optimizeDeps.js
++++ b/packages/router-dev/vite/optimizeDeps.js
+@@ -1,10 +1,17 @@
+ const OPTIONAL_DEPS = ['@mdx-js/mdx', 'vite-tsconfig-paths'];
+ 
+ function getOptimizeDeps(resolveDependency) {
++  const optionalDeps = OPTIONAL_DEPS.filter((dep) => {
++    try {
++      return resolveDependency(dep);
++    } catch {
++      return false;
++    }
++  });
++
+   return {
+-    include: ['react', ...OPTIONAL_DEPS],
++    include: ['react', ...optionalDeps],
+   };
+ }
+ 
+ module.exports = { getOptimizeDeps };
+-

@@ -1,0 +1,21 @@
+diff --git a/packages/vite/src/node/server/environmentState.js b/packages/vite/src/node/server/environmentState.js
+index 9861a3a..712b03b 100644
+--- a/packages/vite/src/node/server/environmentState.js
++++ b/packages/vite/src/node/server/environmentState.js
+@@ -1,9 +1,8 @@
+ const cache = new WeakMap();
+ 
+ function getEnvironmentState(environment, initial) {
+-  const cached = cache.get(environment);
+-  if (cached) {
+-    return cached;
++  if (cache.has(environment)) {
++    return cache.get(environment);
+   }
+ 
+   const value = initial();
+@@ -12,4 +11,3 @@ function getEnvironmentState(environment, initial) {
+ }
+ 
+ module.exports = { getEnvironmentState };
+-

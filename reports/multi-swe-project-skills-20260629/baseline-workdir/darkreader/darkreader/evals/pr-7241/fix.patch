@@ -1,0 +1,22 @@
+diff --git a/src/generators/utils/parse.ts b/src/generators/utils/parse.ts
+index dce4ad0..97452b1 100644
+--- a/src/generators/utils/parse.ts
++++ b/src/generators/utils/parse.ts
+@@ -21,7 +21,7 @@ export interface SitesFixesParserOptions<T> {
+ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>) {
+     const sites: T[] = [];
+ 
+-    const blocks = text.replace(/\r/g, '').split(/^\s*={2,}\s*$/gm);
++    const blocks = text.replace(/\r/g, '').split(/^\s*={3,}\s*$/gm);
+     blocks.forEach((block) => {
+         const lines = block.split('\n');
+         const commandIndices: number[] = [];
+@@ -143,7 +143,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
+ 
+     let recordStart = 0;
+     // Delimiter between two blocks
+-    const delimiterRegex = /\s*={2,}\s*/gm;
++    const delimiterRegex = /^\s*={3,}\s*$/gm;
+     let delimiter: RegExpMatchArray;
+     let count = 0;
+     while ((delimiter = delimiterRegex.exec(text))) {

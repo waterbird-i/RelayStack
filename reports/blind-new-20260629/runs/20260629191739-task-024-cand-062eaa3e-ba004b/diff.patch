@@ -1,0 +1,19 @@
+diff --git a/src/streaming/ndjson.py b/src/streaming/ndjson.py
+index 3d7dcfc..07300ad 100644
+--- a/src/streaming/ndjson.py
++++ b/src/streaming/ndjson.py
+@@ -3,8 +3,13 @@ import json
+ 
+ def parse_chunks(chunks):
+     rows = []
++    buffer = ""
+     for chunk in chunks:
+-        for line in chunk.splitlines():
++        buffer += chunk
++        while "\n" in buffer:
++            line, buffer = buffer.split("\n", 1)
+             if line.strip():
+                 rows.append(json.loads(line))
++    if buffer.strip():
++        rows.append(json.loads(buffer))
+     return rows

@@ -1,0 +1,23 @@
+diff --git a/packages/vite/src/node/server/middlewares/servePublicMiddleware.js b/packages/vite/src/node/server/middlewares/servePublicMiddleware.js
+index 608e03f..43f1bb3 100644
+--- a/packages/vite/src/node/server/middlewares/servePublicMiddleware.js
++++ b/packages/vite/src/node/server/middlewares/servePublicMiddleware.js
+@@ -1,6 +1,12 @@
+ function serveMemoryFiles(files) {
+   return function serveMemoryFile(req, res, next) {
+-    const url = decodeURIComponent(req.url || '/');
++    let url;
++    try {
++      url = decodeURIComponent(req.url || '/');
++    } catch {
++      next();
++      return;
++    }
+ 
+     if (files.has(url)) {
+       res.end(files.get(url));
+@@ -12,4 +18,3 @@ function serveMemoryFiles(files) {
+ }
+ 
+ module.exports = { serveMemoryFiles };
+-

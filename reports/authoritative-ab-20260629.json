@@ -1,0 +1,220 @@
+{
+  "timestamp": "2026-06-29T22:48:18",
+  "check_type": "authoritative_handoff_ab",
+  "suite": {
+    "suite_id": "multi-swe-bench",
+    "suite_name": "Multi-SWE-bench",
+    "authority": "third_party_public_benchmark",
+    "status": "adopted_manifest_only",
+    "manifest_path": "suites/authoritative/multi-swe-bench.json",
+    "manifest_complete": true,
+    "missing_manifest_fields": [],
+    "dataset": {
+      "name": "Multi-SWE-bench",
+      "homepage": "https://multi-swe-bench.github.io/",
+      "repository": "https://github.com/multi-swe-bench/multi-swe-bench",
+      "paper": "https://arxiv.org/abs/2504.02605"
+    },
+    "license": {
+      "name": "See upstream dataset and repository licenses",
+      "url": "https://github.com/multi-swe-bench/multi-swe-bench"
+    },
+    "citation": {
+      "title": "Multi-SWE-bench: A Multilingual Benchmark for Issue Resolving",
+      "url": "https://arxiv.org/abs/2504.02605"
+    }
+  },
+  "local_baseline_suite": "suites/local-25.json",
+  "run_dir": "reports/multi-swe-one-20260629",
+  "dataset": {
+    "name": "ByteDance-Seed/Multi-SWE-bench-flash",
+    "instance_id": "darkreader__darkreader-7241",
+    "org": "darkreader",
+    "repo": "darkreader",
+    "number": 7241,
+    "title": "Fix: parser should ignore Base64 padding within CSS",
+    "issue_url": "https://github.com/darkreader/darkreader/issues/7238",
+    "pr_url": "https://github.com/darkreader/darkreader/pull/7241",
+    "base_commit": "991883df4d5910851130e3dc0e21fcbce604ea7d",
+    "language": "typescript",
+    "license": "MIT"
+  },
+  "ab_groups": [
+    "baseline",
+    "relaystack_handoff"
+  ],
+  "blind_test_status": "official_evaluated",
+  "blocked_reason": null,
+  "prediction_patch_jsonl": {
+    "baseline": {
+      "path": "reports/multi-swe-one-20260629/baseline.jsonl",
+      "exists": true,
+      "valid_shape": true,
+      "missing_fields": [],
+      "patch_bytes": 1016
+    },
+    "relaystack_handoff": {
+      "path": "reports/multi-swe-one-20260629/relaystack_handoff.jsonl",
+      "exists": true,
+      "valid_shape": true,
+      "missing_fields": [],
+      "patch_bytes": 548
+    }
+  },
+  "official_harness_reports": {
+    "baseline": {
+      "path": "reports/multi-swe-one-20260629/baseline-output/final_report.json",
+      "exists": true,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "error_instances": 0,
+      "resolved_ids": [
+        "darkreader/darkreader:pr-7241"
+      ],
+      "unresolved_ids": [],
+      "error_ids": []
+    },
+    "relaystack_handoff": {
+      "path": "reports/multi-swe-one-20260629/relaystack_handoff-output/final_report.json",
+      "exists": true,
+      "completed_instances": 1,
+      "resolved_instances": 1,
+      "unresolved_instances": 0,
+      "error_instances": 0,
+      "resolved_ids": [
+        "darkreader/darkreader:pr-7241"
+      ],
+      "unresolved_ids": [],
+      "error_ids": []
+    }
+  },
+  "result_summary": {
+    "baseline_resolved": 1,
+    "relaystack_handoff_resolved": 1,
+    "baseline_completed": 1,
+    "relaystack_handoff_completed": 1
+  },
+  "environment": {
+    "docker_available": true,
+    "multi_swe_bench_module_available": false,
+    "datasets_module_available": false
+  },
+  "artifacts": [
+    "reports/multi-swe-one-20260629/dataset.jsonl",
+    "reports/multi-swe-one-20260629/baseline.jsonl",
+    "reports/multi-swe-one-20260629/relaystack_handoff.jsonl",
+    "reports/multi-swe-one-20260629/baseline-output/final_report.json",
+    "reports/multi-swe-one-20260629/relaystack_handoff-output/final_report.json",
+    "reports/multi-swe-one-20260629/baseline-agent-output.jsonl",
+    "reports/multi-swe-one-20260629/relaystack_handoff-agent-output.jsonl",
+    "reports/multi-swe-one-20260629/summary.json"
+  ],
+  "agent_metrics": {
+    "baseline": {
+      "thread_id": "019f1351-c5ef-7fe1-8b39-c7f25e48bfee",
+      "usage": {
+        "input_tokens": 1343800,
+        "cached_input_tokens": 1137792,
+        "output_tokens": 9759,
+        "reasoning_output_tokens": 3763,
+        "total_tokens": 1353559,
+        "billable_input_tokens_estimate": 206008
+      },
+      "event_counts": {
+        "item_error": 3,
+        "item_agent_message": 17,
+        "item_mcp_tool_call": 2,
+        "item_command_execution": 72,
+        "item_collab_tool_call": 6,
+        "item_file_change": 4
+      },
+      "started_item_counts": {
+        "mcp_tool_call": 1,
+        "command_execution": 36,
+        "collab_tool_call": 3,
+        "file_change": 2
+      },
+      "completed_item_counts": {
+        "error": 3,
+        "agent_message": 17,
+        "mcp_tool_call": 1,
+        "command_execution": 36,
+        "collab_tool_call": 3,
+        "file_change": 2
+      }
+    },
+    "relaystack_handoff": {
+      "thread_id": "019f1358-f7e6-77b0-8add-33d2ab0b2e47",
+      "usage": {
+        "input_tokens": 1406305,
+        "cached_input_tokens": 1195648,
+        "output_tokens": 10606,
+        "reasoning_output_tokens": 4136,
+        "total_tokens": 1416911,
+        "billable_input_tokens_estimate": 210657
+      },
+      "event_counts": {
+        "item_error": 3,
+        "item_agent_message": 18,
+        "item_command_execution": 70,
+        "item_collab_tool_call": 8,
+        "item_file_change": 2
+      },
+      "started_item_counts": {
+        "command_execution": 35,
+        "collab_tool_call": 4,
+        "file_change": 1
+      },
+      "completed_item_counts": {
+        "error": 3,
+        "agent_message": 18,
+        "command_execution": 35,
+        "collab_tool_call": 4,
+        "file_change": 1
+      }
+    }
+  },
+  "official_harness_timing": {
+    "baseline": {
+      "log_path": "reports/multi-swe-one-20260629/baseline-logs/run_evaluation.log",
+      "started_at": "2026-06-29T20:57:03.208",
+      "completed_at": "2026-06-29T21:14:57.013",
+      "elapsed_seconds": 1073.805
+    },
+    "relaystack_handoff": {
+      "log_path": "reports/multi-swe-one-20260629/relaystack_handoff-logs/run_evaluation.log",
+      "started_at": "2026-06-29T21:15:59.312",
+      "completed_at": "2026-06-29T21:16:03.257",
+      "elapsed_seconds": 3.945
+    }
+  },
+  "comparison_metrics": {
+    "agent_elapsed_delta_seconds": 294.164,
+    "agent_total_tokens_delta": 63352,
+    "agent_output_tokens_delta": 847,
+    "patch_bytes_delta": -468,
+    "interpretation_note": "Harness timing is not comparable across groups here because baseline built Docker images first and handoff reused them."
+  },
+  "protocol_audit": {
+    "clean_baseline": false,
+    "clean_baseline_reason": "baseline agent output shows ponytail skill loading and two read-only explorer subagents, so it is not a no-skill/no-helper baseline.",
+    "baseline_observed_helpers": [
+      "ponytail skill loaded",
+      "2 read-only explorer subagents started"
+    ],
+    "relaystack_handoff_observed_helpers": [
+      "rs-handoff skill loaded",
+      "ponytail skill loaded",
+      "rs-issue skill loaded",
+      "typescript-write skill loaded",
+      "2 read-only explorer subagents started",
+      "npm ci --ignore-scripts used before local jest/eslint verification"
+    ],
+    "interpretation": "This run compares two successful agent workflows, not a clean skill ablation. The handoff group took longer mainly because it performed extra handoff/process/verification work; the current evidence does not prove RelayStack handoff itself is slower or faster.",
+    "evidence": {
+      "baseline_agent_output": "reports/multi-swe-one-20260629/baseline-agent-output.jsonl",
+      "relaystack_handoff_agent_output": "reports/multi-swe-one-20260629/relaystack_handoff-agent-output.jsonl"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "agent_returncode": 0,
+  "auto_repeated_known_info": true,
+  "citation": null,
+  "commands_run": [
+    "/bin/zsh -lc \"sed -n '1,220p' packages/vite/src/node/server/environmentState.js\"",
+    "/bin/zsh -lc \"rg -n \\\"environmentState|initial\\\\(|getEnvironmentState|setEnvironmentState\\\" packages/vite/src/node/server packages/vite/src/node -g '\"'!**/node_modules/**'\"'\"",
+    "/bin/zsh -lc 'git status --short'",
+    "/bin/zsh -lc \"printf '%s\\\\n' \\\"\"'$RS_BENCH_METRICS\"'",
+    "/bin/zsh -lc 'git diff -- packages/vite/src/node/server/environmentState.js'",
+    "/bin/zsh -lc \"node - <<'NODE'\nconst assert = require('node:assert/strict');\nconst { getEnvironmentState } = require('./packages/vite/src/node/server/environmentState.js');\n\nconst envA = {};\nlet callsA = 0;\nassert.equal(getEnvironmentState(envA, () => { callsA++; return false; }), false);\nassert.equal(getEnvironmentState(envA, () => { callsA++; return true; }), false);\nassert.equal(callsA, 1);\n\nconst envB = {};\nassert.equal(getEnvironmentState(envB, () => 0), 0);\nassert.equal(getEnvironmentState({}, () => null), null);\nNODE\""
+  ],
+  "cost_usd": null,
+  "elapsed_seconds": 196.535,
+  "issue_url": null,
+  "known_entry_files": [
+    "packages/vite/src/node/server/environmentState.js"
+  ],
+  "license": "MIT",
+  "license_url": "https://github.com/vitejs/vite/blob/main/LICENSE",
+  "opened_files": [
+    "packages/vite/src/node/server/environmentState.js"
+  ],
+  "original_commit": null,
+  "passed": true,
+  "pr_url": "https://github.com/vitejs/vite/pull/22715",
+  "provenance": {
+    "authority": "public_github_pr",
+    "fixture_notes": "裁剪为单文件 falsy cache 行为 fixture；不包含 Vite 完整仓库。",
+    "license": "MIT",
+    "license_url": "https://github.com/vitejs/vite/blob/main/LICENSE",
+    "pr_url": "https://github.com/vitejs/vite/pull/22715",
+    "provenance_status": "verified_public",
+    "repo_url": "https://github.com/vitejs/vite",
+    "schema_version": 1,
+    "source_type": "github_pr",
+    "source_url": "https://github.com/vitejs/vite/pull/22715",
+    "suite_id": "relaystack-public-fixtures",
+    "suite_name": "RelayStack public GitHub fixtures",
+    "test_oracle": "tasks/task-001/test.sh"
+  },
+  "provenance_status": "verified_public",
+  "repeated_known_files": [
+    "packages/vite/src/node/server/environmentState.js"
+  ],
+  "repeated_known_info": false,
+  "repo_url": "https://github.com/vitejs/vite",
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_chars": null,
+  "snapshot_elapsed_seconds": null,
+  "snapshot_generated": false,
+  "source_type": "github_pr",
+  "source_url": "https://github.com/vitejs/vite/pull/22715",
+  "steps_after_handoff": 6,
+  "suite_id": "relaystack-public-fixtures",
+  "suite_name": "RelayStack public GitHub fixtures",
+  "task": "task-001",
+  "test_returncode": 0,
+  "timestamp": "2026-06-29T16:25:49",
+  "tool_steps": 8,
+  "total_tokens": 265672,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-001-jeqhx899"
+}

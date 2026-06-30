@@ -1,0 +1,22 @@
+diff --git a/src/schedule/business_days.py b/src/schedule/business_days.py
+index 34542cc..b3b5667 100644
+--- a/src/schedule/business_days.py
++++ b/src/schedule/business_days.py
+@@ -2,4 +2,16 @@ from datetime import timedelta
+ 
+ 
+ def add_business_days(start, days, holidays=()):
+-    return start + timedelta(days=days)
++    if days == 0:
++        return start
++
++    holiday_set = set(holidays)
++    current = start
++    remaining = days
++
++    while remaining > 0:
++        current += timedelta(days=1)
++        if current.weekday() < 5 and current not in holiday_set:
++            remaining -= 1
++
++    return current

@@ -1,0 +1,69 @@
+diff --git a/src/ci/junit_summary.py b/src/ci/junit_summary.py
+index 6498d58..141d833 100644
+--- a/src/ci/junit_summary.py
++++ b/src/ci/junit_summary.py
+@@ -1,14 +1,55 @@
+ import xml.etree.ElementTree as ET
+ 
++FIELDS = ("tests", "failures", "errors", "skipped")
+ 
+-def summarize(xml_text):
+-    root = ET.fromstring(xml_text)
+-    suite = root if root.tag == "testsuite" else root.find("testsuite")
+-    if suite is None:
+-        return {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
++
++def _tag(element):
++    return element.tag.rsplit("}", 1)[-1]
++
++
++def _empty():
++    return dict.fromkeys(FIELDS, 0)
++
++
++def _add(left, right):
++    return {field: left[field] + right[field] for field in FIELDS}
++
++
++def _from_testcases(cases):
++    totals = _empty()
++    totals["tests"] = len(cases)
++    for case in cases:
++        for child in case:
++            name = _tag(child)
++            if name in ("failure", "error", "skipped"):
++                totals[name + "s" if name != "skipped" else name] += 1
++    return totals
++
++
++def _from_attrs(node, fallback):
+     return {
+-        "tests": int(suite.attrib.get("tests", 0)),
+-        "failures": int(suite.attrib.get("failures", 0)),
+-        "errors": int(suite.attrib.get("errors", 0)),
+-        "skipped": int(suite.attrib.get("skipped", 0)),
++        field: int(node.attrib[field]) if field in node.attrib else fallback[field]
++        for field in FIELDS
+     }
++
++
++def _summarize_node(node):
++    child_suites = [
++        child for child in node if _tag(child) in ("testsuite", "testsuites")
++    ]
++    direct_cases = [child for child in node if _tag(child) == "testcase"]
++
++    totals = _from_testcases(direct_cases)
++    for child in child_suites:
++        totals = _add(totals, _summarize_node(child))
++
++    if child_suites:
++        return totals
++    return _from_attrs(node, totals)
++
++
++def summarize(xml_text):
++    root = ET.fromstring(xml_text)
++    if _tag(root) not in ("testsuite", "testsuites"):
++        return _empty()
++    return _summarize_node(root)

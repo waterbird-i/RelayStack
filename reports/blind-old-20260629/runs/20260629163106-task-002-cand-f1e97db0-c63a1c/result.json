@@ -1,0 +1,66 @@
+{
+  "agent_returncode": 0,
+  "auto_repeated_known_info": true,
+  "citation": null,
+  "commands_run": [
+    "/bin/zsh -lc \"sed -n '1,220p' packages/vite/src/node/server/middlewares/servePublicMiddleware.js\"",
+    "/bin/zsh -lc 'git status --short'",
+    "/bin/zsh -lc 'git diff -- packages/vite/src/node/server/middlewares/servePublicMiddleware.js'",
+    "/bin/zsh -lc 'ls -la'",
+    "/bin/zsh -lc 'printenv RS_BENCH_METRICS || true'",
+    "/bin/zsh -lc 'git diff --check'",
+    "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('assert');\nconst { serveMemoryFiles } = require('./packages/vite/src/node/server/middlewares/servePublicMiddleware.js');\n\nconst files = new Map([['/hello world.txt', 'content']]);\nconst middleware = serveMemoryFiles(files);\n\nlet nextCount = 0;\nassert.doesNotThrow(() => middleware({ url: '/%' }, { end() { throw new Error('should not end'); } }, () => { nextCount += 1; }));\nassert.strictEqual(nextCount, 1);\n\nlet ended;\nmiddleware({ url: '/hello%20world.txt' }, { end(content) { ended = content; } }, () => { throw new Error('should not call next'); });\nassert.strictEqual(ended, 'content');\nNODE\"",
+    "/bin/zsh -lc 'ls -l agent-metrics.json 2>/dev/null || true'"
+  ],
+  "cost_usd": null,
+  "elapsed_seconds": 316.916,
+  "issue_url": null,
+  "known_entry_files": [
+    "packages/vite/src/node/server/middlewares/servePublicMiddleware.js"
+  ],
+  "license": "MIT",
+  "license_url": "https://github.com/vitejs/vite/blob/main/LICENSE",
+  "opened_files": [
+    "packages/vite/src/node/server/middlewares/servePublicMiddleware.js"
+  ],
+  "original_commit": null,
+  "passed": true,
+  "pr_url": "https://github.com/vitejs/vite/pull/22714",
+  "provenance": {
+    "authority": "public_github_pr",
+    "fixture_notes": "裁剪为 malformed URI public middleware fixture；不包含 Vite 完整仓库。",
+    "license": "MIT",
+    "license_url": "https://github.com/vitejs/vite/blob/main/LICENSE",
+    "pr_url": "https://github.com/vitejs/vite/pull/22714",
+    "provenance_status": "verified_public",
+    "repo_url": "https://github.com/vitejs/vite",
+    "schema_version": 1,
+    "source_type": "github_pr",
+    "source_url": "https://github.com/vitejs/vite/pull/22714",
+    "suite_id": "relaystack-public-fixtures",
+    "suite_name": "RelayStack public GitHub fixtures",
+    "test_oracle": "tasks/task-002/test.sh"
+  },
+  "provenance_status": "verified_public",
+  "repeated_known_files": [
+    "packages/vite/src/node/server/middlewares/servePublicMiddleware.js"
+  ],
+  "repeated_known_info": false,
+  "repo_url": "https://github.com/vitejs/vite",
+  "runner": "no_handoff",
+  "snapshot": null,
+  "snapshot_chars": null,
+  "snapshot_elapsed_seconds": null,
+  "snapshot_generated": false,
+  "source_type": "github_pr",
+  "source_url": "https://github.com/vitejs/vite/pull/22714",
+  "steps_after_handoff": 10,
+  "suite_id": "relaystack-public-fixtures",
+  "suite_name": "RelayStack public GitHub fixtures",
+  "task": "task-002",
+  "test_returncode": 0,
+  "timestamp": "2026-06-29T16:31:06",
+  "tool_steps": 14,
+  "total_tokens": 536804,
+  "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/rsbench-task-002-he_y0y_z"
+}

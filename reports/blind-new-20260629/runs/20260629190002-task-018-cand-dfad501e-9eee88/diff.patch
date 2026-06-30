@@ -1,0 +1,18 @@
+diff --git a/src/router/matcher.js b/src/router/matcher.js
+index ad1c02e..333814e 100644
+--- a/src/router/matcher.js
++++ b/src/router/matcher.js
+@@ -1,5 +1,12 @@
++const ORIGIN = 'http://relaystack.local';
++
++function normalizePath(path) {
++  const pathname = new URL(path, ORIGIN).pathname;
++  return pathname === '/' ? pathname : pathname.replace(/\/+$/, '');
++}
++
+ function matches(route, requestPath) {
+-  return route === requestPath;
++  return normalizePath(route) === normalizePath(requestPath);
+ }
+ 
+ module.exports = { matches };

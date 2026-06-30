@@ -1,0 +1,67 @@
+
+> darkreader@4.9.39 test:ci
+> jest --config=tests/jest.config.js --runInBand --json --outputFile=test-results-unit.json
+
+PASS tests/utils/url.tests.ts
+  ✓ URL is enabled (4 ms)
+  ✓ Get URL host or protocol (1 ms)
+  ✓ Absolute URL (15 ms)
+  ✓ Fully qualified domain (2 ms)
+
+PASS tests/generators/utils/parse.tests.ts
+  ✓ Index config (1 ms)
+  ✓ Empty config
+  ✓ Domain appearing in multiple records (1 ms)
+  ✓ Domain appearing multiple times within the same record
+  ✓ The generic fix appears first (1 ms)
+  ✓ Fixes appear only once (1 ms)
+  ✓ Implied wildcards
+  ✓ Base64 in CSS (1 ms)
+
+PASS tests/utils/time.tests.ts
+  ✓ Time interval (1 ms)
+  ✓ Time interval prediction
+  ✓ Time parse (1 ms)
+  ✓ Duration
+  ✓ Nigth check (1 ms)
+  ✓ Sunrise/sunset (3 ms)
+
+PASS tests/utils/color.tests.ts
+  ✓ Color parsing (28 ms)
+  ✓ Stringify color
+  ✓ Color conversion (1 ms)
+  ✓ Lower calc expressions
+
+PASS tests/config/config.tests.ts
+  ✓ Dark Sites list (9 ms)
+  ✓ Dynamic Theme Fixes config (26 ms)
+  ✓ Inversion Fixes config (4 ms)
+  ✓ Static Themes config (1 ms)
+  ✓ Colorscheme config (1 ms)
+
+PASS tests/utils/text.tests.ts
+  ✓ CSS formatting (3 ms)
+  ✓ Parenthesis Range (2 ms)
+
+PASS tests/utils/promise-barrier.tests.ts
+  ✓ Promise barrier utility (4 ms)
+  ✓ Promise barrier utility: awaiting for barrier after it was settled (3 ms)
+  ✓ Promise barrier utility: resolving multiple times (3 ms)
+
+PASS tests/config/locales.tests.ts
+  ✓ Locales (20 ms)
+
+PASS tests/utils/uid.tests.ts
+  ✓ Unique identifier generation (1 ms)
+
+PASS tests/utils/math.tests.ts
+  ✓ Scale (1 ms)
+  ✓ Clamp
+  ✓ Matrix multiplication
+
+Test Suites: 10 passed, 10 total
+Tests:       37 passed, 37 total
+Snapshots:   0 total
+Time:        3.377 s
+Ran all test suites in 3 projects.
+Test results written to: test-results-unit.json

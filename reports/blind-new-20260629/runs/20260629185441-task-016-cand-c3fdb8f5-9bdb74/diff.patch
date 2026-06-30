@@ -1,0 +1,19 @@
+diff --git a/src/db/sql_filters.py b/src/db/sql_filters.py
+index 83e52d2..2d09c49 100644
+--- a/src/db/sql_filters.py
++++ b/src/db/sql_filters.py
+@@ -1,8 +1,12 @@
+ def build_where(filters):
++    allowed_fields = {"owner", "is_active", "retry_count"}
+     clauses = []
+     params = []
+     for key, value in filters.items():
+-        if not value:
++        if key not in allowed_fields:
++            raise ValueError(f"Unknown filter field: {key}")
++        if value is None or value == "":
+             continue
+-        clauses.append(f"{key} = '{value}'")
++        clauses.append(f"{key} = ?")
++        params.append(value)
+     return (" AND ".join(clauses) or "1=1", params)

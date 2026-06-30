@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "suite_id": "relaystack-local-25",
+  "suite_name": "RelayStack local 25-task benchmark",
+  "authority": "mixed_local_fixture_set",
+  "status": "local_baseline",
+  "task_range": "tasks/task-001..025",
+  "provenance_breakdown": {
+    "verified_public": {
+      "count": 5,
+      "tasks": "task-001..005",
+      "description": "Cropped local fixtures with public upstream PR provenance."
+    },
+    "scenario_only": {
+      "count": 20,
+      "tasks": "task-006..025",
+      "description": "Project-authored engineering scenarios without upstream issue or PR links."
+    }
+  },
+  "reporting_rule": "Use this suite for local regression and handoff signal only. Do not describe all 25 tasks as a third-party authoritative benchmark."
+}

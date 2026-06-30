@@ -1,0 +1,125 @@
+{
+  "timestamp": "2026-06-29T23:10:05",
+  "dataset": "ByteDance-Seed/Multi-SWE-bench-flash",
+  "instance_id": "darkreader__darkreader-7241",
+  "groups": {
+    "baseline": {
+      "agent_returncode": 0,
+      "elapsed_seconds": 314.039,
+      "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/multi-swe-baseline-it11dlm9",
+      "codex_home": "/private/tmp/codex-baseline-q98kcecl",
+      "patch_file": "reports/multi-swe-clean-20260629/baseline.jsonl",
+      "diff_bytes": 558,
+      "has_patch": true,
+      "agent_metrics": {
+        "thread_id": "019f13ee-4c17-7483-9289-2bf1a2db0b6c",
+        "usage": {
+          "input_tokens": 987729,
+          "cached_input_tokens": 805760,
+          "output_tokens": 5155,
+          "reasoning_output_tokens": 1642
+        },
+        "event_counts": {
+          "item.completed:agent_message": 13,
+          "item.started:command_execution": 27,
+          "item.completed:command_execution": 27,
+          "item.started:file_change": 1,
+          "item.completed:file_change": 1
+        },
+        "started_item_counts": {
+          "command_execution": 27,
+          "file_change": 1
+        },
+        "skill_paths": [],
+        "injected_skills": [],
+        "forbidden_markers": {
+          "skill_context": false,
+          "skill_file_read": false,
+          "spawn_agent": false,
+          "global_skill_path": false,
+          "ponytail": false,
+          "typescript_write": false,
+          "non_handoff_skill": false
+        },
+        "protocol_contaminated": false
+      }
+    },
+    "relaystack_handoff": {
+      "agent_returncode": 0,
+      "elapsed_seconds": 278.209,
+      "workdir": "/var/folders/bv/zq75bmmj17z8r1jg1y2hnf080000gn/T/multi-swe-relaystack_handoff-tq12ex46",
+      "codex_home": "/private/tmp/codex-relaystack_handoff-il_tj_2i",
+      "patch_file": "reports/multi-swe-clean-20260629/relaystack_handoff.jsonl",
+      "diff_bytes": 558,
+      "has_patch": true,
+      "agent_metrics": {
+        "thread_id": "019f13f3-357c-7d51-b841-f8f2c44403e7",
+        "usage": {
+          "input_tokens": 301595,
+          "cached_input_tokens": 243968,
+          "output_tokens": 4542,
+          "reasoning_output_tokens": 2040
+        },
+        "event_counts": {
+          "item.completed:agent_message": 10,
+          "item.started:command_execution": 17,
+          "item.completed:command_execution": 17,
+          "item.started:file_change": 1,
+          "item.completed:file_change": 1
+        },
+        "started_item_counts": {
+          "command_execution": 17,
+          "file_change": 1
+        },
+        "skill_paths": [
+          "/private/tmp/codex-relaystack_handoff-il_tj_2i/skills/rs-handoff/SKILL.md"
+        ],
+        "injected_skills": [],
+        "forbidden_markers": {
+          "skill_context": false,
+          "skill_file_read": true,
+          "spawn_agent": false,
+          "global_skill_path": false,
+          "ponytail": false,
+          "typescript_write": false,
+          "non_handoff_skill": false
+        },
+        "protocol_contaminated": false
+      }
+    }
+  },
+  "protocol_audit": {
+    "clean_baseline": true,
+    "relaystack_handoff_project_only": true,
+    "baseline_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": false,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_handoff_skill": false
+    },
+    "relaystack_handoff_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": true,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_handoff_skill": false
+    },
+    "interpretation": "A run is a valid clean ablation only when baseline is no-skill/no-subagent and relaystack_handoff uses only project RelayStack skills without subagents."
+  },
+  "official_harness_status": "blocked_docker_desktop_unavailable",
+  "official_harness_blocked_reason": "Docker Desktop API returned 503 Service Unavailable / docker version hung after app launch; clean patch JSONL was generated but official harness could not complete in this environment.",
+  "comparison_metrics": {
+    "agent_elapsed_delta_seconds": -35.83,
+    "input_tokens_delta": -686134,
+    "cached_input_tokens_delta": -561792,
+    "output_tokens_delta": -613,
+    "reasoning_output_tokens_delta": 398,
+    "patch_bytes_delta": 0,
+    "command_start_delta": -10
+  }
+}
