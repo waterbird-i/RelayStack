@@ -4,6 +4,8 @@
 
 # RelayStack
 
+![RelayStack project introduction](reports/assets/relaystack-intro.png)
+
 RelayStack is a repo-local skill set and handoff protocol for AI-assisted
 software work. It turns chat context, local Git evidence, project docs, and
 agent records into a Markdown snapshot that the next person or agent can use
