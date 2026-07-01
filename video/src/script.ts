@@ -22,23 +22,23 @@ export const scenes = [
   {
     kicker: 'benchmark',
     title: '当前 benchmark：接手成本明显下降',
-    body: '灰色完整圆环代表 baseline，彩色圆环代表 RelayStack 剩余成本：耗时 75.9%，报告 token 77.0%，重复探索 0 次，盲评 53/60 胜场。',
+    body: '二十五题合并口径下，总耗时只剩 baseline 的 75.9%，报告 token 只剩 77.0%。',
     voice:
       '这张接手成本图里，灰色圆环是 baseline，彩色圆环是 RelayStack。二十五题合并口径下，总耗时只剩 baseline 的百分之七十五点九，报告 token 只剩百分之七十七。',
   },
   {
     kicker: 'repeat exploration',
-    title: '重复探索从 4 次降到 0 次',
-    body: 'handoff 把已知事实和来源放进 Evidence Map，减少下一个 owner 重新翻旧账。',
+    title: '盲评胜场更高，重复探索归零',
+    body: '扩展 20 题盲评里，rs handoff 获得 53 个 reviewer 胜场；已知信息重复探索从 4 次降到 0 次。',
     voice:
       '扩展二十题盲评中，rs handoff 获得五十三个 reviewer 胜场，重复探索从四次降到零次。',
   },
   {
     kicker: 'smoke test',
     title: '第三方公开题源烟测：协议链路跑通',
-    body: 'Multi-SWE-bench flash：两组都 resolved 1/1；RelayStack project skills 把 token 降到 34.1%，命令数减半，patch 也更小。',
+    body: '两组 resolved 1/1；token 降到 34.1%，耗时降到 81.3%，命令 32→16，patch 1,016→565 bytes。',
     voice:
-      '第三方公开题源烟测里，两组都 resolved 一题一题。RelayStack project skills 的 token 只剩 baseline 的百分之三十四点一，启动命令从三十二个降到十六个。',
+      '第三方公开题源烟测里，两组都 resolved 一题一题。RelayStack project skills 的 token 只剩 baseline 的百分之三十四点一，耗时只剩百分之八十一点三。工具调用上，启动命令从三十二个降到十六个；patch size 也从一千零十六 bytes 降到五百六十五 bytes。',
   },
   {
     kicker: 'scope',
@@ -57,5 +57,3 @@ export const scenes = [
 ] as const;
 
 export const voiceoverScript = scenes.map((scene) => scene.voice).join('\n');
-
-export const hasVoiceover = true;

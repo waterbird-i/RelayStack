@@ -7,10 +7,9 @@ import {
   interpolate,
   staticFile,
   useCurrentFrame,
-  useVideoConfig,
 } from 'remotion';
 import type {ReactNode} from 'react';
-import {hasVoiceover, scenes} from './script';
+import {scenes} from './script';
 
 const colors = {
   bg: '#02070c',
@@ -25,7 +24,8 @@ const colors = {
   muted: '#c8d0d6',
 };
 
-const sceneFrames = 270;
+const sceneDurations = [181, 249, 353, 420, 242, 570, 251, 270];
+const totalFrames = sceneDurations.reduce((sum, duration) => sum + duration, 0);
 const fade = 24;
 
 const fadeValue = (frame: number, duration: number) => {
@@ -58,7 +58,7 @@ const Shell = ({children}: {children: ReactNode}) => {
           backgroundImage:
             'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
-          translate: `${interpolate(frame, [0, 2160], [0, -80])}px 0`,
+          translate: `${interpolate(frame, [0, totalFrames], [0, -80])}px 0`,
         }}
       />
       <div
@@ -109,9 +109,9 @@ const Brand = () => {
   );
 };
 
-const IntroScene = () => {
+const IntroScene = ({duration}: {duration: number}) => {
   const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [sceneFrames - fade, sceneFrames], [1, 0], {
+  const opacity = interpolate(frame, [duration - fade, duration], [1, 0], {
     easing: Easing.bezier(0.16, 1, 0.3, 1),
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -134,10 +134,10 @@ const IntroScene = () => {
   );
 };
 
-const ProblemScene = ({index}: {index: number}) => {
+const ProblemScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
   const points = ['决策留在聊天里', 'diff 看不到为什么', '风险和验证状态丢失'];
 
   return (
@@ -199,10 +199,10 @@ const ProblemScene = ({index}: {index: number}) => {
   );
 };
 
-const SnapshotScene = ({index}: {index: number}) => {
+const SnapshotScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
   const items = ['current goal', 'what changed', 'why this path', 'risks', 'next action', 'validation plan'];
 
   return (
@@ -365,10 +365,10 @@ const AnimatedDialImage = ({
   );
 };
 
-const BenchmarkScene = ({index}: {index: number}) => {
+const BenchmarkScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
 
   return (
     <Shell>
@@ -401,10 +401,15 @@ const BenchmarkScene = ({index}: {index: number}) => {
   );
 };
 
-const EvidenceScene = ({index}: {index: number}) => {
+const EvidenceScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
+  const metricProgress = interpolate(frame, [22, 112], [0, 1], {
+    easing: Easing.bezier(0.16, 1, 0.3, 1),
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 
   return (
     <Shell>
@@ -437,22 +442,72 @@ const EvidenceScene = ({index}: {index: number}) => {
             background: colors.panel,
             border: `1px solid ${colors.green}`,
             boxShadow: '0 0 64px rgba(131, 222, 121, 0.18)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 36,
-            justifyContent: 'center',
-            minHeight: 430,
+            display: 'grid',
+            gap: 28,
+            gridTemplateRows: '1fr 1fr',
+            minHeight: 500,
             padding: 50,
           }}
         >
-          <div style={{color: colors.muted, fontSize: 34}}>repeated known info</div>
-          <div style={{alignItems: 'center', display: 'flex', gap: 40}}>
-            <span style={{color: colors.orange, fontSize: 112, fontWeight: 900}}>4</span>
-            <span style={{color: colors.muted, fontSize: 76}}>→</span>
-            <span style={{color: colors.green, fontSize: 112, fontWeight: 900}}>0</span>
+          <div
+            style={{
+              alignItems: 'center',
+              border: `1px solid ${colors.blue}`,
+              display: 'grid',
+              gap: 28,
+              gridTemplateColumns: '180px 1fr',
+              padding: '28px 32px',
+            }}
+          >
+            <svg height="154" viewBox="0 0 154 154" width="154">
+              <circle cx="77" cy="77" fill="none" r="57" stroke="rgba(255,255,255,0.18)" strokeWidth="20" />
+              <circle
+                cx="77"
+                cy="77"
+                fill="none"
+                pathLength={100}
+                r="57"
+                stroke={colors.blue}
+                strokeDasharray={`${88.3 * metricProgress} ${100 - 88.3 * metricProgress}`}
+                strokeLinecap="round"
+                strokeWidth="20"
+                transform="rotate(-90 77 77)"
+              />
+              <text fill={colors.text} fontSize="34" fontWeight="900" textAnchor="middle" x="77" y="73">
+                53/60
+              </text>
+              <text fill={colors.muted} fontSize="17" fontWeight="700" textAnchor="middle" x="77" y="101">
+                wins
+              </text>
+            </svg>
+            <div>
+              <div style={{color: colors.blue, fontSize: 34, fontWeight: 820}}>Reviewer signal</div>
+              <div style={{color: colors.muted, fontSize: 28, lineHeight: 1.42, marginTop: 10}}>
+                扩展 20 题盲评中获得 53 个 reviewer 胜场
+              </div>
+            </div>
           </div>
-          <div style={{color: colors.green, fontSize: 34, fontWeight: 760}}>
-            Evidence Map 把事实绑定到来源
+          <div
+            style={{
+              alignItems: 'center',
+              border: `1px solid ${colors.green}`,
+              display: 'grid',
+              gap: 28,
+              gridTemplateColumns: '180px 1fr',
+              padding: '28px 32px',
+            }}
+          >
+            <div style={{alignItems: 'center', display: 'flex', gap: 18, justifyContent: 'center'}}>
+              <span style={{color: colors.orange, fontSize: 76, fontWeight: 900}}>4</span>
+              <span style={{color: colors.muted, fontSize: 48}}>→</span>
+              <span style={{color: colors.green, fontSize: 76, fontWeight: 900}}>0</span>
+            </div>
+            <div>
+              <div style={{color: colors.green, fontSize: 34, fontWeight: 820}}>Known-info repeats</div>
+              <div style={{color: colors.muted, fontSize: 28, lineHeight: 1.42, marginTop: 10}}>
+                Evidence Map 把已知事实和来源绑定到交接里
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -460,10 +515,10 @@ const EvidenceScene = ({index}: {index: number}) => {
   );
 };
 
-const SmokeScene = ({index}: {index: number}) => {
+const SmokeScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
 
   return (
     <Shell>
@@ -496,10 +551,10 @@ const SmokeScene = ({index}: {index: number}) => {
   );
 };
 
-const ClosingScene = ({index}: {index: number}) => {
+const ClosingScene = ({duration, index}: {duration: number; index: number}) => {
   const frame = useCurrentFrame();
   const scene = scenes[index];
-  const opacity = fadeValue(frame, sceneFrames);
+  const opacity = fadeValue(frame, duration);
 
   return (
     <Shell>
@@ -544,30 +599,33 @@ const ClosingScene = ({index}: {index: number}) => {
   );
 };
 
-const renderScene = (index: number) => {
-  if (index === 0) return <IntroScene />;
-  if (index === 1 || index === 6) return <ProblemScene index={index} />;
-  if (index === 2) return <SnapshotScene index={index} />;
-  if (index === 3) return <BenchmarkScene index={index} />;
-  if (index === 4) return <EvidenceScene index={index} />;
-  if (index === 5) return <SmokeScene index={index} />;
-  return <ClosingScene index={index} />;
+const renderScene = (index: number, duration: number) => {
+  if (index === 0) return <IntroScene duration={duration} />;
+  if (index === 1 || index === 6) return <ProblemScene duration={duration} index={index} />;
+  if (index === 2) return <SnapshotScene duration={duration} index={index} />;
+  if (index === 3) return <BenchmarkScene duration={duration} index={index} />;
+  if (index === 4) return <EvidenceScene duration={duration} index={index} />;
+  if (index === 5) return <SmokeScene duration={duration} index={index} />;
+  return <ClosingScene duration={duration} index={index} />;
 };
 
 export const RelayStackIntro = () => {
-  const {fps} = useVideoConfig();
-
   return (
     <AbsoluteFill>
-      {scenes.map((_scene, index) => (
-        <Sequence durationInFrames={sceneFrames} from={index * sceneFrames} key={index}>
-          {renderScene(index)}
-        </Sequence>
-      ))}
-      {hasVoiceover ? (
-        <Audio src={staticFile('voiceover/relaystack-intro/voiceover.wav')} volume={0.96} />
-      ) : null}
-      <div style={{display: 'none'}}>{fps}</div>
+      {scenes.map((_scene, index) => {
+        const duration = sceneDurations[index] ?? 270;
+        const from = sceneDurations.slice(0, index).reduce((sum, item) => sum + item, 0);
+
+        return (
+          <Sequence durationInFrames={duration} from={from} key={index}>
+            {renderScene(index, duration)}
+            <Audio
+              src={staticFile(`voiceover/relaystack-intro/scene-${String(index + 1).padStart(2, '0')}.mp3`)}
+              volume={0.96}
+            />
+          </Sequence>
+        );
+      })}
     </AbsoluteFill>
   );
 };

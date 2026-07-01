@@ -5,7 +5,7 @@ export const RemotionRoot = () => {
   return (
     <Composition
       component={RelayStackIntro}
-      durationInFrames={2160}
+      durationInFrames={2538}
       fps={30}
       height={1080}
       id="RelayStackIntro"
