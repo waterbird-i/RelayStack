@@ -4,7 +4,9 @@
 
 # RelayStack
 
-![RelayStack project introduction](reports/assets/relaystack-intro.png)
+<video src="reports/assets/relaystack-intro.mp4" controls poster="reports/assets/relaystack-intro.png">
+  Watch the RelayStack introduction video: reports/assets/relaystack-intro.mp4
+</video>
 
 RelayStack is a repo-local skill set and handoff protocol for AI-assisted
 software work. It turns chat context, local Git evidence, project docs, and

@@ -1,0 +1,3 @@
+file '/Users/liancong/Documents/RelayStack/video/public/voiceover/relaystack-intro/tts-part-1.mp3'
+file '/Users/liancong/Documents/RelayStack/video/public/voiceover/relaystack-intro/tts-part-2.mp3'
+file '/Users/liancong/Documents/RelayStack/video/public/voiceover/relaystack-intro/tts-part-3.mp3'

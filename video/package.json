@@ -1,0 +1,21 @@
+{
+  "name": "relaystack-video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "studio": "remotion studio --browser-executable=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --chrome-mode=chrome-for-testing",
+    "still": "remotion still RelayStackIntro --frame=30 --scale=0.25 --browser-executable=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --chrome-mode=chrome-for-testing",
+    "render": "remotion render RelayStackIntro out/relaystack-intro.mp4 --browser-executable=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --chrome-mode=chrome-for-testing --concurrency=1"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.484",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.484",
+    "typescript": "5.9.3"
+  }
+}

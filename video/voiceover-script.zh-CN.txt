@@ -1,0 +1,17 @@
+RelayStack 让 AI 编程工作可交接、可追溯、可验证。
+
+AI agent 很能实现，真正容易断的是交接。决策留在聊天里，diff 解释不了为什么改。
+
+RelayStack 把聊天上下文、Git 证据、项目文档和 agent 记录整理成 handoff snapshot。
+
+这份 snapshot 说明目标、改动、原因、风险、下一步和验证方式。
+
+这张接手成本图里，灰色圆环是 baseline，彩色圆环是 RelayStack。二十五题合并口径下，总耗时只剩 baseline 的百分之七十五点九，报告 token 只剩百分之七十七。
+
+扩展二十题盲评中，rs handoff 获得五十三个 reviewer 胜场，重复探索从四次降到零次。
+
+第三方公开题源烟测里，两组都 resolved 一题一题。RelayStack project skills 的 token 只剩 baseline 的百分之三十四点一，启动命令从三十二个降到十六个。
+
+RelayStack 不是 agent 编排器，不是任务系统。它只先解决交接。
+
+安装 repo local skills，运行 rs handoff，把有证据、有风险、有下一步的交接留在仓库里。
