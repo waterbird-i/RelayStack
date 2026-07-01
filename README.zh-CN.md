@@ -4,11 +4,9 @@
 
 # RelayStack
 
-![RelayStack project introduction](reports/assets/relaystack-intro.png)
+![RelayStack 项目介绍图](reports/assets/relaystack-intro.png)
 
-<video src="reports/assets/relaystack-intro.mp4" controls poster="reports/assets/relaystack-intro.png">
-  观看 RelayStack 项目介绍视频：reports/assets/relaystack-intro.mp4
-</video>
+[观看 RelayStack 项目介绍视频](reports/assets/relaystack-intro.mp4)
 
 RelayStack 是一组 repo-local skills，也是一套 AI 辅助开发的交接协议。
 它把聊天上下文、本地 Git 证据、项目文档和 agent 记录整理成一份 Markdown
