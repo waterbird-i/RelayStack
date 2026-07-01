@@ -4,6 +4,8 @@
 
 # RelayStack
 
+![RelayStack project introduction](reports/assets/relaystack-intro.png)
+
 <video src="reports/assets/relaystack-intro.mp4" controls poster="reports/assets/relaystack-intro.png">
   观看 RelayStack 项目介绍视频：reports/assets/relaystack-intro.mp4
 </video>
