@@ -1,49 +1,72 @@
 ---
 name: rs-feat-accept
-description: Validate feature implementation against the approved design and update durable RelayStack attractor docs.
+description: Validate feature implementation against the approved team design and write formal acceptance results back to team owner docs.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Feat Accept
 
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create an acceptance note or a
+substitute process directory inside the repository. Return the optional personal
+note in the conversation and request or wait for a personal path. Still write the
+formal acceptance result to the applicable team owner docs.
+
 Use this skill after feature implementation.
+
+The acceptance baseline is the approved team-owned design under `docs/design/`.
+Formal acceptance results must be written back to the applicable team owner docs.
+A personal acceptance note under `<personal-root>/project/features/` is optional
+process memory and is never the official result.
+
+## Inputs
+
+- approved `docs/design/{slug}.md`, or the project's existing design filename
+- current implementation diff
+- verification evidence
+- related team owner docs
 
 ## Workflow
 
-1. Read the approved design note and current diff.
-2. Verify behavior against acceptance criteria.
+1. Read the approved team design and current diff.
+2. Verify behavior against its acceptance criteria.
 3. Check that non-goals stayed out.
-4. Update only durable attractor docs:
-   - `docs/backlog/`: status and verification
+4. Record the formal result in the applicable team owner docs:
+   - `docs/backlog/`: status, verification, and next step
    - `docs/requirements/`: settled capability behavior
-   - `docs/design/`: final user flow or app behavior
-   - `docs/architecture/`: real module boundaries or contracts
-5. Put detailed acceptance notes in `project/features/` or `rs-handoff`.
-6. Suggest `rs-learn`, `rs-trick`, `rs-decide`, `rs-guide`, or `rs-libdoc` only
-   when the completed work created durable knowledge.
+   - `docs/design/`: accepted behavior, deviations, or follow-up decisions
+   - `docs/architecture/`: real structural changes
+   - `docs/context/`: durable workflow or operating facts
+5. Report remaining gaps and route unresolved defects to `rs-issue`.
+6. Optionally save a personal acceptance note under
+   `<personal-root>/project/features/`.
 
-## Final Output
+## Output
 
-```markdown
-Acceptance:
-- ...
+Required:
 
-Checks:
-- ...
-
-Docs Updated:
-- ...
-
-Skipped:
-- ...
-
-Next Skill:
-- ...
+```text
+Acceptance: pass | partial | fail
+Team Docs Updated:
+- docs/...
+Verification:
+- command: result
+Remaining Gaps:
+- item
 ```
 
-## Rules
+Optional:
 
-- Do not treat passing tests as full acceptance.
-- Do not leave stable facts only in personal notes.
-- Do not update architecture with future target state.
+```text
+<personal-root>/project/features/{slug}-acceptance-note.md
+```
+
+## Guardrails
+
+- Do not treat a personal acceptance note as the official acceptance result.
+- Do not mark work accepted without verification evidence.
+- Do not update docs with intended behavior that the code does not implement.
+- Do not leave formal acceptance results only in chat or personal notes.
+- Do not create a separate acceptance archive in the repository.

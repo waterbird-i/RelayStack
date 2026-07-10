@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -14,6 +16,7 @@ from pathlib import Path
 
 MISSING = "未发现"
 NOT_PROVIDED = "未提供"
+SAFE_TIMESTAMP = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 
 
 def run(command: list[str], cwd: Path) -> str:
@@ -126,7 +129,6 @@ class Evidence:
     changed_files: str
     readme: str
     docs: str
-    handoff: str
     skills: str
 
 
@@ -149,6 +151,19 @@ class AgentRecord:
     warnings: list[str]
 
 
+AGENT_RECORD_SCHEMA_PATH = Path("schemas/agent-record.schema.json")
+
+
+def present(value: object) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return value.strip() not in {"", MISSING, NOT_PROVIDED}
+    if isinstance(value, list):
+        return any(present(item) for item in value)
+    return True
+
+
 def collect_evidence(root: Path) -> Evidence:
     status = run(["git", "status", "--short"], root)
     diff_names = run(["git", "diff", "--name-only"], root)
@@ -162,9 +177,25 @@ def collect_evidence(root: Path) -> Evidence:
         changed_files=unique_lines(diff_names, extra=status_files(status)),
         readme=read_text(root / "README.md"),
         docs=project_files(root, "docs"),
-        handoff=project_files(root, "handoff"),
         skills=project_files(root, "skills"),
     )
+
+
+def evidence_fingerprint(evidence: Evidence) -> str:
+    payload = "\n".join([evidence.branch, evidence.status, evidence.diff_stat, evidence.diff_names])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def validate_agent_record_shape(data: dict[str, object], source_path: Path) -> list[str]:
+    warnings: list[str] = []
+    required = ["agent", "role", "task", "status", "adoption", "write_scope", "verification"]
+    for key in required:
+        if not present(data.get(key)):
+            warnings.append(f"{source_path}: 缺少 AgentRecord 字段 `{key}`")
+    for key in ["write_scope", "conflicts", "verification"]:
+        if key in data and data[key] is not None and not isinstance(data[key], list):
+            warnings.append(f"{source_path}: `{key}` 应为数组")
+    return warnings
 
 
 def list_value(value: object) -> list[str]:
@@ -185,6 +216,7 @@ def text_value(data: dict[str, object], key: str, default: str = MISSING) -> str
 
 
 def record_from_data(data: dict[str, object], source_path: Path, warnings: list[str] | None = None) -> AgentRecord:
+    shape_warnings = validate_agent_record_shape(data, source_path)
     return AgentRecord(
         source=text_value(data, "source", "agent-record"),
         agent=text_value(data, "agent", source_path.stem),
@@ -200,7 +232,7 @@ def record_from_data(data: dict[str, object], source_path: Path, warnings: list[
         adoption=text_value(data, "adoption", "unknown"),
         conflicts=list_value(data.get("conflicts")),
         verification=list_value(data.get("verification")),
-        warnings=warnings or [],
+        warnings=[*(warnings or []), *shape_warnings],
     )
 
 
@@ -416,6 +448,75 @@ def next_action_contract_markdown(args: argparse.Namespace) -> str:
     )
 
 
+def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> dict[str, object]:
+    handoff_questions = {
+        "current_goal": present(args.goal),
+        "completed_work": present(args.completed),
+        "changed_files": evidence.changed_files != MISSING,
+        "why": present(args.why),
+        "risks_or_blockers": True,
+        "next_step": present(args.next_step),
+        "validation": present(args.validation),
+    }
+    evidence_claims = {
+        "current_goal": present(args.goal),
+        "current_stage": present(args.stage),
+        "changed_files": evidence.changed_files != MISSING,
+        "project_context": evidence.readme != MISSING or evidence.docs != MISSING or evidence.skills != MISSING,
+    }
+    if records:
+        evidence_claims["agent_records"] = True
+    next_required = {
+        "next_step": present(args.next_step),
+        "validation": present(args.validation),
+        "done_when": present(args.done_when),
+    }
+    missing_questions = [key for key, ok in handoff_questions.items() if not ok]
+    missing_claims = [key for key, ok in evidence_claims.items() if not ok]
+    missing_next = [key for key, ok in next_required.items() if not ok]
+    optional_next_missing = [key for key, ok in {"next_input": present(args.next_input), "next_file": present(args.next_file)}.items() if not ok]
+    score_parts = [
+        (len(handoff_questions) - len(missing_questions)) / len(handoff_questions),
+        (len(evidence_claims) - len(missing_claims)) / len(evidence_claims),
+        (len(next_required) - len(missing_next)) / len(next_required),
+    ]
+    return {
+        "schema_version": 1,
+        "score": round(sum(score_parts) / len(score_parts) * 100),
+        "handoff_questions": {
+            "total": len(handoff_questions),
+            "missing_count": len(missing_questions),
+            "missing": missing_questions,
+            "answers": handoff_questions,
+        },
+        "evidence_map": {
+            "core_claims": sorted(evidence_claims),
+            "covered": not missing_claims,
+            "missing": missing_claims,
+        },
+        "next_action_contract": {
+            "complete": not missing_next,
+            "missing_required": missing_next,
+            "missing_optional": optional_next_missing,
+        },
+        "agent_record_schema": {
+            "schema": str(AGENT_RECORD_SCHEMA_PATH),
+            "records": len(records),
+            "warnings": [warning for record in records for warning in record.warnings],
+        },
+        "evidence_freshness": {
+            "status": "fresh_at_generation",
+            "fingerprint": evidence_fingerprint(evidence),
+            "source": "git branch + git status --short + git diff --stat + git diff --name-only",
+            "check_command": "python3 scripts/check_snapshot_freshness.py <snapshot.md>",
+        },
+    }
+
+
+def quality_json(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> str:
+    return json.dumps(quality_report(args, evidence, records), ensure_ascii=False, indent=2, sort_keys=True)
+
+
 def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[AgentRecord]) -> str:
     blocker = args.blocker or MISSING
     risk = args.risk or MISSING
@@ -425,6 +526,11 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
     return f"""# Handoff Snapshot: {args.task}
 
 生成时间：{generated_at}
+
+## 0. 机器可读质量评分
+```json
+{quality_json(args, evidence, agent_records)}
+```
 
 ## 1. 当前目标
 - 本轮目标：{args.goal}
@@ -469,8 +575,6 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 {code_block(evidence.readme)}
 - docs：
 {code_block(evidence.docs)}
-- handoff：
-{code_block(evidence.handoff)}
 - skills：
 {code_block(evidence.skills)}
 
@@ -501,14 +605,88 @@ git log --oneline -n 5
 """
 
 
+def ensure_outside_repo(path: Path, root: Path) -> Path:
+    resolved = path.resolve()
+    resolved_root = root.resolve()
+    if resolved == resolved_root or resolved_root in resolved.parents:
+        raise ValueError("snapshot output must be outside the repository root")
+    return resolved
+
+
+def resolve_output_dir(args: argparse.Namespace, root: Path) -> Path:
+    if args.output_dir:
+        output_dir = Path(args.output_dir).expanduser()
+        if not output_dir.is_absolute():
+            output_dir = root / output_dir
+    elif args.personal_root:
+        output_dir = Path(args.personal_root).expanduser() / "project" / "handoffs"
+    else:
+        raise ValueError("provide --personal-root or an explicit --output-dir")
+
+    return ensure_outside_repo(output_dir, root)
+
+
+def validate_timestamp(value: str) -> str:
+    if value in {".", ".."} or not SAFE_TIMESTAMP.fullmatch(value):
+        raise ValueError(
+            "timestamp must match [A-Za-z0-9][A-Za-z0-9._-]* and cannot be . or .."
+        )
+    return value
+
+
 def write_snapshot(args: argparse.Namespace, root: Path) -> Path:
+    timestamp = validate_timestamp(
+        args.timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
+    )
+    output_dir = resolve_output_dir(args, root)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = ensure_outside_repo(output_dir, root)
+    if output_dir.is_symlink() or not output_dir.is_dir():
+        raise ValueError("snapshot output directory must be a real directory")
+
+    output = output_dir / f"snapshot-{timestamp}.md"
+    if output.exists() or output.is_symlink():
+        raise ValueError(f"snapshot target already exists or is a symlink: {output}")
+
     evidence = collect_evidence(root)
     agent_records = collect_agent_records(args.agent_record, root)
-    output_dir = root / args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = args.timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
-    output = output_dir / f"snapshot-{timestamp}.md"
-    output.write_text(render(args, evidence, agent_records), encoding="utf-8")
+    content = render(args, evidence, agent_records)
+    output_dir = ensure_outside_repo(output_dir, root)
+
+    file_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    dir_flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        file_flags |= os.O_NOFOLLOW
+        dir_flags |= os.O_NOFOLLOW
+    if hasattr(os, "O_DIRECTORY"):
+        dir_flags |= os.O_DIRECTORY
+
+    try:
+        dir_fd = os.open(output_dir, dir_flags)
+    except OSError as exc:
+        raise ValueError(f"cannot open snapshot output directory safely: {exc}") from exc
+
+    try:
+        opened_dir = os.fstat(dir_fd)
+        path_dir = output_dir.stat(follow_symlinks=False)
+        if (opened_dir.st_dev, opened_dir.st_ino) != (path_dir.st_dev, path_dir.st_ino):
+            raise ValueError("snapshot output directory changed during validation")
+        fd = os.open(output.name, file_flags, 0o600, dir_fd=dir_fd)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(content)
+        output_dir = ensure_outside_repo(output_dir, root)
+        path_dir = output_dir.stat(follow_symlinks=False)
+        if (opened_dir.st_dev, opened_dir.st_ino) != (path_dir.st_dev, path_dir.st_ino):
+            raise ValueError("snapshot output directory changed during write")
+    except FileExistsError as exc:
+        raise ValueError(
+            f"snapshot target already exists or is a symlink: {output}"
+        ) from exc
+    except OSError as exc:
+        raise ValueError(f"cannot create snapshot target safely: {output}: {exc}") from exc
+    finally:
+        os.close(dir_fd)
+
     return output
 
 
@@ -535,15 +713,28 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--agent-record", action="append", default=[])
     p.add_argument("--agent-summary", action="append", default=[])
     p.add_argument("--reusable-finding", action="append", default=[])
-    p.add_argument("--output-dir", default="handoff")
-    p.add_argument("--timestamp")
+    output_group = p.add_mutually_exclusive_group()
+    output_group.add_argument(
+        "--personal-root",
+        help="personal root; writes to <personal-root>/project/handoffs",
+    )
+    output_group.add_argument(
+        "--output-dir",
+        help="explicit snapshot output directory outside the repository",
+    )
+    p.add_argument(
+        "--timestamp",
+        help="safe filename fragment: [A-Za-z0-9][A-Za-z0-9._-]*",
+    )
     p.add_argument("--self-test", action="store_true")
     return p
 
 
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as temp:
-        root = Path(temp)
+        sandbox = Path(temp)
+        root = sandbox / "repo"
+        root.mkdir()
         json_record = root / "worker-a.json"
         json_record.write_text(
             json.dumps(
@@ -624,6 +815,8 @@ Markdown record 可解析。
                 str(md_record),
                 "--agent-record",
                 "missing.json",
+                "--output-dir",
+                str(sandbox / "handoffs"),
                 "--timestamp",
                 "20000101-000000",
             ]
@@ -632,6 +825,11 @@ Markdown record 可解析。
         text = output.read_text(encoding="utf-8")
         assert output.name == "snapshot-20000101-000000.md"
         assert "# Handoff Snapshot: 测试任务" in text
+        assert "## 0. 机器可读质量评分" in text
+        assert '"missing_count": 2' in text
+        assert '"evidence_freshness"' in text
+        assert "scripts/check_snapshot_freshness.py" in text
+        assert "schemas/agent-record.schema.json" in text
         assert "## 2. 工作区状态" in text
         assert "## 6. Evidence Map" in text
         assert "## 7. Risk Register" in text
@@ -651,13 +849,17 @@ Markdown record 可解析。
 
 
 def main() -> int:
-    args = parser().parse_args()
+    argument_parser = parser()
+    args = argument_parser.parse_args()
     if args.self_test:
         self_test()
         print("self-test ok")
         return 0
     root = git_root(Path.cwd())
-    output = write_snapshot(args, root)
+    try:
+        output = write_snapshot(args, root)
+    except ValueError as exc:
+        argument_parser.error(str(exc))
     print(output)
     return 0
 

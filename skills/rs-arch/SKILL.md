@@ -2,7 +2,7 @@
 name: rs-arch
 description: Maintain RelayStack architecture attractor docs under docs/architecture/.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Arch

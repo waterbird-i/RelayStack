@@ -2,7 +2,7 @@
 name: rs-onboard
 description: Onboard a repository into RelayStack by creating or auditing the five attractor doc directories under docs/.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Onboard
@@ -21,6 +21,22 @@ docs/requirements/
 docs/design/
 docs/architecture/
 ```
+
+These are the only team-maintained project doc directories RelayStack creates
+or recommends committing. Configure or ask for a personal root separately for:
+
+```text
+<personal-root>/project/
+├── roadmaps/
+├── features/
+├── issues/
+├── knowledge/
+└── handoffs/
+```
+
+Do not create these personal process directories inside the repository. Do not
+move or delete pre-existing legacy process files during onboarding without an
+explicit migration request.
 
 ## Workflow
 

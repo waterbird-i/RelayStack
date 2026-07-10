@@ -1,0 +1,317 @@
+{
+  "timestamp": "2026-07-10T02:28:08",
+  "check_type": "authoritative_handoff_ab",
+  "suite": {
+    "suite_id": "multi-swe-bench",
+    "suite_name": "Multi-SWE-bench",
+    "authority": "third_party_public_benchmark",
+    "status": "adopted_manifest_only",
+    "manifest_path": "suites/authoritative/multi-swe-bench.json",
+    "manifest_complete": true,
+    "missing_manifest_fields": [],
+    "dataset": {
+      "name": "Multi-SWE-bench",
+      "homepage": "https://multi-swe-bench.github.io/",
+      "repository": "https://github.com/multi-swe-bench/multi-swe-bench",
+      "paper": "https://arxiv.org/abs/2504.02605"
+    },
+    "license": {
+      "name": "See upstream dataset and repository licenses",
+      "url": "https://github.com/multi-swe-bench/multi-swe-bench"
+    },
+    "citation": {
+      "title": "Multi-SWE-bench: A Multilingual Benchmark for Issue Resolving",
+      "url": "https://arxiv.org/abs/2504.02605"
+    }
+  },
+  "local_baseline_suite": "suites/local-25.json",
+  "run_dir": "reports/multi-swe-six-20260710",
+  "dataset": {
+    "name": "ByteDance-Seed/Multi-SWE-bench-flash",
+    "count": 6,
+    "instances": [
+      {
+        "instance_id": "ponylang__ponyc-2261",
+        "official_id": "ponylang/ponyc:pr-2261",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2261,
+        "title": "Don't verify partial calls for method bodies inherited from a trait.",
+        "base_commit": "682b45d3abd7b24381bfc56423da85c3527785c7",
+        "language": "c",
+        "difficulty": "15mins - 1h",
+        "task_type": "15mins - 1h",
+        "groups": {
+          "baseline": "resolved",
+          "relaystack_handoff": "resolved"
+        }
+      },
+      {
+        "instance_id": "ponylang__ponyc-2221",
+        "official_id": "ponylang/ponyc:pr-2221",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2221,
+        "title": "Fix inconsistencies in multi-line triple-quoted strings",
+        "base_commit": "a58a532ecf9761eb8d91bbad3837ee62da4434b4",
+        "language": "c",
+        "difficulty": "1h - 4h",
+        "task_type": "language-semantics",
+        "groups": {
+          "baseline": "resolved",
+          "relaystack_handoff": "resolved"
+        }
+      },
+      {
+        "instance_id": "ponylang__ponyc-2214",
+        "official_id": "ponylang/ponyc:pr-2214",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2214,
+        "title": "Fix handling of empty and multi-byte character literals",
+        "base_commit": "fff0bdb528a255eb1e87319b9eba908f96364a19",
+        "language": "c",
+        "difficulty": "15mins - 1h",
+        "task_type": "language-semantics",
+        "groups": {
+          "baseline": "resolved",
+          "relaystack_handoff": "unresolved"
+        }
+      },
+      {
+        "instance_id": "ponylang__ponyc-2205",
+        "official_id": "ponylang/ponyc:pr-2205",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2205,
+        "title": "Fix codegen failures on incompatible FFI declarations",
+        "base_commit": "25fa3b158281bee9fd0778de618ad8968d5ed026",
+        "language": "c",
+        "difficulty": "≥4h",
+        "task_type": "compiler-codegen",
+        "groups": {
+          "baseline": "unresolved",
+          "relaystack_handoff": "unresolved"
+        }
+      },
+      {
+        "instance_id": "ponylang__ponyc-2203",
+        "official_id": "ponylang/ponyc:pr-2203",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2203,
+        "title": "Fix internal failure on compilation when boxing bool as union into tuple.",
+        "base_commit": "7f8c5b6ee6d27b8596c785960e5515e1fdebbca0",
+        "language": "c",
+        "difficulty": "≤15mins",
+        "task_type": "≤15mins",
+        "groups": {
+          "baseline": "unresolved",
+          "relaystack_handoff": "unresolved"
+        }
+      },
+      {
+        "instance_id": "ponylang__ponyc-2201",
+        "official_id": "ponylang/ponyc:pr-2201",
+        "org": "ponylang",
+        "repo": "ponyc",
+        "number": 2201,
+        "title": "Fix compiler crash on illegal read from '_'",
+        "base_commit": "f00f95b30dd68c7faaff0aa88508c218bc19f02b",
+        "language": "c",
+        "difficulty": "1h - 4h",
+        "task_type": "1h - 4h",
+        "groups": {
+          "baseline": "unresolved",
+          "relaystack_handoff": "unresolved"
+        }
+      }
+    ]
+  },
+  "ab_groups": [
+    "baseline",
+    "relaystack_handoff"
+  ],
+  "blind_test_status": "official_evaluated",
+  "blocked_reason": null,
+  "prediction_patch_jsonl": {
+    "baseline": {
+      "path": "reports/multi-swe-six-20260710/baseline.jsonl",
+      "exists": true,
+      "valid_shape": true,
+      "missing_fields": [],
+      "patch_bytes": 685
+    },
+    "relaystack_handoff": {
+      "path": "reports/multi-swe-six-20260710/relaystack_handoff.jsonl",
+      "exists": true,
+      "valid_shape": true,
+      "missing_fields": [],
+      "patch_bytes": 1707
+    }
+  },
+  "official_harness_reports": {
+    "baseline": {
+      "path": "reports/multi-swe-six-20260710/baseline-output/final_report.json",
+      "exists": true,
+      "completed_instances": 6,
+      "resolved_instances": 3,
+      "unresolved_instances": 3,
+      "error_instances": 0,
+      "resolved_ids": [
+        "ponylang/ponyc:pr-2261",
+        "ponylang/ponyc:pr-2221",
+        "ponylang/ponyc:pr-2214"
+      ],
+      "unresolved_ids": [
+        "ponylang/ponyc:pr-2205",
+        "ponylang/ponyc:pr-2203",
+        "ponylang/ponyc:pr-2201"
+      ],
+      "error_ids": []
+    },
+    "relaystack_handoff": {
+      "path": "reports/multi-swe-six-20260710/relaystack_handoff-output/final_report.json",
+      "exists": true,
+      "completed_instances": 6,
+      "resolved_instances": 2,
+      "unresolved_instances": 4,
+      "error_instances": 0,
+      "resolved_ids": [
+        "ponylang/ponyc:pr-2261",
+        "ponylang/ponyc:pr-2221"
+      ],
+      "unresolved_ids": [
+        "ponylang/ponyc:pr-2214",
+        "ponylang/ponyc:pr-2205",
+        "ponylang/ponyc:pr-2203",
+        "ponylang/ponyc:pr-2201"
+      ],
+      "error_ids": []
+    }
+  },
+  "result_summary": {
+    "baseline_resolved": 3,
+    "relaystack_handoff_resolved": 2,
+    "baseline_completed": 6,
+    "relaystack_handoff_completed": 6
+  },
+  "environment": {
+    "docker_available": true,
+    "multi_swe_bench_module_available": false,
+    "datasets_module_available": false
+  },
+  "artifacts": [
+    "reports/multi-swe-six-20260710/dataset.jsonl",
+    "reports/multi-swe-six-20260710/baseline.jsonl",
+    "reports/multi-swe-six-20260710/relaystack_handoff.jsonl",
+    "reports/multi-swe-six-20260710/baseline-output/final_report.json",
+    "reports/multi-swe-six-20260710/relaystack_handoff-output/final_report.json",
+    "reports/multi-swe-six-20260710/baseline-agent-output.jsonl",
+    "reports/multi-swe-six-20260710/relaystack_handoff-agent-output.jsonl",
+    "reports/multi-swe-six-20260710/summary.json"
+  ],
+  "agent_metrics": {
+    "baseline": {
+      "thread_id": "019f47ea-b030-7c20-aa53-abacdd896ce9",
+      "usage": {
+        "input_tokens": 948616,
+        "cached_input_tokens": 840576,
+        "output_tokens": 12224,
+        "reasoning_output_tokens": 3371
+      },
+      "event_counts": {
+        "item.completed:agent_message": 113,
+        "item.started:command_execution": 247,
+        "item.completed:command_execution": 247,
+        "item.started:file_change": 21,
+        "item.completed:file_change": 21,
+        "item.started:web_search": 2,
+        "item.completed:web_search": 2
+      },
+      "started_item_counts": {
+        "command_execution": 247,
+        "file_change": 21,
+        "web_search": 2
+      },
+      "skill_paths": [],
+      "injected_skills": [],
+      "forbidden_markers": {
+        "skill_context": false,
+        "skill_file_read": false,
+        "spawn_agent": false,
+        "global_skill_path": false,
+        "ponytail": false,
+        "typescript_write": false,
+        "non_project_skill": false
+      },
+      "protocol_contaminated": false
+    },
+    "relaystack_handoff": {
+      "thread_id": "019f4806-03ac-70f2-bf5d-5bd268762765",
+      "usage": {
+        "input_tokens": 1383643,
+        "cached_input_tokens": 1246464,
+        "output_tokens": 14094,
+        "reasoning_output_tokens": 5336
+      },
+      "event_counts": {
+        "item.completed:agent_message": 102,
+        "item.started:command_execution": 238,
+        "item.completed:command_execution": 238,
+        "item.started:file_change": 12,
+        "item.completed:file_change": 12
+      },
+      "started_item_counts": {
+        "command_execution": 238,
+        "file_change": 12
+      },
+      "skill_paths": [
+        "/private/tmp/codex-relaystack_handoff-9chnwasy/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-9chnwasy/skills/rs-issue-fix/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-dpdxbhkl/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-dpdxbhkl/skills/rs-issue/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-gusdwu0w/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-gway9v2x/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-gway9v2x/skills/rs-issue/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-tdwv985i/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-xzih8bb4/skills/rs-handoff/SKILL.md",
+        "/private/tmp/codex-relaystack_handoff-xzih8bb4/skills/rs-issue/SKILL.md"
+      ],
+      "injected_skills": [],
+      "forbidden_markers": {
+        "skill_context": false,
+        "skill_file_read": true,
+        "spawn_agent": false,
+        "global_skill_path": false,
+        "ponytail": false,
+        "typescript_write": false,
+        "non_project_skill": false
+      },
+      "protocol_contaminated": false
+    }
+  },
+  "protocol_audit": {
+    "clean_baseline": true,
+    "relaystack_handoff_project_only": true,
+    "baseline_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": false,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_project_skill": false
+    },
+    "relaystack_handoff_forbidden_markers": {
+      "skill_context": false,
+      "skill_file_read": true,
+      "spawn_agent": false,
+      "global_skill_path": false,
+      "ponytail": false,
+      "typescript_write": false,
+      "non_project_skill": false
+    },
+    "interpretation": "A run is a valid clean ablation only when baseline is no-skill/no-subagent and relaystack_handoff uses only project RelayStack skills without subagents."
+  }
+}

@@ -2,16 +2,23 @@
 name: rs-issue
 description: Fix a RelayStack issue while preserving root cause notes privately and updating only durable team attractor docs after the fix.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Issue
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create issue process files or a
+substitute process directory inside the repository. Return the personal issue
+record in the conversation and request or wait for a personal path. Continue any
+applicable updates to the five team owner doc categories normally.
 
 Use this skill when existing behavior is broken, incorrect, or risky.
 
 The fix should leave two kinds of memory:
 
-- private process memory in the user's personal project `project/issues/`
+- personal process memory in `<personal-root>/project/issues/`
 - durable team truth in the attractor docs
 
 ## Do Not Use When

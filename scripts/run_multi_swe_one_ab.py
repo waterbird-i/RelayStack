@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TARGET_INSTANCE = "darkreader__darkreader-7241"
 DATASET_NAME = "ByteDance-Seed/Multi-SWE-bench-flash"
-DEPS = "/private/tmp/multi-swe-bench-deps:/private/tmp/multi-swe-bench"
+DEPS = "/private/tmp/multi-swe-bench:/private/tmp/multi-swe-bench-deps"
 CODEX_CONFIG = """model = "gpt-5.5"
 model_provider = "baidu-proxy"
 openai_base_url = "https://oneapi-comate.baidu-int.com/v1"
@@ -55,24 +55,52 @@ def run_shell(command: str, cwd: Path, env: dict[str, str], timeout: int | None 
     )
 
 
-def load_instance() -> dict[str, object]:
+def load_sample_ids(path: Path) -> list[str]:
+    ids: list[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        text = line.strip()
+        if not text or text.startswith("#"):
+            continue
+        if text.startswith("{"):
+            row = json.loads(text)
+            if not isinstance(row, dict) or not row.get("instance_id"):
+                raise SystemExit(f"{path}: JSONL rows must contain instance_id")
+            ids.append(str(row["instance_id"]))
+        else:
+            ids.append(text)
+    return ids
+
+
+def load_instances(instance_ids: list[str], pythonpath: str) -> list[dict[str, object]]:
+    wanted = set(instance_ids)
+    found: list[dict[str, object]] = []
     code = f"""
 import json
 from datasets import load_dataset
 ds = load_dataset({DATASET_NAME!r}, split='train', streaming=True)
+wanted = {sorted(wanted)!r}
+seen = set()
 for row in ds:
-    if row.get('instance_id') == {TARGET_INSTANCE!r}:
+    if row.get('instance_id') in wanted:
         print(json.dumps(row, ensure_ascii=False))
-        break
-else:
-    raise SystemExit('target instance not found')
+        seen.add(row.get('instance_id'))
+        if seen == set(wanted):
+            break
+missing = sorted(set(wanted) - seen)
+if missing:
+    raise SystemExit('target instances not found: ' + ', '.join(missing))
 """
     env = os.environ.copy()
-    env["PYTHONPATH"] = DEPS
+    env["PYTHONPATH"] = pythonpath
     result = run(["python3", "-c", code], ROOT, env=env, timeout=180)
     if result.returncode != 0:
         raise SystemExit(result.stdout)
-    return json.loads(result.stdout.splitlines()[-1])
+    for line in result.stdout.splitlines():
+        if line.startswith("{"):
+            row = json.loads(line)
+            if isinstance(row, dict):
+                found.append(row)
+    return found
 
 
 def clone_repo(instance: dict[str, object], workdir: Path) -> Path:
@@ -178,14 +206,14 @@ def diff(repo_dir: Path) -> str:
 
 
 def make_handoff(instance: dict[str, object], repo_dir: Path) -> str:
-    target = "src/generators/utils/parse.ts"
     return "\n".join(
         [
             f"任务：修复 Multi-SWE-bench 实例 {instance['instance_id']}。",
+            f"仓库：{instance['org']}/{instance['repo']}。",
             f"上游标题：{instance['title']}",
-            f"已知入口文件：`{target}`。",
-            "问题线索：CSS fixes 配置块分隔符应只匹配独立成行的 `==...==`，不要匹配 Base64 padding 中的 `=`。",
-            "建议验证：围绕 `indexSitesFixesConfig` 增加或运行 parser 相关测试；最终以 Multi-SWE-bench 官方 harness 为准。",
+            f"语言：{instance.get('language', 'unknown')}；难度：{instance.get('difficulty', 'unknown')}。",
+            "已知事实：只以上游 problem statement、仓库代码和最小相关验证为准。",
+            "建议验证：优先运行与修改文件最接近的测试；最终以 Multi-SWE-bench 官方 harness 为准。",
         ]
     )
 
@@ -263,41 +291,74 @@ def summarize_agent_output(output: str, group: str) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="reports/multi-swe-one-20260629")
+    parser.add_argument("--instance-id", action="append", dest="instance_ids", help="Multi-SWE instance id. Repeat for multiple samples.")
+    parser.add_argument("--sample-file", type=Path, help="Plain text or JSONL file containing instance_id values.")
+    parser.add_argument("--multi-swe-pythonpath", default=os.environ.get("MULTI_SWE_PYTHONPATH", DEPS))
     args = parser.parse_args()
 
     out = ROOT / args.output_dir
     out.mkdir(parents=True, exist_ok=True)
-    instance = load_instance()
-    (out / "dataset.jsonl").write_text(json.dumps(instance, ensure_ascii=False) + "\n", encoding="utf-8")
+    instance_ids = list(args.instance_ids or [])
+    if args.sample_file:
+        instance_ids.extend(load_sample_ids(args.sample_file))
+    if not instance_ids:
+        instance_ids = [TARGET_INSTANCE]
+    instances = load_instances(instance_ids, args.multi_swe_pythonpath)
+    (out / "dataset.jsonl").write_text(
+        "".join(json.dumps(instance, ensure_ascii=False) + "\n" for instance in instances),
+        encoding="utf-8",
+    )
 
     summary: dict[str, object] = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "dataset": DATASET_NAME,
-        "instance_id": instance["instance_id"],
+        "instance_ids": [instance["instance_id"] for instance in instances],
         "groups": {},
     }
     for group in ["baseline", "relaystack_handoff"]:
-        work = Path(tempfile.mkdtemp(prefix=f"multi-swe-{group}-"))
-        repo = clone_repo(instance, work)
-        codex_home = make_codex_home(group)
-        handoff = make_handoff(instance, repo) if group == "relaystack_handoff" else None
-        if handoff:
-            (out / "handoff.md").write_text(handoff, encoding="utf-8")
-        prompt = write_prompt(group, instance, repo, handoff)
-        code, output, elapsed = run_codex(repo, prompt, codex_home)
-        fix = diff(repo)
-        (out / f"{group}-agent-output.jsonl").write_text(output, encoding="utf-8")
-        (out / f"{group}.patch").write_text(fix, encoding="utf-8")
-        (out / f"{group}.jsonl").write_text(json.dumps(patch_row(instance, fix), ensure_ascii=False) + "\n", encoding="utf-8")
+        agent_output_path = out / f"{group}-agent-output.jsonl"
+        patch_path = out / f"{group}.patch"
+        prediction_path = out / f"{group}.jsonl"
+        agent_output_path.write_text("", encoding="utf-8")
+        patch_path.write_text("", encoding="utf-8")
+        prediction_path.write_text("", encoding="utf-8")
+        runs: list[dict[str, object]] = []
+        started = time.monotonic()
+        for instance in instances:
+            work = Path(tempfile.mkdtemp(prefix=f"multi-swe-{group}-"))
+            repo = clone_repo(instance, work)
+            codex_home = make_codex_home(group)
+            handoff = make_handoff(instance, repo) if group == "relaystack_handoff" else None
+            if handoff:
+                with (out / "handoff.md").open("a", encoding="utf-8") as stream:
+                    stream.write(f"## {instance['instance_id']}\n\n{handoff}\n\n")
+            prompt = write_prompt(group, instance, repo, handoff)
+            code, output, elapsed = run_codex(repo, prompt, codex_home)
+            fix = diff(repo)
+            with agent_output_path.open("a", encoding="utf-8") as stream:
+                stream.write(output)
+            with patch_path.open("a", encoding="utf-8") as stream:
+                stream.write(f"# {instance['instance_id']}\n{fix}\n")
+            with prediction_path.open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(patch_row(instance, fix), ensure_ascii=False) + "\n")
+            runs.append(
+                {
+                    "instance_id": instance["instance_id"],
+                    "agent_returncode": code,
+                    "elapsed_seconds": elapsed,
+                    "workdir": str(work),
+                    "codex_home": str(codex_home),
+                    "diff_bytes": len(fix.encode("utf-8")),
+                    "has_patch": bool(fix.strip()),
+                }
+            )
         summary["groups"][group] = {
-            "agent_returncode": code,
-            "elapsed_seconds": elapsed,
-            "workdir": str(work),
-            "codex_home": str(codex_home),
-            "patch_file": str((out / f"{group}.jsonl").relative_to(ROOT)),
-            "diff_bytes": len(fix.encode("utf-8")),
-            "has_patch": bool(fix.strip()),
-            "agent_metrics": summarize_agent_output(output, group),
+            "elapsed_seconds": round(time.monotonic() - started, 3),
+            "runs": runs,
+            "patch_file": str(prediction_path.relative_to(ROOT)),
+            "diff_bytes": sum(int(run["diff_bytes"]) for run in runs),
+            "has_patch": any(bool(run["has_patch"]) for run in runs),
+            "agent_metrics": summarize_agent_output(agent_output_path.read_text(encoding="utf-8"), group),
         }
 
     groups = summary["groups"]

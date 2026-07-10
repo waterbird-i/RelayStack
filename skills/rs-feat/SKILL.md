@@ -2,15 +2,23 @@
 name: rs-feat
 description: Start and guide a RelayStack feature change. Use when adding a new capability and the team repository should converge on docs/context, docs/backlog, docs/requirements, docs/design, and docs/architecture instead of storing full process archives.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Feat
 
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create feature process notes or a
+substitute process directory inside the repository. Return personal process
+content in the conversation and request or wait for a personal path. Continue
+formal `docs/design/` and other team owner doc updates normally.
+
 Use this skill when the request adds a new capability.
 
-RelayStack feature work keeps the heavy process outside the team repository and
-updates only the durable attractor docs that future sessions must read.
+RelayStack feature work uses an approved team-owned design under `docs/design/`
+to drive implementation. Optional brainstorms, checklists, implementation notes,
+and acceptance notes stay outside the repository as personal process records.
 
 ## Do Not Use When
 
@@ -51,21 +59,24 @@ user-facing behavior needs API, type, permission, and doc changes, route to
 | Current state | Route |
 |---|---|
 | idea is fuzzy | `rs-brainstorm` |
-| clear feature, needs design | `rs-feat-design` |
-| approved design exists | `rs-feat-impl` |
+| clear feature, needs formal team design | `rs-feat-design` |
+| approved design exists under `docs/design/` | `rs-feat-impl` |
 | implementation is done | `rs-feat-accept` |
 | tiny, clear, low-risk change | `rs-feat-ff` |
 | multiple independently deliverable slices or dependency ordering | `rs-roadmap` |
 
 ## Personal Project Notes
 
-Detailed feature process records belong in the user's personal project
-directory at `project/features/` when one is provided, such as:
+Optional feature process records belong in
+`<personal-root>/project/features/`, never in the team repository. The formal,
+approved implementation design belongs in `docs/design/`; no personal feature
+record may replace or override it. Personal records include:
 
 - brainstorm trails
-- draft plans
 - sub-agent records
 - temporary checklists
+- implementation notes
+- acceptance notes
 - validation scratch notes
 
 If no personal project directory is provided, summarize the process in the final

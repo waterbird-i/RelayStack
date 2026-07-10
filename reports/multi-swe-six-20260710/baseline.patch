@@ -1,0 +1,616 @@
+# ponylang__ponyc-2261
+diff --git a/src/libponyc/verify/call.c b/src/libponyc/verify/call.c
+index 0f17568..66c97d5 100644
+--- a/src/libponyc/verify/call.c
++++ b/src/libponyc/verify/call.c
+@@ -9,6 +9,12 @@ static bool check_partial_function_call(pass_opt_t* opt, ast_t* ast)
+ {
+   pony_assert((ast_id(ast) == TK_FUNREF) || (ast_id(ast) == TK_FUNCHAIN) ||
+     (ast_id(ast) == TK_NEWREF));
++
++  ast_t* donor = (ast_t*)ast_data(opt->check.frame->method);
++  if((donor != NULL) && (donor != opt->check.frame->type) &&
++    ((ast_id(donor) == TK_TRAIT) || (ast_id(donor) == TK_INTERFACE)))
++    return true;
++
+   AST_GET_CHILDREN(ast, receiver, method);
+ 
+   // Receiver might be wrapped in another funref/newref
+
+# ponylang__ponyc-2221
+diff --git a/src/libponyc/ast/lexer.c b/src/libponyc/ast/lexer.c
+index e5d84e6..6a2a3a6 100644
+--- a/src/libponyc/ast/lexer.c
++++ b/src/libponyc/ast/lexer.c
+@@ -510,6 +510,27 @@ static token_t* slash(lexer_t* lexer)
+ }
+ 
+ 
++static bool is_space_or_tab(char c)
++{
++  return (c == ' ') || (c == '\t');
++}
++
++
++static bool is_newline_at(lexer_t* lexer, size_t offset)
++{
++  if(offset >= lexer->len)
++    return false;
++
++  char c = lexer->source->m[lexer->ptr + offset];
++
++  if(c == '\n')
++    return true;
++
++  return (c == '\r') && (offset + 1 < lexer->len) &&
++    (lexer->source->m[lexer->ptr + offset + 1] == '\n');
++}
++
++
+ /**
+ * Removes longest common prefix indentation from every line in a triple
+ * quoted string. If the string begins with an empty line, that line is removed
+@@ -538,6 +559,33 @@ static void normalise_string(lexer_t* lexer)
+     memmove(&buf[0], &buf[1], lexer->buflen);
+   }
+ 
++  if(lexer->buflen == 0)
++    return;
++
++  char* last_nl = NULL;
++
++  for(size_t i = lexer->buflen; i > 0; i--)
++  {
++    if(lexer->buffer[i - 1] == '\n')
++    {
++      last_nl = &lexer->buffer[i - 1];
++      break;
++    }
++  }
++
++  if(last_nl != NULL)
++  {
++    char* last_line = last_nl + 1;
++    char* end = lexer->buffer + lexer->buflen;
++    char* p = last_line;
++
++    while((p < end) && is_space_or_tab(*p))
++      p++;
++
++    if(p == end)
++      lexer->buflen = last_line - lexer->buffer;
++  }
++
+   // Calculate leading whitespace.
+   size_t ws = lexer->buflen;
+   size_t ws_this_line = 0;
+@@ -614,6 +662,28 @@ static token_t* triple_string(lexer_t* lexer)
+ {
+   consume_chars(lexer, 3);  // Leading """
+ 
++  size_t ws_after_quote = 0;
++
++  while(is_space_or_tab(lookn(lexer, ws_after_quote + 1)))
++    ws_after_quote++;
++
++  bool starts_on_line_below = is_newline_at(lexer, ws_after_quote);
++
++  if(starts_on_line_below)
++  {
++    while(ws_after_quote > 0)
++    {
++      consume_chars(lexer, 1);
++      ws_after_quote--;
++    }
++
++    if(look(lexer) == '\r')
++      consume_chars(lexer, 1);
++
++    consume_chars(lexer, 1);
++    append_to_token(lexer, '\n');
++  }
++
+   while(true)
+   {
+     if(is_eof(lexer))
+@@ -637,6 +707,27 @@ static token_t* triple_string(lexer_t* lexer)
+       return make_token_with_text(lexer, TK_STRING);
+     }
+ 
++    if(!starts_on_line_below && (c == '\n'))
++    {
++      lex_error(lexer,
++        "Multi-line triple quoted strings must begin on the following line");
++
++      while(true)
++      {
++        if(is_eof(lexer))
++          return literal_doesnt_terminate(lexer);
++
++        if((look(lexer) == '\"') && (lookn(lexer, 2) == '\"') &&
++          (lookn(lexer, 3) == '\"'))
++        {
++          consume_chars(lexer, 3);
++          return make_token(lexer, TK_LEX_ERROR);
++        }
++
++        consume_chars(lexer, 1);
++      }
++    }
++
+     consume_chars(lexer, 1);
+     append_to_token(lexer, c);
+   }
+
+# ponylang__ponyc-2214
+diff --git a/src/libponyc/ast/lexer.c b/src/libponyc/ast/lexer.c
+index 24d67e9..dede562 100644
+--- a/src/libponyc/ast/lexer.c
++++ b/src/libponyc/ast/lexer.c
+@@ -837,6 +837,13 @@ static token_t* character(lexer_t* lexer)
+ {
+   consume_chars(lexer, 1);  // Leading '
+ 
++  if(look(lexer) == '\'')
++  {
++    lex_error(lexer, "Empty character literal");
++    consume_chars(lexer, 1);
++    return make_token(lexer, TK_LEX_ERROR);
++  }
++
+   lexint_t value;
+   lexint_zero(&value);
+ 
+@@ -845,7 +852,7 @@ static token_t* character(lexer_t* lexer)
+     if(is_eof(lexer))
+       return literal_doesnt_terminate(lexer);
+ 
+-    int c = look(lexer);
++    int c = (unsigned char)look(lexer);
+ 
+     if(c == '\'')
+     {
+diff --git a/src/libponyc/ast/lexint.c b/src/libponyc/ast/lexint.c
+index 9c02f9c..cf9760a 100644
+--- a/src/libponyc/ast/lexint.c
++++ b/src/libponyc/ast/lexint.c
+@@ -191,7 +191,7 @@ void lexint_div64(lexint_t* dst, lexint_t* a, uint64_t b)
+ void lexint_char(lexint_t* i, int c)
+ {
+   i->high = (i->high << 8) | (i->low >> 56);
+-  i->low = (i->low << 8) | c;
++  i->low = (i->low << 8) | ((uint8_t)c);
+ }
+ 
+ bool lexint_accum(lexint_t* i, uint64_t digit, uint64_t base)
+
+# ponylang__ponyc-2205
+diff --git a/src/libponyc/codegen/gencall.c b/src/libponyc/codegen/gencall.c
+index 1a7f180..1782bf6 100644
+--- a/src/libponyc/codegen/gencall.c
++++ b/src/libponyc/codegen/gencall.c
+@@ -1001,13 +1001,13 @@ static LLVMValueRef declare_ffi_vararg(compile_t* c, const char* f_name,
+   return func;
+ }
+ 
+-static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
+-  reach_type_t* t, ast_t* args, bool intrinsic)
++static LLVMTypeRef ffi_type(compile_t* c, reach_type_t* t, ast_t* args,
++  bool intrinsic)
+ {
+   ast_t* last_arg = ast_childlast(args);
+ 
+   if((last_arg != NULL) && (ast_id(last_arg) == TK_ELLIPSIS))
+-    return declare_ffi_vararg(c, f_name, t);
++    return LLVMFunctionType(ffi_return_type(c, t, false), NULL, 0, true);
+ 
+   int count = (int)ast_childcount(args);
+   size_t buf_size = count * sizeof(LLVMTypeRef);
+@@ -1031,12 +1031,150 @@ static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
+ 
+   LLVMTypeRef r_type = ffi_return_type(c, t, intrinsic);
+   LLVMTypeRef f_type = LLVMFunctionType(r_type, f_params, count, false);
+-  LLVMValueRef func = LLVMAddFunction(c->module, f_name, f_type);
+ 
+   ponyint_pool_free_size(buf_size, f_params);
++  return f_type;
++}
++
++static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
++  reach_type_t* t, ast_t* args, bool intrinsic)
++{
++  LLVMTypeRef f_type = ffi_type(c, t, args, intrinsic);
++  LLVMValueRef func = LLVMAddFunction(c->module, f_name, f_type);
+   return func;
+ }
+ 
++static bool ffi_type_same(LLVMTypeRef a, LLVMTypeRef b)
++{
++  if(a == b)
++    return true;
++
++  LLVMTypeKind a_kind = LLVMGetTypeKind(a);
++
++  if(a_kind != LLVMGetTypeKind(b))
++    return false;
++
++  switch(a_kind)
++  {
++    case LLVMIntegerTypeKind:
++      return LLVMGetIntTypeWidth(a) == LLVMGetIntTypeWidth(b);
++
++    case LLVMPointerTypeKind:
++      return true;
++
++    case LLVMStructTypeKind:
++    {
++      if(LLVMCountStructElementTypes(a) != LLVMCountStructElementTypes(b))
++        return false;
++
++      unsigned int count = LLVMCountStructElementTypes(a);
++      if(count == 0)
++        return true;
++
++      size_t buf_size = count * sizeof(LLVMTypeRef);
++      LLVMTypeRef* a_elements = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++      LLVMTypeRef* b_elements = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++
++      LLVMGetStructElementTypes(a, a_elements);
++      LLVMGetStructElementTypes(b, b_elements);
++
++      bool ok = true;
++
++      for(unsigned int i = 0; i < count; i++)
++      {
++        if(!ffi_type_same(a_elements[i], b_elements[i]))
++        {
++          ok = false;
++          break;
++        }
++      }
++
++      ponyint_pool_free_size(buf_size, a_elements);
++      ponyint_pool_free_size(buf_size, b_elements);
++      return ok;
++    }
++
++    default:
++      return false;
++  }
++}
++
++static bool ffi_return_type_same(LLVMTypeRef a, LLVMTypeRef b)
++{
++  if(a == b)
++    return true;
++
++  if((LLVMGetTypeKind(a) != LLVMStructTypeKind) ||
++    (LLVMGetTypeKind(b) != LLVMStructTypeKind))
++    return false;
++
++  if(LLVMCountStructElementTypes(a) != LLVMCountStructElementTypes(b))
++    return false;
++
++  unsigned int count = LLVMCountStructElementTypes(a);
++  if(count == 0)
++    return true;
++
++  size_t buf_size = count * sizeof(LLVMTypeRef);
++  LLVMTypeRef* a_elements = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++  LLVMTypeRef* b_elements = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++
++  LLVMGetStructElementTypes(a, a_elements);
++  LLVMGetStructElementTypes(b, b_elements);
++
++  bool ok = true;
++
++  for(unsigned int i = 0; i < count; i++)
++  {
++    if(!ffi_return_type_same(a_elements[i], b_elements[i]))
++    {
++      ok = false;
++      break;
++    }
++  }
++
++  ponyint_pool_free_size(buf_size, a_elements);
++  ponyint_pool_free_size(buf_size, b_elements);
++  return ok;
++}
++
++static bool ffi_type_matches(LLVMTypeRef a, LLVMTypeRef b)
++{
++  if(!ffi_return_type_same(LLVMGetReturnType(a), LLVMGetReturnType(b)))
++    return false;
++
++  if(LLVMIsFunctionVarArg(a) != LLVMIsFunctionVarArg(b))
++    return false;
++
++  if(LLVMCountParamTypes(a) != LLVMCountParamTypes(b))
++    return false;
++
++  int count = LLVMCountParamTypes(a);
++  if(count == 0)
++    return true;
++
++  size_t buf_size = count * sizeof(LLVMTypeRef);
++  LLVMTypeRef* a_params = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++  LLVMTypeRef* b_params = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++  LLVMGetParamTypes(a, a_params);
++  LLVMGetParamTypes(b, b_params);
++
++  bool ok = true;
++
++  for(int i = 0; i < count; i++)
++  {
++    if(!ffi_type_same(a_params[i], b_params[i]))
++    {
++      ok = false;
++      break;
++    }
++  }
++
++  ponyint_pool_free_size(buf_size, a_params);
++  ponyint_pool_free_size(buf_size, b_params);
++  return ok;
++}
++
+ static LLVMValueRef cast_ffi_arg(compile_t* c, LLVMValueRef arg,
+   LLVMTypeRef param)
+ {
+@@ -1087,7 +1225,8 @@ LLVMValueRef gen_ffi(compile_t* c, ast_t* ast)
+     if(decl != NULL)
+     {
+       // Define using the declared types.
+-      AST_GET_CHILDREN(decl, decl_id, decl_ret, decl_params, decl_err);
++      ast_t* decl_params = ast_childidx(decl, 2);
++      ast_t* decl_err = ast_childidx(decl, 4);
+       err = (ast_id(decl_err) == TK_QUESTION);
+       func = declare_ffi(c, f_name, t, decl_params, false);
+     } else if(!strncmp(f_name, "llvm.", 5) || !strncmp(f_name, "internal.", 9)) {
+@@ -1097,6 +1236,28 @@ LLVMValueRef gen_ffi(compile_t* c, ast_t* ast)
+       // Make it varargs.
+       func = declare_ffi_vararg(c, f_name, t);
+     }
++  } else {
++    ast_t* decl = (ast_t*)ast_data(ast);
++    LLVMTypeRef func_type = LLVMGetElementType(LLVMTypeOf(func));
++    LLVMTypeRef call_type = NULL;
++
++    if(decl != NULL)
++    {
++      ast_t* decl_params = ast_childidx(decl, 2);
++      ast_t* decl_err = ast_childidx(decl, 4);
++      err = (ast_id(decl_err) == TK_QUESTION);
++      call_type = ffi_type(c, t, decl_params, false);
++    } else if(!strncmp(f_name, "llvm.", 5) || !strncmp(f_name, "internal.", 9)) {
++      call_type = ffi_type(c, t, args, true);
++    }
++
++    if((call_type != NULL) && !ffi_type_matches(func_type, call_type))
++    {
++      ast_error(c->opt->check.errors, ast,
++        "FFI function declaration for '%s' is incompatible with an existing declaration",
++        f_name);
++      return NULL;
++    }
+   }
+ 
+   // Generate the arguments.
+
+# ponylang__ponyc-2203
+diff --git a/src/libponyc/codegen/genbox.c b/src/libponyc/codegen/genbox.c
+index 6dfa6f2..3a23f5b 100644
+--- a/src/libponyc/codegen/genbox.c
++++ b/src/libponyc/codegen/genbox.c
+@@ -17,7 +17,7 @@ LLVMValueRef gen_box(compile_t* c, ast_t* type, LLVMValueRef value)
+   pony_assert(t != NULL);
+   compile_type_t* c_t = (compile_type_t*)t->c_type;
+ 
+-  if(l_type != c_t->primitive)
++  if((l_type != c_t->primitive) && (l_type != c_t->mem_type))
+     return NULL;
+ 
+   value = gen_assign_cast(c, c_t->mem_type, value, t->ast_cap);
+
+# ponylang__ponyc-2201
+diff --git a/src/libponyc/expr/reference.c b/src/libponyc/expr/reference.c
+index 83e66d3..dc13b85 100644
+--- a/src/libponyc/expr/reference.c
++++ b/src/libponyc/expr/reference.c
+@@ -336,13 +336,85 @@ bool expr_typeref(pass_opt_t* opt, ast_t** astp)
+   return true;
+ }
+ 
++static bool is_legal_dontcare_read(ast_t* ast)
++{
++  // We either are the LHS of an assignment or a tuple element. That tuple must
++  // either be a pattern or the LHS of an assignment. It can be embedded in
++  // other tuples, which may appear in sequences.
++
++  // '_' may be wrapped in a sequence.
++  ast_t* parent = ast_parent(ast);
++  if(ast_id(parent) == TK_SEQ)
++    parent = ast_parent(parent);
++
++  switch(ast_id(parent))
++  {
++    case TK_ASSIGN:
++    {
++      AST_GET_CHILDREN(parent, right, left);
++      if(ast == left)
++        return true;
++      return false;
++    }
++
++    case TK_TUPLE:
++    {
++      ast_t* grandparent = ast_parent(parent);
++
++      while((ast_id(grandparent) == TK_TUPLE) ||
++        (ast_id(grandparent) == TK_SEQ))
++      {
++        parent = grandparent;
++        grandparent = ast_parent(parent);
++      }
++
++      switch(ast_id(grandparent))
++      {
++        case TK_ASSIGN:
++        {
++          AST_GET_CHILDREN(grandparent, right, left);
++
++          if(parent == left)
++            return true;
++
++          break;
++        }
++
++        case TK_CASE:
++        {
++          AST_GET_CHILDREN(grandparent, pattern, guard, body);
++
++          if(parent == pattern)
++            return true;
++
++          break;
++        }
++
++        default: {}
++      }
++
++      break;
++    }
++
++    default: {}
++  }
++
++  return false;
++}
++
+ bool expr_dontcareref(pass_opt_t* opt, ast_t* ast)
+ {
+-  (void)opt;
+   pony_assert(ast_id(ast) == TK_DONTCAREREF);
+ 
+   ast_settype(ast, ast_from(ast, TK_DONTCARETYPE));
+ 
++  if(is_result_needed(ast) && !is_legal_dontcare_read(ast))
++  {
++    ast_error(opt->check.errors, ast, "can't read from '_'");
++    ast_settype(ast, ast_from(ast, TK_ERRORTYPE));
++    return false;
++  }
++
+   return true;
+ }
+ 
+diff --git a/src/libponyc/pass/verify.c b/src/libponyc/pass/verify.c
+index 512b223..445370c 100644
+--- a/src/libponyc/pass/verify.c
++++ b/src/libponyc/pass/verify.c
+@@ -2,7 +2,6 @@
+ #include "../verify/call.h"
+ #include "../verify/control.h"
+ #include "../verify/fun.h"
+-#include "expr.h"
+ #include "ponyassert.h"
+ 
+ 
+@@ -104,87 +103,6 @@ static bool verify_assign(pass_opt_t* opt, ast_t* ast)
+ }
+ 
+ 
+-static bool is_legal_dontcare_read(ast_t* ast)
+-{
+-  // We either are the LHS of an assignment or a tuple element. That tuple must
+-  // either be a pattern or the LHS of an assignment. It can be embedded in
+-  // other tuples, which may appear in sequences.
+-
+-  // '_' may be wrapped in a sequence.
+-  ast_t* parent = ast_parent(ast);
+-  if(ast_id(parent) == TK_SEQ)
+-    parent = ast_parent(parent);
+-
+-  switch(ast_id(parent))
+-  {
+-    case TK_ASSIGN:
+-    {
+-      AST_GET_CHILDREN(parent, right, left);
+-      if(ast == left)
+-        return true;
+-      return false;
+-    }
+-
+-    case TK_TUPLE:
+-    {
+-      ast_t* grandparent = ast_parent(parent);
+-
+-      while((ast_id(grandparent) == TK_TUPLE) ||
+-        (ast_id(grandparent) == TK_SEQ))
+-      {
+-        parent = grandparent;
+-        grandparent = ast_parent(parent);
+-      }
+-
+-      switch(ast_id(grandparent))
+-      {
+-        case TK_ASSIGN:
+-        {
+-          AST_GET_CHILDREN(grandparent, right, left);
+-
+-          if(parent == left)
+-            return true;
+-
+-          break;
+-        }
+-
+-        case TK_CASE:
+-        {
+-          AST_GET_CHILDREN(grandparent, pattern, guard, body);
+-
+-          if(parent == pattern)
+-            return true;
+-
+-          break;
+-        }
+-
+-        default: {}
+-      }
+-
+-      break;
+-    }
+-
+-    default: {}
+-  }
+-
+-  return false;
+-}
+-
+-
+-static bool verify_dontcareref(pass_opt_t* opt, ast_t* ast)
+-{
+-  pony_assert(ast_id(ast) == TK_DONTCAREREF);
+-
+-  if(is_result_needed(ast) && !is_legal_dontcare_read(ast))
+-  {
+-    ast_error(opt->check.errors, ast, "can't read from '_'");
+-    return false;
+-  }
+-
+-  return true;
+-}
+-
+-
+ ast_result_t pass_verify(ast_t** astp, pass_opt_t* options)
+ {
+   ast_t* ast = *astp;
+@@ -205,7 +123,6 @@ ast_result_t pass_verify(ast_t** astp, pass_opt_t* options)
+     case TK_FFICALL:      r = verify_ffi_call(options, ast); break;
+     case TK_TRY:
+     case TK_TRY_NO_CHECK: r = verify_try(options, ast); break;
+-    case TK_DONTCAREREF:  r = verify_dontcareref(options, ast); break;
+     case TK_ERROR:        ast_seterror(ast); break;
+ 
+     default:              ast_inheritflags(ast); break;
+

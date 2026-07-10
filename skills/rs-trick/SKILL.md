@@ -2,16 +2,23 @@
 name: rs-trick
 description: Capture a reusable programming pattern, library usage, or technical recipe for RelayStack work.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Trick
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create raw trick notes or a
+substitute process directory inside the repository. Return the personal record in
+the conversation and request or wait for a personal path. Continue promoting
+stable knowledge to the applicable team owner docs normally.
 
 Use this skill for prescriptive knowledge: "when doing X, use Y".
 
 ## Destination
 
-- Personal notes for raw investigation and examples.
+- `<personal-root>/project/knowledge/` for raw investigation and examples.
 - Team docs only when the trick is stable enough that future contributors should
   follow it.
 

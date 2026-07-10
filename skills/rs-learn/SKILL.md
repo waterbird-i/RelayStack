@@ -2,23 +2,30 @@
 name: rs-learn
 description: Capture a pitfall or good practice discovered during RelayStack work.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Learn
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create raw learning notes or a
+substitute process directory inside the repository. Return the personal record in
+the conversation and request or wait for a personal path. Continue promoting
+stable knowledge to the applicable team owner docs normally.
 
 Use this skill when a feature, issue, or exploration produced reusable learning.
 
 ## Do Not Use When
 
 - The learning is now a settled rule, constraint, or decision; use `rs-decide`.
-- The detail is only useful for one incident; keep it in personal notes or
-  `rs-handoff`.
+- The detail is only useful for one incident; keep it in
+  `<personal-root>/project/knowledge/`.
 - The lesson has not been verified; use `rs-explore` first.
 
 ## Destination
 
-- Personal project notes: detailed story, failed attempts, incident context.
+- `<personal-root>/project/knowledge/`: raw story, failed attempts, and incident context.
 - Team docs: only the stable lesson future work should reuse.
 
 Stable lessons usually update:

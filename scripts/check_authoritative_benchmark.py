@@ -32,6 +32,44 @@ def load_jsonl_first(path: Path) -> dict[str, object] | None:
     return None
 
 
+def load_jsonl_all(path: Path) -> list[dict[str, object]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, object]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        data = json.loads(line)
+        if not isinstance(data, dict):
+            raise SystemExit(f"{path}: expected object line")
+        rows.append(data)
+    return rows
+
+
+def instance_id(row: dict[str, object]) -> str:
+    if row.get("instance_id"):
+        return str(row["instance_id"])
+    return f"{row.get('org')}__{row.get('repo')}-{row.get('number')}"
+
+
+def official_id(row: dict[str, object]) -> str:
+    return f"{row.get('org')}/{row.get('repo')}:pr-{row.get('number')}"
+
+
+def inferred_task_type(row: dict[str, object]) -> str:
+    if row.get("task_type"):
+        return str(row["task_type"])
+    title = str(row.get("title") or "").lower()
+    if "parser" in title or "parse" in title:
+        return "parser"
+    if "ffi" in title or "codegen" in title:
+        return "compiler-codegen"
+    if "string" in title or "character" in title:
+        return "language-semantics"
+    return str(row.get("difficulty") or "unknown")
+
+
 def check_suite(path: Path) -> dict[str, object]:
     suite = load_json(path)
     required = ["suite_id", "suite_name", "authority", "status", "dataset", "license", "citation", "provenance_mapping"]
@@ -90,6 +128,47 @@ def final_report_status(path: Path) -> dict[str, object]:
     }
 
 
+def status_for(report: dict[str, object], row: dict[str, object]) -> str:
+    keys = {instance_id(row), official_id(row)}
+    for key, status in [
+        ("resolved_ids", "resolved"),
+        ("unresolved_ids", "unresolved"),
+        ("error_ids", "error"),
+        ("incomplete_ids", "incomplete"),
+        ("empty_patch_ids", "empty_patch"),
+    ]:
+        values = report.get(key, [])
+        if isinstance(values, list) and keys.intersection(str(value) for value in values):
+            return status
+    return "unknown"
+
+
+def dataset_summary(rows: list[dict[str, object]], reports: dict[str, dict[str, object]]) -> dict[str, object]:
+    instances: list[dict[str, object]] = []
+    for row in rows:
+        item = {
+            "instance_id": instance_id(row),
+            "official_id": official_id(row),
+            "org": row.get("org"),
+            "repo": row.get("repo"),
+            "number": row.get("number"),
+            "title": row.get("title"),
+            "base_commit": (row.get("base") or {}).get("sha") if isinstance(row.get("base"), dict) else row.get("base_commit"),
+            "language": row.get("language"),
+            "difficulty": row.get("difficulty"),
+            "task_type": inferred_task_type(row),
+            "groups": {
+                name: status_for(report, row) for name, report in reports.items()
+            },
+        }
+        instances.append(item)
+    return {
+        "name": "ByteDance-Seed/Multi-SWE-bench-flash",
+        "count": len(rows),
+        "instances": instances,
+    }
+
+
 def load_summary_metrics(path: Path) -> dict[str, object]:
     if not path.exists():
         return {}
@@ -119,6 +198,20 @@ def load_summary_metrics(path: Path) -> dict[str, object]:
     return metrics
 
 
+def run_artifacts(run_dir: Path) -> list[str]:
+    names = [
+        "dataset.jsonl",
+        "baseline.jsonl",
+        "relaystack_handoff.jsonl",
+        "baseline-output/final_report.json",
+        "relaystack_handoff-output/final_report.json",
+        "baseline-agent-output.jsonl",
+        "relaystack_handoff-agent-output.jsonl",
+        "summary.json",
+    ]
+    return [str((run_dir / name).relative_to(ROOT)) for name in names]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--suite", default="suites/authoritative/multi-swe-bench.json")
@@ -128,7 +221,8 @@ def main() -> int:
 
     suite_path = ROOT / args.suite
     run_dir = ROOT / args.run_dir
-    dataset_row = load_jsonl_first(run_dir / "dataset.jsonl")
+    dataset_rows = load_jsonl_all(run_dir / "dataset.jsonl")
+    dataset_row = dataset_rows[0] if dataset_rows else None
     predictions = {
         "baseline": patch_prediction_status(run_dir / "baseline.jsonl"),
         "relaystack_handoff": patch_prediction_status(run_dir / "relaystack_handoff.jsonl"),
@@ -153,19 +247,7 @@ def main() -> int:
         "suite": check_suite(suite_path),
         "local_baseline_suite": str(Path("suites/local-25.json")),
         "run_dir": str(run_dir.relative_to(ROOT)),
-        "dataset": {
-            "name": "ByteDance-Seed/Multi-SWE-bench-flash",
-            "instance_id": None if dataset_row is None else dataset_row.get("instance_id"),
-            "org": None if dataset_row is None else dataset_row.get("org"),
-            "repo": None if dataset_row is None else dataset_row.get("repo"),
-            "number": None if dataset_row is None else dataset_row.get("number"),
-            "title": None if dataset_row is None else dataset_row.get("title"),
-            "issue_url": None if dataset_row is None else f"https://github.com/{dataset_row.get('org')}/{dataset_row.get('repo')}/issues/7238",
-            "pr_url": None if dataset_row is None else f"https://github.com/{dataset_row.get('org')}/{dataset_row.get('repo')}/pull/{dataset_row.get('number')}",
-            "base_commit": None if dataset_row is None else dataset_row.get("base", {}).get("sha"),
-            "language": None if dataset_row is None else dataset_row.get("language"),
-            "license": "MIT",
-        },
+        "dataset": dataset_summary(dataset_rows, official_reports),
         "ab_groups": ["baseline", "relaystack_handoff"],
         "blind_test_status": status,
         "blocked_reason": blocked_reason,
@@ -182,22 +264,18 @@ def main() -> int:
             "multi_swe_bench_module_available": importlib.util.find_spec("multi_swe_bench") is not None,
             "datasets_module_available": importlib.util.find_spec("datasets") is not None,
         },
-        "artifacts": [
-            "reports/multi-swe-one-20260629/dataset.jsonl",
-            "reports/multi-swe-one-20260629/baseline.jsonl",
-            "reports/multi-swe-one-20260629/relaystack_handoff.jsonl",
-            "reports/multi-swe-one-20260629/baseline-output/final_report.json",
-            "reports/multi-swe-one-20260629/relaystack_handoff-output/final_report.json",
-            "reports/multi-swe-one-20260629/baseline-agent-output.jsonl",
-            "reports/multi-swe-one-20260629/relaystack_handoff-agent-output.jsonl",
-            "reports/multi-swe-one-20260629/summary.json",
-        ],
+        "artifacts": run_artifacts(run_dir),
     }
     result.update(summary_metrics)
     output = ROOT / args.output
+    if Path(args.output).is_absolute():
+        output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(output.relative_to(ROOT))
+    try:
+        print(output.relative_to(ROOT))
+    except ValueError:
+        print(output)
     return 0 if status == "official_evaluated" else 1
 
 

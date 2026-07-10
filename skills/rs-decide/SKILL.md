@@ -2,7 +2,7 @@
 name: rs-decide
 description: Record an already-made RelayStack technical decision, constraint, or convention.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Decide

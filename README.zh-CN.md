@@ -51,12 +51,40 @@ RelayStack 把这条边界写清楚：
 ├── 稳定项目文档：context、backlog、requirements、design、architecture
 └── 可选 agent 记录：worker 结论、reviewer 结论、冲突说明
     ↓
-handoff/snapshot-<timestamp>.md
+<personal-root>/project/handoffs/snapshot-<timestamp>.md
     ↓
 下一个人或 agent 继续工作
 ```
 
-RelayStack 用少量 owner docs 保存需要跨会话保留的事实：
+仓库中由团队维护、可提交的项目文档只有：
+
+```text
+docs/context/
+docs/backlog/
+docs/requirements/
+docs/design/
+docs/architecture/
+```
+
+Roadmap、Feature 和 Issue 的过程记录、原始 Knowledge、Handoff Snapshot 都是仓库外的个人记录。Feature 过程记录仅指 brainstorm、checklist、implementation notes 和可选的 acceptance notes，不包括正式 feature design：
+
+```text
+<personal-root>/project/
+├── roadmaps/
+├── features/
+├── issues/
+├── knowledge/
+└── handoffs/
+```
+
+`docs/backlog/` 可以保存团队可见的优先级和下一步，但 roadmap 正文必须留在个人记录中。
+正式、获批并驱动实现的 feature design 必须位于 `docs/design/{slug}.md`，或遵循该目录
+已有命名约定。它是实现和验收的权威输入，任何个人 feature 记录都不能替代或覆盖它。
+正式验收结果必须回写适用的五类团队文档；个人 acceptance note 仅为可选过程记录。
+稳定 Knowledge 必须提升到五类团队文档之一，原始探索和经验保留在
+`<personal-root>/project/knowledge/`。
+
+RelayStack 用这些 owner docs 保存需要跨会话保留的事实：
 
 ```text
 docs/context/
@@ -103,7 +131,7 @@ docs/architecture/
 `rs-handoff` 会生成：
 
 ```text
-handoff/snapshot-<timestamp>.md
+<personal-root>/project/handoffs/snapshot-<timestamp>.md
 ```
 
 这份 snapshot 回答 7 个问题：
@@ -122,6 +150,10 @@ handoff/snapshot-<timestamp>.md
   用户输入和 agent record。
 - `Risk Register`：记录风险、触发条件、影响和缓解动作，而不是泛泛写“有风险”。
 - `Next Action Contract`：写清下一步动作、输入、触达文件、验证命令和完成标志。
+
+snapshot 顶部还包含机器可读质量块，记录 7 个交接问题缺了几个、Evidence Map
+是否覆盖核心结论、Next Action Contract 是否完整，以及当前 Git diff 的证据指纹。
+后续可用 `scripts/check_snapshot_freshness.py` 判断 snapshot 生成后工作区证据是否已变化。
 
 当附加多个 agent records 时，snapshot 还会生成 `Agent 并行边界`，记录写入范围、
 采纳状态、冲突、验证结果和文件范围重叠警告。
@@ -142,6 +174,8 @@ Agent record 可以是 JSON，也可以是 Markdown frontmatter。常用字段�
   "verification": ["self-test"]
 }
 ```
+
+JSON 形态的 AgentRecord 契约见 `schemas/agent-record.schema.json`。
 
 ## 快速开始
 
@@ -167,8 +201,13 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --stage "MVP implementation" \
   --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
-  --validation "Read the snapshot and answer the handoff questions"
+  --validation "Read the snapshot and answer the handoff questions" \
+  --personal-root "$HOME/RelayStackRecords"
 ```
+
+`--personal-root` 会写入 `<personal-root>/project/handoffs`。为兼容旧用法仍保留
+显式 `--output-dir`，但解析后的路径必须位于仓库外。两个参数都未提供时，命令会
+报参数错误，不会默认写入仓库。
 
 可以附加 agent records：
 
@@ -197,9 +236,9 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 | 路线图 | `rs-roadmap` | 把模糊大目标拆成可推进的 feature pass |
 | 讨论入口 | `rs-brainstorm` | 想法模糊时分诊到 design、feature 或 roadmap |
 | 特性流程 | `rs-feat` | 新特性子流程入口 |
-|  | `rs-feat-design` | 起草后续实现应遵循的 design |
-|  | `rs-feat-impl` | 按已确认 design 的推进顺序写代码 |
-|  | `rs-feat-accept` | 对照 design 核对实现，并更新稳定文档 |
+|  | `rs-feat-design` | 在 `docs/design/` 创建正式团队 design |
+|  | `rs-feat-impl` | 按获批的团队 design 实现 |
+|  | `rs-feat-accept` | 对照团队 design 验收，并把正式结果回写团队 owner docs |
 |  | `rs-feat-ff` | 小而清晰的特性直通车 |
 | 问题流程 | `rs-issue` | 已有行为出问题时的入口 |
 |  | `rs-issue-report` | 把疑似 bug 落成可复现 report |
@@ -260,6 +299,12 @@ benchmark 只测一个窄口径：
 这两轮是协议隔离烟测，不包装成榜单成绩。其中 project-skills 这轮也跑通了官方
 Multi-SWE-bench harness：`baseline 1/1 resolved`，
 `relaystack_handoff 1/1 resolved`。
+
+扩展 6 样本 Multi-SWE-bench 结果记录在
+`reports/multi-swe-six-20260710`：两组都完成官方 harness `6/6` 实例，harness
+error 为 `0`。baseline resolved `3/6`，RelayStack handoff resolved `2/6`。
+agent 执行耗时 baseline 为 `2114.644s`，handoff 为 `1880.211s`。语言 / 仓库 /
+任务类型分层见 `reports/multi-swe-six-20260710/strata-summary.json`。
 
 Demo 成功的标准是：一个新的人或 agent 只读 snapshot，就能在 5 分钟内继续。
 

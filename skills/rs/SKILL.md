@@ -2,7 +2,7 @@
 name: rs
 description: RelayStack root entry. Use when the user says rs, asks which RelayStack skill to use, wants the system overview, or gives an open-ended request that should be routed to an rs-* skill.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS
@@ -11,6 +11,21 @@ updated: 2026-06-24
 requests to the right `rs-*` skill.
 
 It does not implement work. It only routes.
+
+## Storage Contract
+
+- Team-maintained, committable project docs are limited to `docs/context/`,
+  `docs/backlog/`, `docs/requirements/`, `docs/design/`, and
+  `docs/architecture/`.
+- Roadmap bodies, Feature process notes, Issue records, raw Knowledge, and
+  Handoff Snapshots are personal records under
+  `<personal-root>/project/{roadmaps,features,issues,knowledge,handoffs}/`.
+- `docs/backlog/` may hold team-visible priorities and next steps, but not the
+  roadmap body. A formal, approved feature design belongs in `docs/design/` and
+  is the authoritative implementation and acceptance input; personal feature
+  notes cannot replace it.
+- Promote stable knowledge into one of the five team doc categories; keep raw
+  exploration and experience in personal `project/knowledge/`.
 
 ## Quick Scan
 

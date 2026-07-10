@@ -2,10 +2,17 @@
 name: rs-issue-analyze
 description: Find root cause, assess risk, and propose fixes for a RelayStack issue.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Issue Analyze
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create issue analysis files or a
+substitute process directory inside the repository. Return the analysis in the
+conversation and request or wait for a personal path. Continue any applicable
+updates to the five team owner doc categories normally.
 
 Use this skill after an issue report exists.
 
@@ -21,7 +28,9 @@ Use this skill after an issue report exists.
 4. Identify the root cause with file references.
 5. Assess blast radius and regression risk.
 6. Offer 2-3 fix options and recommend one.
-7. Wait for user confirmation before editing.
+7. Write the analysis to `<personal-root>/project/issues/` when a personal root
+   is available.
+8. Wait for user confirmation before editing.
 
 ## Output
 

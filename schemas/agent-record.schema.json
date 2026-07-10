@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://relaystack.local/schemas/agent-record.schema.json",
+  "title": "RelayStack AgentRecord",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "agent",
+    "role",
+    "task",
+    "status",
+    "adoption",
+    "write_scope",
+    "verification"
+  ],
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "type": "string"
+    },
+    "output": {
+      "type": "string"
+    },
+    "conclusion": {
+      "type": "string"
+    },
+    "adopted_output": {
+      "type": "string"
+    },
+    "rejected_reason": {
+      "type": "string"
+    },
+    "write_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed", "partial", "blocked", "unknown"]
+    },
+    "adoption": {
+      "type": "string",
+      "enum": ["adopted", "accepted", "reference", "rejected", "unknown"]
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

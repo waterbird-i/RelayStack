@@ -344,6 +344,15 @@ def output_summary(output: str, returncode: int) -> dict[str, object]:
     }
 
 
+def blind_output_summary(output: str, returncode: int) -> dict[str, object]:
+    summary = output_summary(output, returncode)
+    tail = str(summary["tail"])
+    for token in ["rs_handoff", "no_handoff", "snapshot_generated", "snapshot_chars", "snapshot_elapsed_seconds", "workdir"]:
+        tail = tail.replace(token, "[redacted]")
+    summary["tail"] = tail
+    return summary
+
+
 def write_blind_artifacts(
     blind_dir: Path,
     pair_id: str,
@@ -409,12 +418,10 @@ def write_blind_artifacts(
         "known_entry_files": result["known_entry_files"],
         "repeated_known_files": result["repeated_known_files"],
         "auto_repeated_known_info": result["auto_repeated_known_info"],
-        "snapshot_elapsed_seconds": result["snapshot_elapsed_seconds"],
-        "snapshot_chars": result["snapshot_chars"],
         "diff_summary": diff_lines,
         "test_summary": output_summary(test_output, result["test_returncode"]),
-        "transcript_summary": output_summary(agent_output, result["agent_returncode"]),
-        "redactions": ["runner_name", "group_name", "prompt_branding", "workdir"],
+        "transcript_summary": blind_output_summary(agent_output, result["agent_returncode"]),
+        "redactions": ["identity", "group", "prompt_branding", "local_paths"],
     }
     provenance = result.get("provenance", {})
     if not isinstance(provenance, dict):

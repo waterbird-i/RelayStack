@@ -1,0 +1,39 @@
+{
+    "total_instances": 6,
+    "submitted_instances": 6,
+    "completed_instances": 6,
+    "incomplete_instances": 0,
+    "resolved_instances": 3,
+    "unresolved_instances": 3,
+    "empty_patch_instances": 0,
+    "error_instances": 0,
+    "submitted_ids": [
+        "ponylang/ponyc:pr-2261",
+        "ponylang/ponyc:pr-2221",
+        "ponylang/ponyc:pr-2214",
+        "ponylang/ponyc:pr-2205",
+        "ponylang/ponyc:pr-2203",
+        "ponylang/ponyc:pr-2201"
+    ],
+    "completed_ids": [
+        "ponylang/ponyc:pr-2261",
+        "ponylang/ponyc:pr-2221",
+        "ponylang/ponyc:pr-2214",
+        "ponylang/ponyc:pr-2205",
+        "ponylang/ponyc:pr-2203",
+        "ponylang/ponyc:pr-2201"
+    ],
+    "incomplete_ids": [],
+    "resolved_ids": [
+        "ponylang/ponyc:pr-2261",
+        "ponylang/ponyc:pr-2221",
+        "ponylang/ponyc:pr-2214"
+    ],
+    "unresolved_ids": [
+        "ponylang/ponyc:pr-2205",
+        "ponylang/ponyc:pr-2203",
+        "ponylang/ponyc:pr-2201"
+    ],
+    "empty_patch_ids": [],
+    "error_ids": []
+}

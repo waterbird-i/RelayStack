@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RelayStack — 5 分钟接手一个陌生 AI 会话</title>
+<link rel="icon" href="data:,">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --bg:#05070a;
+    --panel:#0b0f14;
+    --panel-2:#0f1520;
+    --line:rgba(255,255,255,0.08);
+    --line-strong:rgba(255,255,255,0.16);
+    --ink:#eef2f6;
+    --ink-dim:#8b96a5;
+    --ink-dimmer:#5b6675;
+    --red:#fb8a28;
+    --red-dim:#fb8a2833;
+    --teal:#75bf6c;
+    --teal-dim:#75bf6c22;
+    --amber:#ffb84d;
+    --glass-bg:rgba(255,255,255,0.055);
+    --glass-bg-soft:rgba(255,255,255,0.035);
+    --glass-border:rgba(255,255,255,0.14);
+    --glass-highlight:rgba(255,255,255,0.09);
+    --glass-shadow:0 24px 70px -24px rgba(0,0,0,0.55), inset 0 1px 0 var(--glass-highlight);
+    --glass-shadow-lg:0 40px 100px -30px rgba(0,0,0,0.6), inset 0 1px 0 var(--glass-highlight);
+    --glass-blur:blur(6px) saturate(125%);
+    --frosted:none;
+    --mono: "JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans: "Neue Haas Grotesk","Inter",-apple-system,"Segoe UI",sans-serif;
+    --display: "Arial Black","Avenir Next Heavy","Impact","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  body{overflow-x:hidden;}
+
+  /* ---------- FROSTED TOUCH: reusable glass surface ---------- */
+  .glass{
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:var(--frosted);
+    backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+  }
+  .glass-soft{
+    background:var(--glass-bg-soft);
+    -webkit-backdrop-filter:var(--frosted);
+    backdrop-filter:var(--frosted);
+    border:1px solid var(--line-strong);
+  }
+
+  /* subtle grain */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:999; pointer-events:none;
+    display:none;
+    opacity:0.02;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  a{color:inherit;}
+
+  /* ---------- DECORATIVE BACKDROP ---------- */
+  .deco{position:absolute; pointer-events:none; z-index:0;}
+  .deco-blob{
+    border-radius:50%; filter:blur(42px); opacity:0.45;
+  }
+  .deco-grid{
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:linear-gradient(180deg, transparent, rgba(0,0,0,0.9) 30%, rgba(0,0,0,0.9) 70%, transparent);
+  }
+  .deco-ring{
+    border:1px solid rgba(255,255,255,0.06); border-radius:50%;
+  }
+  .deco-dot{width:5px; height:5px; border-radius:50%; background:var(--teal); opacity:.6;}
+  section, .hero{isolation:isolate;}
+  .section-head, .pain-wrap, .console-frame, .agent-wrap, .bench-grid, .bench-table-wrap, .prov-note, .hero-stats, .hero-title, .hero-sub, .kicker, .scroll-cue{position:relative; z-index:1;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:8vh 6vw 6vh;
+    border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(117,191,108,0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(251,138,40,0.08), transparent 55%);
+  }
+  .kicker{
+    font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--ink-dimmer); margin-bottom:28px; display:flex; align-items:center; gap:10px;
+  }
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal);}
+  h1.hero-title{
+    font-family:var(--display);
+    font-size:clamp(40px, 6.4vw, 92px);
+    line-height:0.98; letter-spacing:-0.02em; font-weight:900; margin:0 0 28px;
+    max-width:1100px;
+  }
+  h1.hero-title .accent{color:var(--teal);}
+  h1.hero-title .strike{color:var(--red); position:relative;}
+  .hero-sub{
+    font-size:clamp(16px,2vw,20px); color:var(--ink-dim); max-width:760px; line-height:1.6; margin-bottom:44px;
+    font-weight:400;
+  }
+  .hero-stats{
+    display:flex; gap:14px; flex-wrap:wrap; padding-top:28px;
+  }
+  .hstat{
+    padding:18px 24px; border-radius:18px;
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border); box-shadow:var(--glass-shadow);
+    transition:transform .2s ease;
+  }
+  .hstat:hover{transform:translateY(-3px);}
+  .hstat .n{font-family:var(--mono); font-size:34px; font-weight:700; color:var(--ink); line-height:1;}
+  .hstat .n.teal{color:var(--teal);}
+  .hstat .l{font-size:12px; color:var(--ink-dimmer); margin-top:8px; letter-spacing:.02em;}
+  .scroll-cue{
+    position:absolute; bottom:36px; left:6vw; font-family:var(--mono); font-size:11px;
+    color:var(--ink-dimmer); letter-spacing:.15em; text-transform:uppercase;
+    display:flex; align-items:center; gap:10px;
+  }
+  .scroll-cue .bar{width:1px; height:26px; background:linear-gradient(to bottom, var(--teal), transparent); animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:9vh 6vw; border-bottom:1px solid var(--line); position:relative;}
+  section:not(.hero){
+    content-visibility:auto;
+    contain-intrinsic-size:900px;
+  }
+  .section-head{max-width:900px; margin-bottom:52px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--teal); margin-bottom:16px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:24px;height:24px;border:1px solid var(--teal); border-radius:50%; font-size:11px;
+    background:var(--teal-dim); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+  }
+  h2{font-family:var(--display); font-size:clamp(26px,3.4vw,42px); font-weight:900; letter-spacing:-0.01em; margin:0 0 14px; line-height:1.15;}
+  .section-desc{color:var(--ink-dim); font-size:16px; line-height:1.7; max-width:680px;}
+
+  /* ---------- PAIN (60s no-relaystack) ---------- */
+  .pain-wrap{display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:start;}
+  @media (max-width:980px){.pain-wrap{grid-template-columns:1fr;}}
+  .term{
+    background:rgba(0,0,0,0.42); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border); border-radius:18px; overflow:hidden;
+    box-shadow:var(--glass-shadow-lg);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px; padding:12px 16px;
+    background:rgba(255,255,255,0.04); border-bottom:1px solid var(--line);
+  }
+  .term-bar .tdot{width:11px;height:11px;border-radius:50%;}
+  .term-bar .tdot.r{background:#ff5f57;} .term-bar .tdot.y{background:#febc2e;} .term-bar .tdot.g{background:#28c840;}
+  .term-bar .tname{font-family:var(--mono); font-size:12px; color:var(--ink-dimmer); margin-left:8px;}
+  .term-body{font-family:var(--mono); font-size:13px; line-height:1.7; padding:20px; color:#c7d0da; max-height:420px; overflow:auto;}
+  .term-body .add{color:#59d499;}
+  .term-body .del{color:#ff6b6b;}
+  .term-body .meta{color:#5b6675;}
+  .term-body .file{color:#7bb8ff;}
+  .chat-bubble{
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border); border-radius:16px; padding:14px 16px; margin-top:14px;
+    font-size:13.5px; color:var(--ink-dim); line-height:1.6; box-shadow:var(--glass-shadow);
+  }
+  .chat-bubble .who{font-family:var(--mono); font-size:11px; color:var(--ink-dimmer); margin-bottom:6px; text-transform:uppercase; letter-spacing:.08em;}
+
+  .pain-questions{display:flex; flex-direction:column; gap:14px;}
+  .qcard{
+    border:1px solid var(--red-dim);
+    background:linear-gradient(180deg, rgba(251,138,40,0.10), rgba(255,255,255,0.03));
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border-radius:16px; padding:18px 20px; display:flex; gap:14px; align-items:flex-start;
+    box-shadow:var(--glass-shadow); transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .qcard:hover{transform:translateY(-2px); box-shadow:0 30px 80px -24px rgba(0,0,0,0.6), inset 0 1px 0 var(--glass-highlight);}
+  .qcard .qmark{font-family:var(--mono); font-size:20px; color:var(--red); font-weight:800; line-height:1;}
+  .qcard .qtext{font-size:15px; color:var(--ink); line-height:1.5;}
+  .qcard .qtext b{color:var(--red); font-weight:700;}
+  .verdict-line{
+    margin-top:24px; padding-top:20px; border-top:1px dashed var(--line);
+    font-size:14px; color:var(--ink-dimmer); font-family:var(--mono); line-height:1.7;
+  }
+
+  /* ---------- CONSOLE (3 columns) ---------- */
+  .console-frame{
+    border:1px solid var(--glass-border); border-radius:22px; overflow:hidden;
+    background:var(--glass-bg); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    box-shadow:var(--glass-shadow-lg);
+  }
+  .console-topbar{
+    display:flex; align-items:center; justify-content:space-between; padding:14px 22px;
+    background:rgba(255,255,255,0.04); border-bottom:1px solid var(--line);
+  }
+  .console-topbar .left{display:flex; align-items:center; gap:12px;}
+  .console-topbar .tdot{width:10px;height:10px;border-radius:50%;}
+  .console-title{font-family:var(--mono); font-size:12px; color:var(--ink-dimmer); letter-spacing:.05em;}
+  .console-live{
+    font-family:var(--mono); font-size:11px; color:var(--teal); display:flex; align-items:center; gap:6px;
+    border:1px solid var(--teal-dim); padding:4px 10px; border-radius:20px;
+    background:rgba(117,191,108,0.08); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+  }
+  .console-live .blip{width:6px;height:6px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal); animation:blip 1.4s infinite;}
+  @keyframes blip{0%,100%{opacity:1}50%{opacity:.25}}
+
+  .scenario-panel{display:none;}
+  .scenario-panel.active{display:block;}
+
+  .case-strip{
+    display:flex; flex-wrap:wrap; gap:8px; padding:16px 20px;
+    border-bottom:1px solid var(--line); background:rgba(255,255,255,0.025);
+  }
+  .case-btn{
+    font-family:var(--mono); font-size:11px; color:var(--ink-dimmer);
+    border:1px solid var(--glass-border); background:var(--glass-bg-soft);
+    border-radius:20px; padding:7px 12px; cursor:pointer; transition:all .2s ease;
+  }
+  .case-btn:hover{color:var(--ink); border-color:var(--ink-dimmer);}
+  .case-btn.active{color:var(--teal); border-color:var(--teal); background:var(--teal-dim);}
+
+  .cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);}
+  @media (max-width:1100px){.cols{grid-template-columns:1fr;}}
+  .col{padding:26px 24px; border-right:1px solid var(--line); min-height:640px;}
+  .col:last-child{border-right:none;}
+  .col-a{background:linear-gradient(180deg, rgba(251,138,40,0.05), transparent 30%);}
+  .col-b{background:linear-gradient(180deg, rgba(117,191,108,0.07), transparent 30%);}
+  .col-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .col-tag{
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:20px;
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+  }
+  .col-tag.no{color:var(--red); background:var(--red-dim); border:1px solid var(--red-dim);}
+  .col-tag.yes{color:var(--teal); background:var(--teal-dim); border:1px solid var(--teal-dim);}
+  .col-tag.result{color:var(--amber); background:rgba(255,184,77,0.12); border:1px solid rgba(255,184,77,0.25);}
+  .col-h3{font-size:15px; font-weight:700; margin:0 0 4px;}
+  .col-sub{font-size:12px; color:var(--ink-dimmer); font-family:var(--mono);}
+
+  .block{margin-bottom:22px;}
+  .block-label{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-dimmer); margin-bottom:10px;}
+  .mini-code{
+    font-family:var(--mono); font-size:12px; background:rgba(0,0,0,0.38);
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border); border-radius:12px;
+    padding:12px 14px; color:#b8c2cc; line-height:1.65; white-space:pre-wrap; word-break:break-word;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .mini-code .add{color:#59d499;} .mini-code .del{color:#ff6b6b;} .mini-code .meta{color:#5b6675;}
+
+  .list-plain{list-style:none; margin:0; padding:0; font-size:13px; color:var(--ink-dim); line-height:1.8;}
+  .list-plain li{padding-left:18px; position:relative; margin-bottom:6px;}
+  .list-plain li::before{content:"—"; position:absolute; left:0; color:var(--ink-dimmer);}
+
+  .evidence-item{
+    border:1px solid var(--glass-border); border-radius:14px; padding:12px 14px; margin-bottom:10px;
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    box-shadow:0 14px 40px -18px rgba(0,0,0,0.4);
+  }
+  .evidence-item .claim{font-size:13px; color:var(--ink); margin-bottom:6px; font-weight:600;}
+  .evidence-item .src{font-family:var(--mono); font-size:11px; color:var(--teal);}
+  .evidence-item .conf{font-family:var(--mono); font-size:11px; color:var(--ink-dimmer); float:right;}
+
+  .risk-item{
+    border:1px solid var(--glass-border); border-left:3px solid var(--amber); padding:10px 14px; margin-bottom:10px;
+    background:linear-gradient(180deg, rgba(255,184,77,0.08), rgba(255,255,255,0.03));
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border-radius:4px 14px 14px 4px; box-shadow:0 14px 40px -18px rgba(0,0,0,0.4);
+  }
+  .risk-item .rtitle{font-size:13px; font-weight:700; color:var(--amber); margin-bottom:4px;}
+  .risk-item .rbody{font-size:12.5px; color:var(--ink-dim); line-height:1.6;}
+  .risk-item .rbody b{color:var(--ink);}
+
+  .contract-box{
+    border:1px solid var(--teal-dim); border-radius:16px; padding:16px;
+    background:linear-gradient(180deg, rgba(117,191,108,0.09), rgba(255,255,255,0.03));
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    box-shadow:var(--glass-shadow);
+  }
+  .contract-row{display:flex; gap:10px; font-size:12.5px; margin-bottom:9px; align-items:flex-start;}
+  .contract-row .k{font-family:var(--mono); color:var(--ink-dimmer); min-width:74px; flex-shrink:0;}
+  .contract-row .v{color:var(--ink); line-height:1.55;}
+  .contract-row .v code{font-family:var(--mono); background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px; font-size:11.5px;}
+
+  .boundary-box{
+    border:1px dashed var(--glass-border); border-radius:14px; padding:12px 14px; font-size:12px;
+    color:var(--ink-dimmer); font-family:var(--mono); line-height:1.7;
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+  }
+  .boundary-box b{color:var(--ink);}
+
+  /* right col metrics */
+  .metric-row{display:flex; align-items:baseline; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line);}
+  .metric-row:last-child{border-bottom:none;}
+  .metric-row .ml{font-size:13px; color:var(--ink-dim);}
+  .metric-row .mv{font-family:var(--mono); font-size:20px; font-weight:700; color:var(--ink);}
+  .metric-row .mv.good{color:var(--teal);}
+  .metric-row .mv.bad{color:var(--red);}
+  .metric-delta{font-family:var(--mono); font-size:11px; color:var(--ink-dimmer);}
+
+  .checklist{margin-top:8px;}
+  .check-item{display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--ink-dim); margin-bottom:10px; line-height:1.5;}
+  .check-item .ck{color:var(--teal); font-family:var(--mono); flex-shrink:0;}
+
+  .source-card{
+    border:1px dashed var(--glass-border); border-radius:14px; padding:12px 14px;
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+  }
+  .source-row{display:flex; gap:10px; font-size:12px; margin-bottom:8px; align-items:flex-start;}
+  .source-row:last-child{margin-bottom:0;}
+  .source-row .sk{font-family:var(--mono); color:var(--ink-dimmer); min-width:64px; flex-shrink:0;}
+  .source-row .sv{color:var(--ink-dim); font-family:var(--mono); line-height:1.5; word-break:break-word;}
+
+  .handoff-questions{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
+  }
+  .hq-item{
+    border:1px solid var(--glass-border); border-radius:12px; padding:10px 12px;
+    background:rgba(255,255,255,0.035);
+  }
+  .hq-item .hq-k{font-family:var(--mono); font-size:10px; color:var(--ink-dimmer); margin-bottom:5px; text-transform:uppercase; letter-spacing:.08em;}
+  .hq-item .hq-v{font-size:12.5px; color:var(--ink); line-height:1.45;}
+  .handoff-value{
+    border:1px solid var(--teal-dim); border-radius:14px; padding:12px 14px;
+    background:linear-gradient(180deg, rgba(117,191,108,0.08), rgba(255,255,255,0.03));
+  }
+  .handoff-value .hv-title{font-size:13px; font-weight:700; color:var(--teal); margin-bottom:8px;}
+  .handoff-value ul{margin:0; padding-left:18px; color:var(--ink-dim); font-size:12.5px; line-height:1.65;}
+  @media (max-width:900px){.handoff-questions{grid-template-columns:1fr;}}
+
+  .handoff-delta{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    border-top:1px solid var(--line); background:rgba(255,255,255,0.025);
+  }
+  .delta-item{padding:16px 20px; border-right:1px solid var(--line);}
+  .delta-item:last-child{border-right:none;}
+  .delta-item .dk{font-family:var(--mono); font-size:11px; color:var(--ink-dimmer); margin-bottom:6px;}
+  .delta-item .dv{font-size:13px; color:var(--ink); line-height:1.45;}
+  .delta-item .dv.good{color:var(--teal);}
+  @media (max-width:900px){.handoff-delta{grid-template-columns:1fr 1fr;}}
+
+  .arrow-flow{display:flex; align-items:center; justify-content:center; gap:8px; margin:0 -2px;}
+  .arrow-flow .af{font-family:var(--mono); color:var(--ink-dimmer); font-size:20px;}
+  @media (max-width:1100px){ .arrow-flow{display:none;} }
+
+  /* ---------- BENCHMARK ---------- */
+  .bench-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media (max-width:900px){.bench-grid{grid-template-columns:repeat(2,1fr);}}
+  .bench-card{
+    border:1px solid var(--glass-border); border-radius:20px; padding:26px 22px;
+    background:var(--glass-bg); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    position:relative; overflow:hidden; box-shadow:var(--glass-shadow);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .bench-card:hover{transform:translateY(-4px); box-shadow:0 34px 90px -24px rgba(0,0,0,0.6), inset 0 1px 0 var(--glass-highlight);}
+  .bench-card .bignum{font-family:var(--mono); font-size:40px; font-weight:800; color:var(--teal); line-height:1;}
+  .bench-card .bignum.amber{color:var(--amber);}
+  .bench-card .blabel{font-size:13px; color:var(--ink); margin-top:10px; font-weight:600;}
+  .bench-card .bsub{font-size:12px; color:var(--ink-dimmer); margin-top:6px; font-family:var(--mono); line-height:1.5;}
+
+  .bench-table-wrap{
+    margin-top:40px; overflow-x:auto; border-radius:18px; border:1px solid var(--glass-border);
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    box-shadow:var(--glass-shadow);
+  }
+  table.bt{width:100%; border-collapse:collapse; font-size:13px;}
+  table.bt th{
+    text-align:left; font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-dimmer); padding:14px 16px; border-bottom:1px solid var(--glass-border); font-weight:600;
+  }
+  table.bt td{padding:14px 16px; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+  table.bt tr:last-child td{border-bottom:none;}
+  table.bt td.strong{color:var(--ink); font-weight:600;}
+  table.bt td.teal{color:var(--teal); font-family:var(--mono);}
+  table.bt tr:hover td{background:rgba(255,255,255,0.03);}
+
+  .prov-note{
+    margin-top:22px; font-size:12.5px; color:var(--ink-dimmer); border-top:1px solid var(--line); padding-top:18px; line-height:1.7;
+  }
+  .prov-note code{background:rgba(255,255,255,0.06); padding:1px 6px; border-radius:3px; font-family:var(--mono);}
+
+  /* ---------- INTERACTIVE ADD-ONS ---------- */
+  .tab-row{display:flex; gap:6px; margin-bottom:12px;}
+  .tab-btn{
+    font-family:var(--mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border); color:var(--ink-dimmer);
+    padding:7px 13px; border-radius:20px; cursor:pointer; transition:all .2s ease;
+  }
+  .tab-btn:hover{color:var(--ink); border-color:var(--ink-dimmer);}
+  .tab-btn.active{background:var(--red-dim); border-color:var(--red); color:var(--red);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .clickable{cursor:pointer; transition:transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;}
+  .clickable:hover{border-color:var(--teal); transform:translateY(-2px); box-shadow:0 20px 50px -20px rgba(0,0,0,0.5);}
+  .evidence-item.clickable:hover, .risk-item.clickable:hover{background:rgba(255,255,255,0.06);}
+  .expand-hint{font-family:var(--mono); font-size:10px; color:var(--ink-dimmer); float:right; opacity:.7;}
+  .expand-detail{
+    display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
+    font-size:12px; color:var(--ink-dim); line-height:1.6;
+  }
+  .expand-detail.open{display:block;}
+  .expand-detail code{background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px; font-family:var(--mono);}
+
+  .snapshot-btn{
+    width:100%; margin-top:6px; font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    background:var(--teal-dim); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--teal); color:var(--teal);
+    padding:12px 14px; border-radius:26px; cursor:pointer; transition:all .2s ease;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 16px 40px -18px rgba(117,191,108,0.35);
+  }
+  .snapshot-btn:hover{background:rgba(117,191,108,0.28); transform:translateY(-2px);}
+
+  .run-btn{
+    width:100%; font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    background:var(--amber); color:#1a1206; border:none;
+    padding:12px 14px; border-radius:26px; cursor:pointer; font-weight:700;
+    display:flex; align-items:center; justify-content:center; gap:8px; transition:filter .15s ease, transform .2s ease;
+    box-shadow:0 16px 40px -18px rgba(255,184,77,0.4);
+  }
+  .run-btn:hover{filter:brightness(1.08); transform:translateY(-2px);}
+  .run-btn:disabled{opacity:.5; cursor:default; filter:none; transform:none;}
+  .run-output{
+    margin-top:12px; font-family:var(--mono); font-size:11.5px; background:rgba(0,0,0,0.38);
+    -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border);
+    border-radius:12px; padding:12px 14px; color:#b8c2cc; line-height:1.7; min-height:64px; white-space:pre-wrap;
+  }
+  .run-output .ok{color:var(--teal);}
+  .run-output .cursor{display:inline-block; width:6px; background:var(--ink-dim); animation:blip 1s infinite;}
+
+  /* modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(2,4,8,0.6); backdrop-filter:var(--frosted); -webkit-backdrop-filter:var(--frosted);
+    display:none; align-items:center; justify-content:center; z-index:1000; padding:4vh 4vw;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    width:min(860px, 100%); max-height:88vh;
+    background:rgba(15,20,28,0.68); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border);
+    border-radius:24px; overflow:hidden; display:flex; flex-direction:column;
+    box-shadow:0 70px 140px -30px rgba(0,0,0,0.75), inset 0 1px 0 var(--glass-highlight);
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 22px;
+    border-bottom:1px solid var(--line); background:rgba(255,255,255,0.04);
+  }
+  .modal-head .mt{font-family:var(--mono); font-size:13px; color:var(--ink);}
+  .modal-actions{display:flex; gap:8px;}
+  .modal-copy, .modal-close{
+    font-family:var(--mono); font-size:11px; background:var(--glass-bg-soft); -webkit-backdrop-filter:var(--frosted); backdrop-filter:var(--frosted);
+    border:1px solid var(--glass-border);
+    color:var(--ink-dimmer); padding:6px 13px; border-radius:16px; cursor:pointer; transition:all .2s ease;
+  }
+  .modal-copy:hover{color:var(--teal); border-color:var(--teal);}
+  .modal-close:hover{color:var(--red); border-color:var(--red);}
+  .modal-body{padding:22px; overflow:auto;}
+  .modal-body pre{
+    margin:0; font-family:var(--mono); font-size:12.5px; line-height:1.75; color:#c7d0da; white-space:pre-wrap; word-break:break-word;
+  }
+
+  /* footer */
+  footer{padding:6vh 6vw 8vh; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px;}
+  footer .brand{font-family:var(--mono); font-size:13px; color:var(--ink-dimmer);}
+  footer .repo-link{font-family:var(--mono); font-size:13px; color:var(--teal); text-decoration:none; border-bottom:1px solid var(--teal-dim); padding-bottom:2px;}
+
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:8px;}
+
+  @media (max-width:900px), (pointer:coarse){
+    .deco-blob{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero" style="border-bottom:1px solid var(--line);">
+  <div class="deco deco-blob" id="heroBlobA" style="width:520px; height:520px; right:-120px; top:-140px; background:var(--teal);"></div>
+  <div class="deco deco-blob" id="heroBlobB" style="width:380px; height:380px; right:220px; bottom:-160px; background:var(--red);"></div>
+  <div class="deco deco-ring" style="width:640px; height:640px; right:-180px; top:6%;"></div>
+  <div class="deco deco-ring" style="width:420px; height:420px; right:40px; top:16%;"></div>
+  <svg class="deco" id="heroDots" style="right:6%; top:12%; width:280px; height:360px;" viewBox="0 0 280 360">
+  </svg>
+  <div class="kicker"><span class="dot"></span>HACKATHON DEMO · RELAYSTACK · 2026</div>
+  <h1 class="hero-title">
+    <span class="strike">AI 写代码很强，</span><br>
+    一换人、一换 agent，<span class="accent">就断。</span>
+  </h1>
+  <p class="hero-sub">
+    目标不清、风险不明、验证方式没人知道、改动原因全在已经关掉的聊天窗口里。
+    RelayStack 把这些散落的上下文，压成一份下一位接手者能直接用的交接快照。
+  </p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n teal">5 分钟</div><div class="l">读完 snapshot 即可接手，不读之前的会话</div></div>
+    <div class="hstat"><div class="n">24.1%</div><div class="l">25 题 benchmark，接手耗时下降</div></div>
+    <div class="hstat"><div class="n">53 / 60</div><div class="l">扩展 20 题盲评，rs-handoff 胜出场次</div></div>
+    <div class="hstat"><div class="n teal">0</div><div class="l">重复探索已知信息次数（原为 4）</div></div>
+  </div>
+  <div class="scroll-cue"><span class="bar"></span>scroll — 先看没有 relaystack 的样子</div>
+</section>
+
+<!-- ============ 60s: WITHOUT RELAYSTACK ============ -->
+<section id="pain">
+  <div class="section-head">
+    <div class="eyebrow"><span class="num">1</span>不用 RelayStack</div>
+    <h2>接手者拿到的，只有 diff 和几句聊天片段</h2>
+    <p class="section-desc">
+      同一个仓库，换一个人或者换一个 agent 来接手。他能看到代码改了，但看不到为什么改、
+      改完有没有验证过、下一步该碰哪个文件。信息是散的，风险是隐藏的。
+    </p>
+  </div>
+
+  <div class="pain-wrap">
+    <div>
+      <div class="term">
+        <div class="term-bar">
+          <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+          <span class="tname">git diff — RelayStack/tasks/task-011</span>
+        </div>
+        <div class="term-body"><span class="meta">$ git diff src/markdown/frontmatter.js</span>
+
+<span class="file">diff --git a/src/markdown/frontmatter.js b/src/markdown/frontmatter.js</span>
+<span class="meta">@@ -10,8 +10,14 @@ function parseMetadata(block) {</span>
+ function parseFrontMatter(text) {
+<span class="del">-  const start = text.indexOf('---');
+-  const end = text.indexOf('---', start + 3);</span>
+<span class="add">+  if (!text.startsWith('---')) {
++    return { metadata: {}, body: text };
++  }
++  const end = findClosingLine(text, 3);</span>
+   if (start === -1 || end === -1) {
+     return { metadata: {}, body: text };
+   }
+<span class="meta">... 6 more lines changed</span></span>
+      </div>
+      <div class="chat-bubble">
+        <div class="who">最后一条聊天记录</div>
+        "这个 front matter 解析有点问题，正文里出现 --- 也会被当成分隔符……
+        我先改一下 indexOf 那块，应该差不多了，你看看？"
+      </div>
+    </div>
+
+    <div class="pain-questions">
+      <div class="qcard">
+        <span class="qmark">?</span>
+        <span class="qtext">这个改动的<b>目标</b>是什么？只是消除误判，还是也要支持嵌套 YAML？</span>
+      </div>
+      <div class="qcard">
+        <span class="qmark">?</span>
+        <span class="qtext">改完<b>跑过测试吗</b>？跑的是哪个命令，通过了几条？</span>
+      </div>
+      <div class="qcard">
+        <span class="qmark">?</span>
+        <span class="qtext">还有<b>没有别的文件</b>依赖旧的 `indexOf` 行为？改动边界在哪？</span>
+      </div>
+      <div class="qcard">
+        <span class="qmark">?</span>
+        <span class="qtext">如果有另一个 agent 在并行改别的模块，<b>会不会踩到同一批文件</b>？</span>
+      </div>
+      <div class="verdict-line">
+        观众此刻应该感到的：信息散、风险不清 — 接手者要么重新读一遍仓库，要么带着假设往下改。
+        两种都在浪费时间，也都在攒风险。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 90s: WITH RELAYSTACK — the console ============ -->
+<section id="console">
+  <div class="section-head">
+    <div class="eyebrow"><span class="num">2</span>触发 rs-handoff</div>
+    <h2>同一个仓库，生成一份 Handoff Snapshot</h2>
+    <p class="section-desc">
+      一条指令，RelayStack 读取 git 状态、diff、项目文档和 agent 记录，
+      生成 <code style="font-family:var(--mono);color:var(--teal);">handoff/snapshot-&lt;timestamp&gt;.md</code>，
+      并附带三份质量契约：Evidence Map、Risk Register、Next Action Contract。
+    </p>
+  </div>
+
+  <div class="console-frame">
+    <div class="console-topbar">
+      <div class="left">
+        <span class="tdot" style="background:#ff5f57;"></span>
+        <span class="tdot" style="background:#febc2e;"></span>
+        <span class="tdot" style="background:#28c840;"></span>
+        <span class="console-title" id="consoleTitle">relaystack — handoff console — task-011: frontmatter 边界修复</span>
+      </div>
+      <div class="console-live"><span class="blip"></span>rs-handoff · snapshot generated</div>
+    </div>
+
+    <div class="case-strip" id="caseStrip">
+      <button class="case-btn active" data-case="task-017" onclick="switchCase('task-017', this)">task-017 log redaction</button>
+      <button class="case-btn" data-case="task-007" onclick="switchCase('task-007', this)">task-007 zip slip</button>
+      <button class="case-btn" data-case="task-014" onclick="switchCase('task-014', this)">task-014 cursor page</button>
+      <button class="case-btn" data-case="task-024" onclick="switchCase('task-024', this)">task-024 ndjson stream</button>
+      <button class="case-btn" data-case="task-025" onclick="switchCase('task-025', this)">task-025 deploy diff</button>
+    </div>
+
+    <div class="cols">
+      <div class="col col-a">
+        <div class="col-head">
+          <div>
+            <div class="col-h3">没有 Handoff Snapshot</div>
+            <div class="col-sub">diff / chat / instruction only</div>
+          </div>
+          <span class="col-tag no">NO SNAPSHOT</span>
+        </div>
+
+        <div class="block">
+          <div class="block-label">接手者看到的材料</div>
+          <div class="mini-code" id="noSnapshotDiff"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">聊天片段</div>
+          <div class="chat-bubble" style="margin-top:0;" id="noSnapshotChat"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">缺失的上下文</div>
+          <ul class="list-plain" id="missingContextList"></ul>
+        </div>
+
+        <div class="block">
+          <div class="block-label">接手者还要补问的问题</div>
+          <ul class="list-plain" id="openQuestionList"></ul>
+        </div>
+
+        <div class="block" style="margin-bottom:0;">
+          <div class="block-label">接手者状态</div>
+          <div class="mini-code" id="noSnapshotState" style="color:var(--red);"></div>
+        </div>
+      </div>
+
+      <div class="col col-b">
+        <div class="col-head">
+          <div>
+            <div class="col-h3">有 Handoff Snapshot</div>
+            <div class="col-sub" id="snapshotFileLabel">handoff/snapshot-20260709.md</div>
+          </div>
+          <span class="col-tag yes">WITH SNAPSHOT</span>
+        </div>
+
+        <div class="block">
+          <div class="block-label">Evidence Map</div>
+          <div id="evidenceList"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">Snapshot 回答的交接问题</div>
+          <div class="handoff-questions" id="handoffQuestionGrid"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">Risk Register</div>
+          <div id="riskList"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">Next Action Contract</div>
+          <div class="contract-box" id="nextActionContract"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-label">为什么这份交接文档重要</div>
+          <div class="handoff-value" id="handoffValue"></div>
+        </div>
+
+        <div class="block" style="margin-bottom:14px;">
+          <div class="block-label">这份材料从哪来</div>
+          <div class="source-card">
+            <div class="source-row"><span class="sk">场景来源</span><span class="sv" id="sourceProvenance"></span></div>
+            <div class="source-row"><span class="sk">任务说明</span><span class="sv" id="instructionSource"></span></div>
+            <div class="source-row"><span class="sk">已知信息</span><span class="sv" id="handoffSource"></span></div>
+            <div class="source-row"><span class="sk">验收脚本</span><span class="sv" id="testSource"></span></div>
+          </div>
+        </div>
+
+        <button class="snapshot-btn" id="generateSnapshotBtn" onclick="generateSnapshotFromAgent()">
+          打开这份 Handoff Snapshot →
+        </button>
+      </div>
+    </div>
+
+    <div class="handoff-delta">
+      <div class="delta-item"><div class="dk">定位入口</div><div class="dv" id="deltaEntry"></div></div>
+      <div class="delta-item"><div class="dk">风险暴露</div><div class="dv" id="deltaRisk"></div></div>
+      <div class="delta-item"><div class="dk">下一步</div><div class="dv good" id="deltaNext"></div></div>
+      <div class="delta-item"><div class="dk">验证方式</div><div class="dv good" id="deltaValidation"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EVIDENCE / BENCHMARK ============ -->
+<section id="evidence">
+  <div class="section-head">
+    <div class="eyebrow"><span class="num">4</span>证据收口</div>
+    <h2>三层验证撑住的结论：接手成本确实降了</h2>
+    <p class="section-desc">
+      本地 25 题 + 扩展 20 题盲评 + 第三方 Multi-SWE-bench 官方 harness 三层验证。
+      数字来自 <code style="font-family:var(--mono);color:var(--teal);">reports/</code> 目录下的真实运行记录，不是估算。
+    </p>
+  </div>
+
+  <div class="bench-grid">
+    <div class="bench-card">
+      <div class="bignum">24.1%</div>
+      <div class="blabel">接手耗时下降</div>
+      <div class="bsub">本地 25 题 benchmark，A/B 对照</div>
+    </div>
+    <div class="bench-card">
+      <div class="bignum">23.0%</div>
+      <div class="blabel">报告 token 下降</div>
+      <div class="bsub">同一批任务，rs_handoff vs no_handoff</div>
+    </div>
+    <div class="bench-card">
+      <div class="bignum amber">53 / 60</div>
+      <div class="blabel">盲评胜场</div>
+      <div class="bsub">扩展 20 题 × 3 位盲评 reviewer</div>
+    </div>
+    <div class="bench-card">
+      <div class="bignum">4 → 0</div>
+      <div class="blabel">重复已知信息探索</div>
+      <div class="bsub">已在 handoff 中出现的信息不再被重新挖一遍</div>
+    </div>
+  </div>
+
+  <div class="bench-table-wrap">
+    <table class="bt">
+      <thead>
+        <tr><th>评测</th><th>对照组</th><th>规模</th><th>关键结果</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="strong">本地 25 题</td>
+          <td>no_handoff vs rs_handoff</td>
+          <td>25 任务</td>
+          <td class="teal">耗时 -19.3% · token -3.3% · 24/25 通过</td>
+          <td>reports/benchmark-ab-20260629.zh-CN.md</td>
+        </tr>
+        <tr>
+          <td class="strong">扩展盲评 20 题</td>
+          <td>3 位独立 reviewer 盲评</td>
+          <td>20 任务 × 3</td>
+          <td class="teal">rs_handoff 53/60 胜场 · 重复探索 4→0</td>
+          <td>reports/blind-expanded-20260625/final.zh-CN.md</td>
+        </tr>
+        <tr>
+          <td class="strong">Multi-SWE-bench（官方）</td>
+          <td>clean baseline vs rs-handoff</td>
+          <td>1 官方样本</td>
+          <td class="teal">两组均 1/1 resolved · handoff 少用 711,747 tokens</td>
+          <td>reports/authoritative-clean-ab-20260629.zh-CN.md</td>
+        </tr>
+        <tr>
+          <td class="strong">项目技能 A/B（官方）</td>
+          <td>clean baseline vs 仅用 rs-handoff/rs-issue-fix</td>
+          <td>1 官方样本</td>
+          <td class="teal">token 降至 34.1% · 耗时降至 81.3% · patch 更贴近官方 fix</td>
+          <td>reports/multi-swe-project-skills-20260629</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prov-note">
+    数据分层说明：本地 25 题中 <code>task-001..005</code> 绑定公开 GitHub PR（vite / marked / react-router，MIT 许可），
+    可追溯性强；<code>task-006..025</code> 为项目自建工程场景题，适合覆盖回归但不单独作为第三方公开评测结论。
+    Multi-SWE-bench 结果为官方 harness 判定，非本地 oracle。当前样本量仍小，下一轮计划扩到 3–5 个官方样本并固定 clean baseline。
+  </div>
+</section>
+
+<footer>
+  <div class="brand">RelayStack — repo-local skill set &amp; handoff protocol for AI-assisted software work</div>
+  <div>
+    <span style="font-family:var(--mono); font-size:12px; color:var(--ink-dimmer);">现场演示用投屏辅助页面 · 主线是 live demo</span>
+  </div>
+</footer>
+
+<!-- ============ MODAL: full snapshot ============ -->
+<div class="modal-overlay" id="snapshotModal" onclick="if(event.target===this) closeSnapshotModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="mt">handoff/snapshot-20260709-150211.md</span>
+      <div class="modal-actions">
+        <button class="modal-copy" id="copySnapshotBtn" onclick="copySnapshot()">复制全文</button>
+        <button class="modal-close" onclick="closeSnapshotModal()">关闭 ✕</button>
+      </div>
+    </div>
+    <div class="modal-body"><pre id="snapshotPre"></pre></div>
+  </div>
+</div>
+
+<script type="text/plain" id="snapshot-md"># Handoff Snapshot：修复 Markdown front matter 解析边界
+
+生成时间：2026-07-09 15:02:11
+
+## 1. 当前目标
+- 本轮目标：只修改 src/markdown/frontmatter.js，让解析器只在文件首行严格等于 "---" 时才触发 front matter 解析，避免正文中的分隔线被误判
+- 当前阶段：implementation in progress
+- 负责人：worker_a（当前 agent）
+- 是否可继续：是
+
+## 2. 工作区状态
+- 工作区：RelayStack/tasks/task-011
+- 分支：main
+- 未提交变更：
+```text
+ M src/markdown/frontmatter.js
+```
+- diff 统计：
+```text
+ src/markdown/frontmatter.js | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+```
+- 主要改动文件：
+```text
+src/markdown/frontmatter.js
+```
+
+## 3. 已完成
+- 已定位根因：parseFrontMatter 使用 text.indexOf('---') 未限制必须在文件开头、必须独占一行
+- 已改写 parseFrontMatter：先判断 text.startsWith('---')，再查找下一处独占一行的 "---" 作为结束标记
+- 已确认不需要引入 YAML parser，metadata 仍用简单的 key: value 拆分
+
+## 4. 未完成
+- 未补充"缺失结束行"分支的专项测试用例
+- 未运行 bash test.sh 做最终验证
+
+## 5. 阻塞与风险
+- 阻塞：未发现
+- 风险：正文中出现独占一行的 "---" 仍可能被误判为结束标记，需要用测试锁定行为
+- 需要用户确认：未发现
+
+## 6. Evidence Map
+- 根因：indexOf('---') 未限制行首、未限制独占一行
+  - 证据来源：git diff + src/markdown/frontmatter.js:13
+  - 可信度：高
+- 只修改 frontmatter.js，不引入 YAML parser
+  - 证据来源：instruction.md 第 8-14 行 + handoff.md
+  - 可信度：高
+- 测试覆盖要求：有 front matter / 正文中 --- / 缺失结束行 三种场景
+  - 证据来源：handoff.md 第 6 行
+  - 可信度：高
+
+## 7. Risk Register
+- 风险：正文中出现独占一行的 "---"
+  - 触发条件：Markdown 正文本身使用 --- 作为水平分隔线
+  - 影响：front matter 结束位置误判，导致正文被截断
+  - 缓解动作：仅在文件首行严格等于 --- 时才进入解析分支
+- 风险：缺失结束行
+  - 触发条件：front matter 开头存在但未闭合
+  - 影响：metadata 解析异常或抛出边界错误
+  - 缓解动作：找不到结束行时按原文返回，metadata 置为 {}
+
+## 8. Next Action Contract
+- 下一步动作：补齐"缺失结束行"分支的测试用例，并运行完整测试
+- 输入：src/markdown/frontmatter.js 当前实现 + test.sh 既有用例
+- 触达文件：src/markdown/frontmatter.js
+- 验证命令：bash test.sh
+- 完成标志：3 条用例（含 front matter / 正文含 --- / 缺失结束行）全部通过
+
+## 9. Agent 交接信息
+- 参与代理：worker_a（implementation）
+- write_scope：src/markdown/frontmatter.js
+- adoption：accepted
+- conflicts：未发现
+- verification：self-test passed（本地跑通 2/3 用例，缺失结束行分支待补）
+
+## 10. 复现命令
+```bash
+git diff src/markdown/frontmatter.js
+bash test.sh
+```
+
+## 11. Agent 并行边界
+- 当前只有 worker_a 声明了对 src/markdown/frontmatter.js 的写入范围
+- 未发现其他并行 agent 的写入范围重叠
+</script>
+
+<script>
+function switchTab(btn, tabId){
+  var row = btn.parentElement;
+  row.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var panelWrap = row.parentElement;
+  panelWrap.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(tabId).classList.add('active');
+}
+
+function toggleDetail(el){
+  var detail = el.querySelector('.expand-detail');
+  if(!detail) return;
+  detail.classList.toggle('open');
+}
+
+var demoCases = {
+  'task-017': {
+    task:'task-017',
+    title:'日志脱敏：header 和 URL query 都不能泄露',
+    file:'src/logging/redactor.py',
+    snapshotFile:'handoff/snapshot-task-017.md',
+    provenance:'RelayStack scenario fixtures（project_authored_scenario）',
+    instructionSource:'tasks/task-017/instruction.md',
+    handoffSource:'tasks/task-017/handoff.md',
+    testSource:'tasks/task-017/test.sh',
+    diff:`M  src/logging/redactor.py
+
+- sensitive = {"authorization", "cookie", "x-api-key"}
+- if key in sensitive:
+-   value = "[REDACTED]"
++ # header 大小写不敏感
++ # URL query 中 token/password/secret 也要脱敏`,
+    chat:'“日志里还有 token/password，先把 headers 里几个字段盖掉吧。URL 里有没有暂时不确定，你接着看看。”',
+    missing:['不知道真实入口是不是 redactor.py','容易只修 header 小写匹配，漏掉 URL query','不知道哪些 key 属于敏感字段','不知道是否允许新增依赖'],
+    openQuestions:['当前目标到底是 header 脱敏，还是 URL 也要处理？','敏感字段列表在哪里？大小写是否算绕过？','可以引第三方库，还是必须 stdlib？','怎么证明非敏感 query 没被破坏？'],
+    state:'→ 重新搜索 logging 调用链\\n→ 猜测 URL query 是否在范围内\\n→ 可能只补一半安全边界',
+    evidence:[
+      {claim:'入口文件：src/logging/redactor.py', source:'tasks/task-017/instruction.md'},
+      {claim:'根因：header 匹配大小写敏感，且完全缺 URL query 处理', source:'tasks/task-017/handoff.md'},
+      {claim:'stdlib urllib.parse 足够，不需要新增依赖', source:'tasks/task-017/handoff.md'}
+    ],
+    risks:['只修 header 会继续泄露 query token/password/secret','大小写变体 Authorization / TOKEN 可能绕过脱敏'],
+    questions:{goal:'修复日志脱敏，覆盖 header 与 URL query',progress:'入口、根因、修复方向和验收边界已确定',files:'只触达 src/logging/redactor.py',why:'避免 token/password/secret 进入日志平台',risk:'大小写绕过与 query 泄露',next:'用 urllib.parse 处理 query 并统一 key 大小写',validation:'bash test.sh 覆盖敏感/非敏感参数'},
+    value:['把安全边界从“可能要脱敏”收束成可执行清单','让接手者不用重新追 logging 调用链','把不新增依赖和验收条件提前锁住'],
+    next:'在 redactor.py 中统一大小写匹配敏感 key，并用 urllib.parse 重写 query 值',
+    validation:'bash test.sh：敏感 header 大小写不敏感脱敏；query 中 token/password/secret 脱敏；非敏感参数保留',
+    delta:{entry:'snapshot 直接给 redactor.py', risk:'query 泄露和大小写绕过被提前点名', next:'用 stdlib 最小修复', validation:'bash test.sh 覆盖安全边界'}
+  },
+  'task-007': {
+    task:'task-007',
+    title:'归档解压：阻断 Zip Slip 路径穿越',
+    file:'src/archive/safeExtract.js',
+    snapshotFile:'handoff/snapshot-task-007.md',
+    provenance:'RelayStack scenario fixtures（project_authored_scenario）',
+    instructionSource:'tasks/task-007/instruction.md',
+    handoffSource:'tasks/task-007/handoff.md',
+    testSource:'tasks/task-007/test.sh',
+    diff:`M  src/archive/safeExtract.js
+
+- if (!target.startsWith(base)) return null
++ const target = path.resolve(base, entry.name)
++ if (target !== base && !target.startsWith(base + path.sep))
++   throw new Error("unsafe path")`,
+    chat:'“解压路径不太安全，我看 startsWith 有点问题。你把 ../ 这种挡掉就行。”',
+    missing:['不知道 sibling-prefix 也是漏洞','不知道非法 entry 应该抛错还是静默过滤','不知道目标路径是否必须留在 destination 内','不知道是否需要真的解压文件'],
+    openQuestions:['目标路径边界怎么定义？','非法 entry 是过滤还是 fail fast？','绝对路径和 sibling-prefix 是否在验收范围内？','这个任务需要真正解压文件吗？'],
+    state:'→ 容易继续写字符串 startsWith 补丁\\n→ 漏掉 /tmp/outside vs /tmp/out\\n→ 需要自己设计验证样例',
+    evidence:[
+      {claim:'入口文件：src/archive/safeExtract.js', source:'tasks/task-007/instruction.md'},
+      {claim:'根因：字符串前缀不是路径边界', source:'tasks/task-007/handoff.md'},
+      {claim:'修复方向：path.resolve 后检查 target === base 或 base + path.sep', source:'tasks/task-007/handoff.md'}
+    ],
+    risks:['sibling prefix 可绕过 startsWith','静默过滤非法 entry 会隐藏构建制品问题'],
+    questions:{goal:'阻断归档 entry 路径穿越',progress:'入口与 path.resolve 修复方向已确认',files:'只触达 src/archive/safeExtract.js',why:'构建制品解压不能写出 destination',risk:'startsWith 不是路径边界，sibling-prefix 可绕过',next:'用 resolved path 做边界判断并 fail fast',validation:'bash test.sh 覆盖 ../、绝对路径、sibling-prefix'},
+    value:['把安全修复从“挡 ../”提升到路径边界验证','避免接手者漏掉 sibling-prefix 这种非直观绕过','让异常语义和测试样例提前固定'],
+    next:'用 path.resolve 做路径边界判断，非法 entry fail fast',
+    validation:'bash test.sh：../、绝对路径、sibling prefix 都抛 unsafe path；正常 entry 返回 { name, target }',
+    delta:{entry:'snapshot 直接给 safeExtract.js', risk:'sibling-prefix 绕过被明确暴露', next:'path.resolve + base/path.sep', validation:'bash test.sh 覆盖穿越路径'}
+  },
+  'task-014': {
+    task:'task-014',
+    title:'游标分页：插入新数据后第二页不能重复',
+    file:'src/pagination/cursor_page.py',
+    snapshotFile:'handoff/snapshot-task-014.md',
+    provenance:'RelayStack scenario fixtures（project_authored_scenario）',
+    instructionSource:'tasks/task-014/instruction.md',
+    handoffSource:'tasks/task-014/handoff.md',
+    testSource:'tasks/task-014/test.sh',
+    diff:`M  src/pagination/cursor_page.py
+
+- start = int(cursor or 0)
+- return items[start:start + limit], str(start + limit)
++ # cursor 保存最后一条记录的 (created_at, id)
++ # 按 created_at desc, id desc 继续翻页`,
+    chat:'“分页 cursor 不稳定，第一页之后插入新记录，第二页会重复。先别大改，修一下 cursor。”',
+    missing:['不知道 cursor 不能继续当 offset','不知道排序 tie-breaker 是 id 倒序','不知道第一页后插入新记录是关键复现','不知道最后一页 next_cursor 语义'],
+    openQuestions:['cursor 是 offset 还是记录身份？','同一 created_at 怎么排序？','第一页之后插入新数据怎么复现？','最后一页应该返回空串还是 None？'],
+    state:'→ 可能继续调 offset\\n→ 自己构造不出插入场景\\n→ 重复/跳过数据风险留在生产',
+    evidence:[
+      {claim:'入口文件：src/pagination/cursor_page.py', source:'tasks/task-014/instruction.md'},
+      {claim:'根因：offset cursor 在数据集变化后不稳定', source:'tasks/task-014/handoff.md'},
+      {claim:'cursor 应保存最后一条记录的 (created_at, id)', source:'tasks/task-014/handoff.md'}
+    ],
+    risks:['新数据插入会导致第二页重复上一页尾项','created_at 相同必须用 id 做稳定 tie-breaker'],
+    questions:{goal:'让 cursor pagination 在数据插入后仍稳定',progress:'排序规则、cursor 内容和验收场景已明确',files:'只触达 src/pagination/cursor_page.py',why:'Feed/工单列表翻页不能重复或跳项',risk:'offset cursor 在数据集变化后失效',next:'cursor 保存最后一条记录的 created_at/id',validation:'bash test.sh 验证插入新记录后的第二页'},
+    value:['把“分页不稳定”转成确定的复现条件','免去接手者重新设计 cursor 语义','把排序、最后一页和验证都写进交接合同'],
+    next:'按 created_at/id 倒序排序，用最后一条记录生成 cursor',
+    validation:'bash test.sh：第一页后插入新记录，第二页不重复；最后一页 next_cursor 为 None',
+    delta:{entry:'snapshot 直接给 cursor_page.py', risk:'插入新数据复现条件被写清楚', next:'cursor 存 created_at/id', validation:'bash test.sh 验证翻页稳定性'}
+  },
+  'task-024': {
+    task:'task-024',
+    title:'NDJSON streaming：chunk 边界不等于行边界',
+    file:'src/streaming/ndjson.py',
+    snapshotFile:'handoff/snapshot-task-024.md',
+    provenance:'RelayStack scenario fixtures（project_authored_scenario）',
+    instructionSource:'tasks/task-024/instruction.md',
+    handoffSource:'tasks/task-024/handoff.md',
+    testSource:'tasks/task-024/test.sh',
+    diff:`M  src/streaming/ndjson.py
+
+- for chunk in chunks:
+-   for line in chunk.split("\\n"):
+-     yield json.loads(line)
++ buffer += chunk
++ # 只解析换行前的完整 JSON 行`,
+    chat:'“streaming parser 有时候解析失败，应该是 chunk 切开了 JSON。你看一下 split line 那块。”',
+    missing:['不知道空行要忽略','不知道末尾无换行也要解析','不知道非法剩余 buffer 应抛原始 JSONDecodeError','不知道不能按 chunk 独立 split'],
+    openQuestions:['chunk 边界和行边界是什么关系？','末尾没有换行要不要解析？','空行是否算错误？','坏 JSON 应该吞掉还是暴露原异常？'],
+    state:'→ 容易只 try/catch json.loads\\n→ 跨 chunk 数据仍不稳定\\n→ 末尾 buffer 边界靠猜',
+    evidence:[
+      {claim:'入口文件：src/streaming/ndjson.py', source:'tasks/task-024/instruction.md'},
+      {claim:'根因：stream chunk 边界不等于行边界', source:'tasks/task-024/handoff.md'},
+      {claim:'最小实现：维护 buffer，只解析 \\n 前完整行', source:'tasks/task-024/handoff.md'}
+    ],
+    risks:['跨 chunk JSON 行会被拆坏','吞掉 JSONDecodeError 会隐藏坏数据'],
+    questions:{goal:'修复 NDJSON streaming 跨 chunk 解析',progress:'buffer 策略和边界测试已确定',files:'只触达 src/streaming/ndjson.py',why:'日志/消息/LLM streaming 都会跨 chunk',risk:'按 chunk split 会拆坏 JSON 行',next:'维护 buffer，只解析完整行，结束时处理剩余行',validation:'bash test.sh 覆盖跨 chunk、空行、末尾无换行、坏 JSON'},
+    value:['让接手者立刻抓住“chunk 不是 line”的根因','避免用 try/catch 掩盖 streaming 状态机问题','把异常保留策略也写清楚'],
+    next:'维护 buffer，忽略空行，输入结束时解析最后一行',
+    validation:'bash test.sh：跨 chunk JSON 行可解析；空行忽略；末尾无换行可解析；非法 buffer 抛 JSONDecodeError',
+    delta:{entry:'snapshot 直接给 ndjson.py', risk:'chunk/line 边界错位被点名', next:'buffer + 完整行解析', validation:'bash test.sh 覆盖 stream 边界'}
+  },
+  'task-025': {
+    task:'task-025',
+    title:'部署 reconciler：数组下标不是服务身份',
+    file:'src/deploy/reconciler.js',
+    snapshotFile:'handoff/snapshot-task-025.md',
+    provenance:'RelayStack scenario fixtures（project_authored_scenario）',
+    instructionSource:'tasks/task-025/instruction.md',
+    handoffSource:'tasks/task-025/handoff.md',
+    testSource:'tasks/task-025/test.sh',
+    diff:`M  src/deploy/reconciler.js
+
+- desired.forEach((next, index) => compare(next, current[index]))
++ const currentByName = new Map(current.map(s => [s.name, s]))
++ # 以 name 对齐 create/update/delete`,
+    chat:'“部署 diff 在服务重排时会误报 update。应该别按 index 对比了，但输出顺序别乱。”',
+    missing:['不知道 name 才是服务身份','不知道 create/update/delete 输出顺序','不知道重排不应该产生 diff','不知道 before/after 应该保留什么'],
+    openQuestions:['服务身份是数组位置还是 name？','重排是否应该产生 diff？','create/update/delete 输出顺序怎么排？','update 需要带 before/after 吗？'],
+    state:'→ 可能继续按数组位置修补\\n→ 重排仍被误判成更新\\n→ 删除顺序和新增顺序不稳定',
+    evidence:[
+      {claim:'入口文件：src/deploy/reconciler.js', source:'tasks/task-025/instruction.md'},
+      {claim:'根因：数组 index 不是资源身份', source:'tasks/task-025/handoff.md'},
+      {claim:'用 Map(name -> service) 对齐即可', source:'tasks/task-025/handoff.md'}
+    ],
+    risks:['服务重排制造假 diff','删除项若不按 current 顺序会影响发布审计'],
+    questions:{goal:'让部署 reconciler 按服务身份计算 diff',progress:'身份字段、输出类型和顺序已明确',files:'只触达 src/deploy/reconciler.js',why:'发布 diff 不能把重排误报成更新',risk:'数组 index 会制造假 diff',next:'用 Map(name -> service) 对齐 desired/current',validation:'bash test.sh 验证重排、新增、更新、删除顺序'},
+    value:['把“diff 不准”拆成身份建模问题','避免接手者继续在数组下标上修补','让发布审计需要的输出顺序成为完成标准'],
+    next:'按 name 建 Map，先按 desired 输出 create/update，再按 current 输出 delete',
+    validation:'bash test.sh：重排不产生 diff；新增/更新/删除按指定顺序输出',
+    delta:{entry:'snapshot 直接给 reconciler.js', risk:'重排误报 update 被提前拦住', next:'Map(name -> service)', validation:'bash test.sh 验证 diff 顺序'}
+  }
+};
+
+var currentCase = demoCases['task-017'];
+
+function setText(id, value){
+  var el = document.getElementById(id);
+  if(el) el.textContent = value;
+}
+
+function renderList(id, items){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = items.map(function(item){ return '<li>' + escapeHtml(item) + '</li>'; }).join('');
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, function(ch){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+  });
+}
+
+function renderCards(id, items, kind){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = items.map(function(item){
+    if(kind === 'risk'){
+      return '<div class="risk-item"><div class="rtitle">' + escapeHtml(item) + '</div></div>';
+    }
+    return '<div class="evidence-item"><span class="conf">可信度：高</span><div class="claim">' + escapeHtml(item.claim) + '</div><div class="src">来源：' + escapeHtml(item.source) + '</div></div>';
+  }).join('');
+}
+
+function renderContract(item){
+  var el = document.getElementById('nextActionContract');
+  if(!el) return;
+  el.innerHTML = [
+    ['下一步', item.next],
+    ['触达文件', item.file],
+    ['验证命令', 'bash test.sh'],
+    ['完成标志', item.validation.replace(/^bash test.sh：/, '')]
+  ].map(function(row){
+    return '<div class="contract-row"><span class="k">' + escapeHtml(row[0]) + '</span><span class="v">' + escapeHtml(row[1]) + '</span></div>';
+  }).join('');
+}
+
+function renderHandoffQuestions(item){
+  var el = document.getElementById('handoffQuestionGrid');
+  if(!el) return;
+  var rows = [
+    ['目标', item.questions.goal],
+    ['进度', item.questions.progress],
+    ['文件', item.questions.files],
+    ['原因', item.questions.why],
+    ['风险', item.questions.risk],
+    ['下一步', item.questions.next],
+    ['验证', item.questions.validation]
+  ];
+  el.innerHTML = rows.map(function(row){
+    return '<div class="hq-item"><div class="hq-k">' + escapeHtml(row[0]) + '</div><div class="hq-v">' + escapeHtml(row[1]) + '</div></div>';
+  }).join('');
+}
+
+function renderHandoffValue(item){
+  var el = document.getElementById('handoffValue');
+  if(!el) return;
+  el.innerHTML = '<div class="hv-title">从“重新理解”变成“按合同继续”</div><ul>' +
+    item.value.map(function(line){ return '<li>' + escapeHtml(line) + '</li>'; }).join('') +
+    '</ul>';
+}
+
+function snapshotMarkdown(item){
+  return [
+    '# Handoff Snapshot: ' + item.task + ' ' + item.title,
+    '',
+    '## 1. 当前目标',
+    '- 修复：' + item.title,
+    '- 入口文件：' + item.file,
+    '',
+    '## 2. Evidence Map',
+    item.evidence.map(function(row){ return '- ' + row.claim + '（来源：' + row.source + '）'; }).join('\n'),
+    '',
+    '## 3. Risk Register',
+    item.risks.map(function(line){ return '- ' + line; }).join('\n'),
+    '',
+    '## 4. Next Action Contract',
+    '- 下一步：' + item.next,
+    '- 验证命令：bash test.sh',
+    '- 完成标志：' + item.validation.replace(/^bash test.sh：/, ''),
+    '',
+    '## 5. Handoff Questions',
+    Object.keys(item.questions).map(function(key){ return '- ' + key + ': ' + item.questions[key]; }).join('\n'),
+    '',
+    '## 6. 来源',
+    '- 任务说明：' + item.instructionSource,
+    '- Snapshot 已知信息：' + item.handoffSource,
+    '- 验收脚本：' + item.testSource
+  ].join('\n');
+}
+
+function renderCase(caseId){
+  var item = demoCases[caseId] || demoCases['task-017'];
+  currentCase = item;
+  setText('consoleTitle', 'relaystack — handoff console — ' + item.task + ': ' + item.title);
+  setText('snapshotFileLabel', item.snapshotFile);
+  setText('noSnapshotDiff', item.diff);
+  setText('noSnapshotChat', item.chat);
+  renderList('missingContextList', item.missing);
+  renderList('openQuestionList', item.openQuestions);
+  setText('noSnapshotState', item.state);
+  renderCards('evidenceList', item.evidence, 'evidence');
+  renderCards('riskList', item.risks, 'risk');
+  renderContract(item);
+  renderHandoffQuestions(item);
+  renderHandoffValue(item);
+  setText('sourceProvenance', item.provenance);
+  setText('instructionSource', item.instructionSource);
+  setText('handoffSource', item.handoffSource);
+  setText('testSource', item.testSource);
+  setText('deltaEntry', item.delta.entry);
+  setText('deltaRisk', item.delta.risk);
+  setText('deltaNext', item.delta.next);
+  setText('deltaValidation', item.delta.validation);
+}
+
+function switchCase(caseId, btn){
+  document.querySelectorAll('.case-btn').forEach(function(el){ el.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  renderCase(caseId);
+}
+
+renderCase('task-017');
+
+function showSnapshotModal(text){
+  document.getElementById('snapshotPre').textContent = text;
+  document.getElementById('snapshotModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openSnapshotModal(){
+  showSnapshotModal(snapshotMarkdown(currentCase));
+}
+
+function closeSnapshotModal(){
+  document.getElementById('snapshotModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeSnapshotModal();
+});
+
+function copySnapshot(){
+  var text = document.getElementById('snapshotPre').textContent || document.getElementById('snapshot-md').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn = document.getElementById('copySnapshotBtn');
+    var old = btn.textContent;
+    btn.textContent = '已复制 ✓';
+    setTimeout(function(){ btn.textContent = old; }, 1600);
+  });
+}
+
+async function generateSnapshotFromAgent(){
+  var btn = document.getElementById('generateSnapshotBtn');
+  var fallback = snapshotMarkdown(currentCase);
+  var old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+
+  try{
+    var res = await fetch('/api/relaystack', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({task:currentCase.task, skill:'rs-handoff', snapshotFile:currentCase.snapshotFile})
+    });
+    if(!res.ok) throw new Error('snapshot api unavailable');
+    var data = await res.json();
+    showSnapshotModal(data.snapshot || data.output || fallback);
+  }catch(e){
+    showSnapshotModal(fallback);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+}
+
+var validationRunning = false;
+function runValidation(){
+  if(validationRunning) return;
+  validationRunning = true;
+  var btn = document.getElementById('runBtn');
+  var out = document.getElementById('runOutput');
+  btn.disabled = true;
+  btn.textContent = '运行中…';
+
+  var lines = [
+    '$ bash test.sh',
+    currentCase.validation.replace(/^bash test.sh：/, '  ✓ '),
+    '',
+    'test.sh passed'
+  ];
+
+  out.textContent = '';
+  var i = 0;
+  function typeLine(){
+    if(i >= lines.length){
+      out.innerHTML = out.innerHTML.replace('3 passed, 0 failed', '<span class="ok">3 passed, 0 failed ✓</span>');
+      btn.textContent = '✓ 验证通过';
+      validationRunning = false;
+      return;
+    }
+    out.textContent += (i>0 ? '\n' : '') + lines[i];
+    i++;
+    setTimeout(typeLine, i===1 ? 260 : 340);
+  }
+  typeLine();
+}
+
+/* ---------- GSAP ---------- */
+if(window.gsap && window.ScrollTrigger){
+  gsap.registerPlugin(ScrollTrigger);
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lightMotion = reduceMotion || window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+
+  if(!lightMotion){
+    gsap.to('#heroBlobA', {x:40, y:30, duration:9, ease:'sine.inOut', repeat:-1, yoyo:true});
+    gsap.to('#heroBlobB', {x:-30, y:-24, duration:11, ease:'sine.inOut', repeat:-1, yoyo:true});
+  }
+
+  if(!reduceMotion){
+    gsap.timeline({defaults:{ease:'power3.out'}})
+      .from('.kicker', {opacity:0, y:14, duration:.5})
+      .from('.hero-title', {opacity:0, y:26, duration:.7}, '-=.25')
+      .from('.hero-sub', {opacity:0, y:18, duration:.6}, '-=.35')
+      .from('.hstat', {opacity:0, y:16, duration:.5, stagger:.08}, '-=.3')
+      .from('.scroll-cue', {opacity:0, duration:.5}, '-=.1');
+
+    function replayTrigger(trigger, start){
+      return {
+        trigger:trigger,
+        start:start,
+        end:'bottom top',
+        toggleActions:'play reverse play reverse'
+      };
+    }
+    function sectionHeadTrigger(trigger){
+      return {
+        trigger:trigger,
+        start:'top 85%',
+        end:'top 85%',
+        toggleActions:'play none none reverse'
+      };
+    }
+    function holdAfterEnterTrigger(trigger, start){
+      return {
+        trigger:trigger,
+        start:start,
+        end:start,
+        toggleActions:'play none none reverse'
+      };
+    }
+
+    gsap.utils.toArray('section').forEach(function(sec){
+      var head = sec.querySelector('.section-head');
+      if(!head) return;
+      gsap.from(head, {
+        opacity:0,
+        y:30,
+        duration:.6,
+        ease:'power2.out',
+        scrollTrigger:sectionHeadTrigger(head)
+      });
+    });
+
+    gsap.from('.qcard', {
+      opacity:0,
+      x:-20,
+      duration:.5,
+      stagger:.1,
+      ease:'power2.out',
+      clearProps:'transform',
+      scrollTrigger:replayTrigger('.pain-questions', 'top 80%')
+    });
+    gsap.from('.term', {
+      opacity:0,
+      x:20,
+      duration:.6,
+      ease:'power2.out',
+      scrollTrigger:replayTrigger('.term', 'top 85%')
+    });
+    gsap.from('.cols .col', {
+      opacity:0,
+      y:24,
+      duration:.55,
+      stagger:.12,
+      ease:'power2.out',
+      scrollTrigger:replayTrigger('.console-frame', 'top 78%')
+    });
+    gsap.from('.bench-card', {
+      opacity:0,
+      y:24,
+      scale:.96,
+      duration:.5,
+      stagger:.08,
+      ease:'back.out(1.4)',
+      scrollTrigger:holdAfterEnterTrigger('.bench-grid', 'top 82%')
+    });
+    gsap.from('table.bt tbody tr', {
+      opacity:0,
+      y:12,
+      duration:.4,
+      stagger:.06,
+      ease:'power2.out',
+      scrollTrigger:holdAfterEnterTrigger('.bench-table-wrap', 'top 88%')
+    });
+
+    gsap.utils.toArray('.bench-card .bignum').forEach(function(el){
+      var raw = el.textContent.trim();
+      var match = raw.match(/-?\d+(\.\d+)?/);
+      if(!match) return;
+      var end = parseFloat(match[0]);
+      var prefix = raw.slice(0, match.index);
+      var suffix = raw.slice(match.index + match[0].length);
+      var decimals = match[0].includes('.') ? match[0].split('.')[1].length : 0;
+      var obj = {val:0};
+      var countTween = null;
+
+      function renderVal(v){ el.textContent = prefix + v.toFixed(decimals) + suffix; }
+      function killTween(){ if(countTween) countTween.kill(); }
+      function countUp(){
+        killTween();
+        obj.val = 0;
+        renderVal(0);
+        countTween = gsap.to(obj, {
+          val:end,
+          duration:1.1,
+          ease:'power1.out',
+          overwrite:true,
+          onUpdate:function(){ renderVal(obj.val); }
+        });
+      }
+      function resetDown(){
+        killTween();
+        obj.val = 0;
+        renderVal(0);
+      }
+
+      ScrollTrigger.create({
+        trigger:el,
+        start:'top 88%',
+        end:'top 88%',
+        onEnter:countUp,
+        onEnterBack:countUp,
+        onLeaveBack:resetDown
+      });
+    });
+  }
+}
+</script>
+
+</body>
+</html>

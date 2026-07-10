@@ -2,10 +2,17 @@
 name: rs-explore
 description: Explore code or docs to answer a focused question and preserve reusable evidence.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Explore
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create raw knowledge notes or a
+substitute process directory inside the repository. Return the evidence notes in
+the conversation and request or wait for a personal path. Continue durable team
+owner doc updates normally.
 
 Use this skill when the user asks how something works or wants evidence before
 designing or fixing.
@@ -18,7 +25,8 @@ designing or fixing.
 4. Put the short answer first.
 5. List only evidence that supports the answer.
 6. If the conclusion is durable, update the right attractor doc.
-7. Put detailed evidence notes in personal project notes or `rs-handoff`.
+7. Put raw evidence notes in `<personal-root>/project/knowledge/`; use
+   `rs-handoff` only for a personal continuation snapshot.
 
 ## Output
 

@@ -2,7 +2,7 @@
 name: rs-feat-ff
 description: Fast RelayStack feature path for tiny changes that do not need a design phase.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Feat FF

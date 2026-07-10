@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-07-10T00:31:00+08:00",
+  "status": "blocked_before_official_harness",
+  "dataset_source": "ByteDance-Seed/Multi-SWE-bench-flash",
+  "sample_count": 6,
+  "sample_file": "/tmp/relaystack-multi-swe-six/dataset.jsonl",
+  "sample_ids": [
+    "ponylang__ponyc-2261",
+    "ponylang__ponyc-2221",
+    "ponylang__ponyc-2214",
+    "ponylang__ponyc-2205",
+    "ponylang__ponyc-2203",
+    "ponylang__ponyc-2201"
+  ],
+  "environment": {
+    "docker_available": true,
+    "datasets_available": true,
+    "multi_swe_bench_spec_available": true,
+    "run_evaluation_import": "failed",
+    "failure": "ModuleNotFoundError: No module named 'multi_swe_bench.harness.repos.python.qiskit'",
+    "likely_cause": "Multi-SWE-bench contains both Qiskit and qiskit paths; cloning/installing on macOS default case-insensitive filesystem collapses those package paths."
+  },
+  "strata_summary": {
+    "language": {
+      "c": {
+        "total": 6
+      }
+    },
+    "repo": {
+      "ponylang/ponyc": {
+        "total": 6
+      }
+    },
+    "task_type": {
+      "language-semantics": 2,
+      "compiler-codegen": 1,
+      "difficulty-only": 3
+    }
+  },
+  "next_step": "Run Multi-SWE-bench dependency checkout and official harness on a case-sensitive APFS volume or Linux filesystem, then write final_report.json for baseline and relaystack_handoff before claiming official expanded clean A/B results."
+}

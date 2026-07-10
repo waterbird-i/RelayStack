@@ -1,0 +1,108 @@
+[2026-07-10 02:14:41,902] [run_evaluation.py] [INFO]: Initialize logger successfully.
+[2026-07-10 02:14:41,902] [run_evaluation.py] [INFO]: Building images...
+[2026-07-10 02:14:41,902] [run_evaluation.py] [INFO]: Loading repo commits...
+[2026-07-10 02:14:41,902] [run_evaluation.py] [INFO]: Creating instances...
+[2026-07-10 02:14:41,902] [run_evaluation.py] [INFO]: Loading datasets...
+[2026-07-10 02:14:42,115] [run_evaluation.py] [INFO]: Successfully loaded 6 valid datasets from ['/Users/liancong/Documents/RelayStack/reports/multi-swe-six-20260710/dataset.jsonl']
+[2026-07-10 02:14:42,116] [run_evaluation.py] [INFO]: Successfully loaded 6 valid instances.
+[2026-07-10 02:14:42,368] [run_evaluation.py] [INFO]: Total images: 7
+[2026-07-10 02:14:42,468] [run_evaluation.py] [INFO]: Images built successfully.
+[2026-07-10 02:14:42,468] [run_evaluation.py] [INFO]: Running instances...
+[2026-07-10 02:14:42,469] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2261 with command: bash /home/fix-run.sh...
+[2026-07-10 02:17:20,313] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2221 with command: bash /home/fix-run.sh...
+[2026-07-10 02:19:53,820] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2214 with command: bash /home/fix-run.sh...
+[2026-07-10 02:22:16,446] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2205 with command: bash /home/fix-run.sh...
+[2026-07-10 02:24:38,920] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2203 with command: bash /home/fix-run.sh...
+[2026-07-10 02:24:39,500] [run_evaluation.py] [INFO]: Running mswebench/ponylang_m_ponyc:pr-2201 with command: bash /home/fix-run.sh...
+[2026-07-10 02:24:40,055] [run_evaluation.py] [INFO]: Instances run successfully.
+[2026-07-10 02:24:40,055] [run_evaluation.py] [INFO]: Running evaluation...
+[2026-07-10 02:24:40,056] [gen_report.py] [INFO]: Initialize logger successfully.
+[2026-07-10 02:24:40,056] [gen_report.py] [INFO]: Collecting report tasks...
+[2026-07-10 02:24:40,057] [gen_report.py] [INFO]: Successfully collected 6 tasks.
+[2026-07-10 02:24:40,057] [gen_report.py] [INFO]: Loading dataset...
+[2026-07-10 02:24:40,286] [gen_report.py] [INFO]: Successfully loaded 6 valid datasets from ['/Users/liancong/Documents/RelayStack/reports/multi-swe-six-20260710/dataset.jsonl']
+[2026-07-10 02:24:40,372] [gen_report.py] [ERROR]: Invalid report for ponylang/ponyc:pr-2214, Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1059, 0, 0)
+  test = (1024, 2, 0)
+  fix  = (1025, 1, 0), Before applying the fix patch, the test passed; however, after applying the fix patch, the test failed. A brief summary is as follows: Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1059, 0, 0)
+  test = (1024, 2, 0)
+  fix  = (1025, 1, 0). `LexerTest.InvalidEscapeCharacterLiteral`: Test(run=<TestStatus.NONE: 'NONE'>, test=<TestStatus.PASS: 'PASS'>, fix=<TestStatus.FAIL: 'FAIL'>)
+[2026-07-10 02:24:40,391] [gen_report.py] [ERROR]: Invalid report for ponylang/ponyc:pr-2205, Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1045, 0, 0)
+  test = (1010, 7, 0)
+  fix  = (1003, 14, 0), Before applying the fix patch, the test passed; however, after applying the fix patch, the test failed. A brief summary is as follows: Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1045, 0, 0)
+  test = (1010, 7, 0)
+  fix  = (1003, 14, 0). `CodegenTraceTest.NoTrace`: Test(run=<TestStatus.PASS: 'PASS'>, test=<TestStatus.PASS: 'PASS'>, fix=<TestStatus.FAIL: 'FAIL'>)
+[2026-07-10 02:24:40,406] [gen_report.py] [ERROR]: Invalid report for ponylang/ponyc:pr-2203, Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1044, 0, 0)
+  test = (1004, 1, 0)
+  fix  = (0, 0, 0), After applying the fix patch, no test results were captured when executing the test command. A brief summary is as follows: Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1044, 0, 0)
+  test = (1004, 1, 0)
+  fix  = (0, 0, 0)
+[2026-07-10 02:24:40,419] [gen_report.py] [ERROR]: Invalid report for ponylang/ponyc:pr-2201, Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1042, 0, 0)
+  test = (460, 1, 0)
+  fix  = (0, 0, 0), After applying the fix patch, no test results were captured when executing the test command. A brief summary is as follows: Test Result Summary:
+Stage Descriptions:
+  run  : Execute the test command without any patches applied.
+  test : Execute the test command after applying the test patch.
+  fix  : Execute the test command after applying both the test patch and the fix patch.
+Each stage is reported as (pass, fail, skip), representing the number of tests that passed, failed, or were skipped, respectively.
+
+Results:
+  run  = (1042, 0, 0)
+  test = (460, 1, 0)
+  fix  = (0, 0, 0)
+[2026-07-10 02:24:40,419] [gen_report.py] [INFO]: Successfully generated 2 reports.

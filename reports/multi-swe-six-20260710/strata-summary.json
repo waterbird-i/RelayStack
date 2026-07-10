@@ -1,0 +1,166 @@
+{
+  "instances": [
+    {
+      "base_commit": "682b45d3abd7b24381bfc56423da85c3527785c7",
+      "difficulty": "15mins - 1h",
+      "groups": {
+        "baseline": "resolved",
+        "relaystack_handoff": "resolved"
+      },
+      "instance_id": "ponylang__ponyc-2261",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "15mins - 1h",
+      "title": "Don't verify partial calls for method bodies inherited from a trait."
+    },
+    {
+      "base_commit": "a58a532ecf9761eb8d91bbad3837ee62da4434b4",
+      "difficulty": "1h - 4h",
+      "groups": {
+        "baseline": "resolved",
+        "relaystack_handoff": "resolved"
+      },
+      "instance_id": "ponylang__ponyc-2221",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "language-semantics",
+      "title": "Fix inconsistencies in multi-line triple-quoted strings"
+    },
+    {
+      "base_commit": "fff0bdb528a255eb1e87319b9eba908f96364a19",
+      "difficulty": "15mins - 1h",
+      "groups": {
+        "baseline": "resolved",
+        "relaystack_handoff": "unresolved"
+      },
+      "instance_id": "ponylang__ponyc-2214",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "language-semantics",
+      "title": "Fix handling of empty and multi-byte character literals"
+    },
+    {
+      "base_commit": "25fa3b158281bee9fd0778de618ad8968d5ed026",
+      "difficulty": "≥4h",
+      "groups": {
+        "baseline": "unresolved",
+        "relaystack_handoff": "unresolved"
+      },
+      "instance_id": "ponylang__ponyc-2205",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "compiler-codegen",
+      "title": "Fix codegen failures on incompatible FFI declarations"
+    },
+    {
+      "base_commit": "7f8c5b6ee6d27b8596c785960e5515e1fdebbca0",
+      "difficulty": "≤15mins",
+      "groups": {
+        "baseline": "unresolved",
+        "relaystack_handoff": "unresolved"
+      },
+      "instance_id": "ponylang__ponyc-2203",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "≤15mins",
+      "title": "Fix internal failure on compilation when boxing bool as union into tuple."
+    },
+    {
+      "base_commit": "f00f95b30dd68c7faaff0aa88508c218bc19f02b",
+      "difficulty": "1h - 4h",
+      "groups": {
+        "baseline": "unresolved",
+        "relaystack_handoff": "unresolved"
+      },
+      "instance_id": "ponylang__ponyc-2201",
+      "language": "c",
+      "repo": "ponylang/ponyc",
+      "task_type": "1h - 4h",
+      "title": "Fix compiler crash on illegal read from '_'"
+    }
+  ],
+  "run_dir": "reports/multi-swe-six-20260710",
+  "strata": {
+    "language": {
+      "c": {
+        "baseline": {
+          "resolved": 3,
+          "total": 6,
+          "unresolved": 3
+        },
+        "relaystack_handoff": {
+          "resolved": 2,
+          "total": 6,
+          "unresolved": 4
+        }
+      }
+    },
+    "repo": {
+      "ponylang/ponyc": {
+        "baseline": {
+          "resolved": 3,
+          "total": 6,
+          "unresolved": 3
+        },
+        "relaystack_handoff": {
+          "resolved": 2,
+          "total": 6,
+          "unresolved": 4
+        }
+      }
+    },
+    "task_type": {
+      "15mins - 1h": {
+        "baseline": {
+          "resolved": 1,
+          "total": 1
+        },
+        "relaystack_handoff": {
+          "resolved": 1,
+          "total": 1
+        }
+      },
+      "1h - 4h": {
+        "baseline": {
+          "total": 1,
+          "unresolved": 1
+        },
+        "relaystack_handoff": {
+          "total": 1,
+          "unresolved": 1
+        }
+      },
+      "compiler-codegen": {
+        "baseline": {
+          "total": 1,
+          "unresolved": 1
+        },
+        "relaystack_handoff": {
+          "total": 1,
+          "unresolved": 1
+        }
+      },
+      "language-semantics": {
+        "baseline": {
+          "resolved": 2,
+          "total": 2
+        },
+        "relaystack_handoff": {
+          "resolved": 1,
+          "total": 2,
+          "unresolved": 1
+        }
+      },
+      "≤15mins": {
+        "baseline": {
+          "total": 1,
+          "unresolved": 1
+        },
+        "relaystack_handoff": {
+          "total": 1,
+          "unresolved": 1
+        }
+      }
+    }
+  }
+}

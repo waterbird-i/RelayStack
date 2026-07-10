@@ -2,10 +2,17 @@
 name: rs-issue-fix
 description: Apply a confirmed issue fix, verify it, and update durable RelayStack attractor docs.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Issue Fix
+
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create personal fix notes or a
+substitute process directory inside the repository. Return those notes in the
+conversation and request or wait for a personal path. Continue code, verification,
+and applicable team owner doc updates normally.
 
 Use this skill when the root cause and fix direction are confirmed.
 
@@ -16,7 +23,7 @@ Use this skill when the root cause and fix direction are confirmed.
 3. Make the narrowest root-cause fix.
 4. Verify the original reproduction no longer fails.
 5. Run scoped regression checks for the impact area.
-6. Write detailed fix notes to `project/issues/` when available.
+6. Write detailed fix notes to `<personal-root>/project/issues/` when available.
 7. Update durable attractor docs:
    - `docs/backlog/`: issue status and verification
    - `docs/requirements/`: clarified expected behavior

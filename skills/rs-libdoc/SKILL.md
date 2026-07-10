@@ -2,7 +2,7 @@
 name: rs-libdoc
 description: Write source-of-truth reference documentation for public APIs, commands, or reusable components.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Libdoc

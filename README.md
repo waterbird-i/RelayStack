@@ -56,13 +56,47 @@ current work state
 ├── stable project docs: context, backlog, requirements, design, architecture
 └── optional agent records: worker notes, reviewer notes, conflict notes
     ↓
-handoff/snapshot-<timestamp>.md
+<personal-root>/project/handoffs/snapshot-<timestamp>.md
     ↓
 next person or agent continues the work
 ```
 
-RelayStack uses a small set of owner docs for facts that should survive the
-current session:
+The only team-maintained project documentation committed to the repository is:
+
+```text
+docs/context/
+docs/backlog/
+docs/requirements/
+docs/design/
+docs/architecture/
+```
+
+Roadmaps, feature and issue process records, raw knowledge, and handoff snapshots
+are personal records outside the repository. Feature process records mean
+brainstorms, checklists, implementation notes, and optional acceptance notes;
+they do not include the formal feature design:
+
+```text
+<personal-root>/project/
+├── roadmaps/
+├── features/
+├── issues/
+├── knowledge/
+└── handoffs/
+```
+
+`docs/backlog/` may hold team-visible priorities and next steps, but roadmap
+prose stays personal. A formal, approved feature design must live at
+`docs/design/{slug}.md`, or follow the directory's existing naming convention.
+It is the authoritative input for implementation and acceptance; personal
+feature records cannot replace or override it. Formal acceptance results are
+written back to the applicable five team doc categories, while a personal
+acceptance note is optional. Promote stable knowledge into one of the five team
+doc categories and keep raw exploration or experience in
+`<personal-root>/project/knowledge/`.
+
+RelayStack uses these owner docs for facts that should survive the current
+session:
 
 ```text
 docs/context/
@@ -110,7 +144,7 @@ handoff          rs-handoff
 `rs-handoff` generates:
 
 ```text
-handoff/snapshot-<timestamp>.md
+<personal-root>/project/handoffs/snapshot-<timestamp>.md
 ```
 
 The snapshot answers:
@@ -132,6 +166,11 @@ It also carries three small quality contracts:
 - `Next Action Contract`: names the next action, inputs, touched files,
   validation command, and done signal.
 
+The top of each snapshot also includes a machine-readable quality block: missing
+handoff questions, Evidence Map coverage, Next Action Contract completeness, and
+the current Git evidence fingerprint. Use `scripts/check_snapshot_freshness.py`
+to detect whether the workspace diff changed after snapshot generation.
+
 When multiple agent records are attached, the snapshot also includes an
 `Agent parallel boundary` section: write scopes, adoption state, conflicts,
 validation, and overlapping file-scope warnings.
@@ -152,6 +191,8 @@ Agent records can be JSON or Markdown frontmatter. Useful fields:
   "verification": ["self-test"]
 }
 ```
+
+The JSON AgentRecord contract lives at `schemas/agent-record.schema.json`.
 
 ## Quick Start
 
@@ -177,8 +218,14 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --stage "MVP implementation" \
   --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
-  --validation "Read the snapshot and answer the handoff questions"
+  --validation "Read the snapshot and answer the handoff questions" \
+  --personal-root "$HOME/RelayStackRecords"
 ```
+
+`--personal-root` writes to `<personal-root>/project/handoffs`. An explicit
+`--output-dir` remains available for compatibility, but it must resolve outside
+the repository. The command fails instead of defaulting to a repo-local path
+when neither option is provided.
 
 Attach optional agent records:
 
@@ -208,9 +255,9 @@ It routes to the smallest useful entry point.
 | Roadmap | `rs-roadmap` | Split a large goal into smaller feature passes |
 | Discussion Entry | `rs-brainstorm` | Triage a fuzzy idea into design, feature, or roadmap work |
 | Feature Flow | `rs-feat` | Entry point for new capability work |
-|  | `rs-feat-design` | Draft the design that later implementation should follow |
-|  | `rs-feat-impl` | Implement according to the approved design order |
-|  | `rs-feat-accept` | Check the implementation against design and update durable docs |
+|  | `rs-feat-design` | Create the formal team-owned design under `docs/design/` |
+|  | `rs-feat-impl` | Implement from the approved team design |
+|  | `rs-feat-accept` | Verify against that design and write formal results to team owner docs |
 |  | `rs-feat-ff` | Fast path for tiny clear features |
 | Issue Flow | `rs-issue` | Entry point for broken behavior |
 |  | `rs-issue-report` | Turn a suspected bug into a reproducible report |
@@ -274,6 +321,13 @@ suite from a third-party authoritative issue-fixing source:
 These runs are protocol-isolated smoke tests, not leaderboard claims. The
 project-skills run also completed the official Multi-SWE-bench harness:
 `baseline 1/1 resolved` and `relaystack_handoff 1/1 resolved`.
+
+The expanded six-sample Multi-SWE-bench run is recorded in
+`reports/multi-swe-six-20260710`: both groups completed `6/6` official harness
+instances with `0` harness errors. Baseline resolved `3/6`; RelayStack handoff
+resolved `2/6`. Agent execution time was `2114.644s` for baseline and
+`1880.211s` for handoff. Use `reports/multi-swe-six-20260710/strata-summary.json`
+for the language / repo / task-type split.
 
 A demo succeeds when a new person or agent can read only the snapshot and
 continue within 5 minutes.

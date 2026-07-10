@@ -673,10 +673,65 @@ handoff：Agent A 限定探索并写 snapshot，Agent B 只读 snapshot + 上游
 oracle：上游官方 harness / test patch
 ```
 
+扩样本统计口径：
+
+```bash
+python3 scripts/run_multi_swe_one_ab.py \
+  --instance-id darkreader__darkreader-7241 \
+  --instance-id <another-instance-id> \
+  --output-dir reports/multi-swe-expanded-YYYYMMDD
+
+python3 scripts/summarize_multi_swe_strata.py \
+  --run-dir reports/multi-swe-expanded-YYYYMMDD \
+  --output reports/multi-swe-expanded-YYYYMMDD/strata-summary.json
+```
+
+`run_multi_swe_one_ab.py` 可接收多个 `--instance-id` 或 `--sample-file`，输出多行
+`dataset.jsonl` 和两组 prediction JSONL。`summarize_multi_swe_strata.py` 只读取
+已有 `dataset.jsonl` 和官方 harness `final_report.json`，按 `language`、`org/repo`、
+`task_type` 聚合 completed / resolved / unresolved / error。它不会生成新的
+prediction，也不会把本地 summary 伪造成官方结果。
+
+macOS 默认大小写不敏感文件系统会让 Multi-SWE-bench 的 `Qiskit` / `qiskit`
+包路径碰撞。官方 harness 扩样运行应放在大小写敏感 APFS 卷或 Linux 文件系统，
+并保持 source-first `PYTHONPATH`：
+`/Volumes/RelayStackCase/multi-swe-bench:/Volumes/RelayStackCase/multi-swe-bench-deps`。
+
+2026-07-10 的 6 样本官方 harness 扩样结果记录在
+`reports/multi-swe-six-20260710` 和
+`reports/authoritative-clean-ab-six-20260710.json`：
+
+- baseline：`completed 6/6`，`resolved 3/6`，`error 0`
+- relaystack_handoff：`completed 6/6`，`resolved 2/6`，`error 0`
+- agent 执行耗时：baseline `2114.644s`，handoff `1880.211s`
+- 分层结果：`reports/multi-swe-six-20260710/strata-summary.json`
+
+这个结果证明扩样与分层统计链路已经跑通，但不证明 handoff 在该 6 样本集上优于
+baseline；当前 resolved 数是 baseline 更高。
+
+接手者 snapshot-only 盲测和候选输出盲评分开：
+
+```bash
+python3 scripts/build_continuation_blind_packets.py \
+  reports/blind-expanded-20260625 \
+  --output-dir reports/continuation-blind-20260625
+
+python3 scripts/check_blind_leaks.py \
+  reports/continuation-blind-20260625/continuation-packets.jsonl
+
+python3 scripts/run_continuation_blind_packets.py \
+  reports/continuation-blind-20260625/continuation-packets.jsonl \
+  --agent-cmd 'codex exec --json --ephemeral -C "$PWD" - < "$RS_CONTINUATION_PROMPT"' \
+  --output-dir reports/continuation-blind-20260625/results
+```
+
+`continuation-packets.jsonl` 只给接手者 `snapshot.md` 和 `upstream-task.md`。
+不要把 `raw-runs.jsonl`、`unblind-map.json`、`agent-output.txt` 或原聊天交给接手者。
+
 轻量校验：
 
 ```bash
 python3 scripts/validate_provenance.py
-python3 -m py_compile runners/_runner.py scripts/add_benchmark_tasks.py scripts/validate_provenance.py
+python3 -m py_compile runners/_runner.py scripts/add_benchmark_tasks.py scripts/validate_provenance.py scripts/run_multi_swe_one_ab.py scripts/summarize_multi_swe_strata.py scripts/build_continuation_blind_packets.py scripts/run_continuation_blind_packets.py scripts/check_blind_leaks.py scripts/check_snapshot_freshness.py scripts/prepare_multi_swe_deps.py
 git diff --check
 ```

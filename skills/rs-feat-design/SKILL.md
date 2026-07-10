@@ -1,54 +1,86 @@
 ---
 name: rs-feat-design
-description: Draft a small feature design note as the single input for implementation, while keeping stable facts aligned with RelayStack attractor docs.
+description: Create or update the approved team-owned feature design under docs/design/ as the authoritative implementation input.
 version: "0.1.0"
-updated: 2026-06-24
+updated: 2026-07-10
 ---
 
 # RS Feat Design
 
+## Missing Personal Root
+
+If `<personal-root>` is not provided, do not create optional feature process
+notes or a substitute process directory inside the repository. Return those
+notes in the conversation and request or wait for a personal path. Always create
+or update the formal team design under `docs/design/` normally.
+
 Use this skill after a feature is clear enough to design.
 
-In RelayStack, a design note is a working input, not a permanent team archive.
-Keep it in `project/features/` inside the user's personal project directory.
-These records are personal modification history, not team-maintained docs.
+The formal design that is reviewed, approved, and used to drive implementation
+is a team owner doc at `docs/design/{slug}.md`, or the existing project naming
+convention within `docs/design/`. Personal feature records under
+`<personal-root>/project/features/` are optional process notes only. They may
+contain brainstorms, checklists, implementation notes, or acceptance notes, but
+must not be the authoritative design or the sole implementation input.
+
+## Inputs
+
+- `docs/context/`
+- related `docs/requirements/`, `docs/architecture/`, and `docs/backlog/`
+- existing team design docs under `docs/design/`
+- optional personal brainstorm notes
 
 ## Workflow
 
-1. Read:
-   - `docs/context/`
-   - related `docs/requirements/`
-   - related `docs/design/`
-   - related `docs/architecture/`
-   - related `docs/backlog/`
-2. Confirm one feature scope and explicit non-goals.
-3. Draft `{slug}-design.md` in `project/features/`.
-4. Cover:
-   - current behavior
-   - planned behavior
-   - user-visible acceptance criteria
-   - affected attractor docs
-   - implementation order
-5. Ask for user approval before implementation.
-6. If the work no longer fits one feature, route to `rs-roadmap`.
+1. Confirm one feature scope and explicit non-goals.
+2. Draft or update the formal design in `docs/design/{slug}.md`, following the
+   directory's existing naming convention when one exists.
+3. Cover current behavior, target behavior, user flow, contracts, affected
+   modules, rollout, acceptance criteria, risks, and verification.
+4. Update requirements or architecture only when the design settles durable
+   capability or structural facts.
+5. Get the team design approved before routing to `rs-feat-impl`.
+6. Optionally keep checklists or working notes in
+   `<personal-root>/project/features/`; label them non-authoritative.
 
 ## Output
 
-```markdown
-# {slug} Design
+Required authoritative output:
 
-## Goal
-## Non-Goals
-## Current Attractor Facts
-## Proposed Behavior
-## Implementation Order
-## Acceptance Criteria
-## Attractor Docs To Update
+```text
+docs/design/{slug}.md
 ```
 
-## Rules
+Optional personal process records:
 
-- Do not write code from this skill.
-- Do not store long design archives in team docs.
-- Do not invent requirements or architecture facts.
-- Use `rs-feat-impl` only after the design is approved.
+```text
+<personal-root>/project/features/
+```
+
+## Design Shape
+
+```markdown
+# Feature: {name}
+
+## Context
+## Goal
+## Non-Goals
+## Current Behavior
+## Proposed Behavior
+## User Flow
+## Contracts
+## Affected Areas
+## Acceptance Criteria
+## Rollout
+## Risks
+## Verification
+```
+
+## Guardrails
+
+- Do not place the formal or approved design in personal `project/features/`.
+- Do not use a personal checklist or note as the sole implementation input.
+- Do not implement from this skill.
+- Do not hide contract changes inside implementation notes.
+- If the work requires multiple independently deliverable slices, route to
+  `rs-roadmap` before writing feature-level design.

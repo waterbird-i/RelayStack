@@ -1,0 +1,601 @@
+# ponylang__ponyc-2261
+diff --git a/src/libponyc/verify/call.c b/src/libponyc/verify/call.c
+index 0f17568..262c3b4 100644
+--- a/src/libponyc/verify/call.c
++++ b/src/libponyc/verify/call.c
+@@ -5,6 +5,25 @@
+ #include "ponyassert.h"
+ 
+ 
++static bool current_method_body_is_trait(pass_opt_t* opt)
++{
++  ast_t* method = opt->check.frame->method;
++
++  if(method == NULL)
++    return false;
++
++  ast_t* body_donor = (ast_t*)ast_data(method);
++
++  if(body_donor == NULL)
++    return false;
++
++  if(body_donor == opt->check.frame->type)
++    return false;
++
++  return (ast_id(body_donor) == TK_TRAIT) ||
++    (ast_id(body_donor) == TK_INTERFACE);
++}
++
+ static bool check_partial_function_call(pass_opt_t* opt, ast_t* ast)
+ {
+   pony_assert((ast_id(ast) == TK_FUNREF) || (ast_id(ast) == TK_FUNCHAIN) ||
+@@ -47,7 +66,10 @@ static bool check_partial_function_call(pass_opt_t* opt, ast_t* ast)
+   {
+     ast_seterror(ast);
+ 
+-    if((ast_id(call_error) != TK_QUESTION) && !is_sugared_call) {
++    if((ast_id(call_error) != TK_QUESTION) &&
++      !is_sugared_call &&
++      !current_method_body_is_trait(opt))
++    {
+       ast_error(opt->check.errors, call_error,
+         "call is not partial but the method is - " \
+         "a question mark is required after this call");
+@@ -56,7 +78,10 @@ static bool check_partial_function_call(pass_opt_t* opt, ast_t* ast)
+       r = false;
+     }
+   } else {
+-    if((ast_id(call_error) == TK_QUESTION) && !is_sugared_call) {
++    if((ast_id(call_error) == TK_QUESTION) &&
++      !is_sugared_call &&
++      !current_method_body_is_trait(opt))
++    {
+       ast_error(opt->check.errors, call_error,
+         "call is partial but the method is not - " \
+         "this question mark should be removed");
+
+# ponylang__ponyc-2221
+diff --git a/src/libponyc/ast/lexer.c b/src/libponyc/ast/lexer.c
+index e5d84e6..aee2df7 100644
+--- a/src/libponyc/ast/lexer.c
++++ b/src/libponyc/ast/lexer.c
+@@ -510,34 +510,61 @@ static token_t* slash(lexer_t* lexer)
+ }
+ 
+ 
++static bool is_line_whitespace(char c)
++{
++  return (c != '\n') && isspace((unsigned char)c);
++}
++
++
++static void strip_trailing_whitespace_line(lexer_t* lexer)
++{
++  size_t last_line = lexer->buflen;
++
++  while((last_line > 0) && (lexer->buffer[last_line - 1] != '\n'))
++    last_line--;
++
++  if(last_line == 0)
++    return;
++
++  for(size_t i = last_line; i < lexer->buflen; i++)
++  {
++    if(!is_line_whitespace(lexer->buffer[i]))
++      return;
++  }
++
++  lexer->buflen = last_line;
++}
++
++
+ /**
+ * Removes longest common prefix indentation from every line in a triple
+-* quoted string. If the string begins with an empty line, that line is removed
+-* entirely.
++* quoted string. If the string begins with a whitespace-only line, that line is
++* removed entirely.
+ */
+-static void normalise_string(lexer_t* lexer)
++static bool normalise_string(lexer_t* lexer)
+ {
+   if(lexer->buflen == 0)
+-    return;
++    return true;
+ 
+   // If we aren't multiline, do nothing.
+-  if(memchr(lexer->buffer, '\n', lexer->buflen) == NULL)
+-    return;
++  char* first_newline = (char*)memchr(lexer->buffer, '\n', lexer->buflen);
++
++  if(first_newline == NULL)
++    return true;
+ 
+-  // Trim a leading newline if there is one.
+   char* buf = lexer->buffer;
++  size_t first_line_len = first_newline - buf;
+ 
+-  if((buf[0] == '\r') && (buf[1] == '\n'))
++  for(size_t i = 0; i < first_line_len; i++)
+   {
+-    lexer->buflen -= 2;
+-    memmove(&buf[0], &buf[2], lexer->buflen);
+-  }
+-  else if(buf[0] == '\n')
+-  {
+-    lexer->buflen--;
+-    memmove(&buf[0], &buf[1], lexer->buflen);
++    if(!is_line_whitespace(buf[i]))
++      return false;
+   }
+ 
++  lexer->buflen -= first_line_len + 1;
++  memmove(&buf[0], &buf[first_line_len + 1], lexer->buflen);
++  strip_trailing_whitespace_line(lexer);
++
+   // Calculate leading whitespace.
+   size_t ws = lexer->buflen;
+   size_t ws_this_line = 0;
+@@ -605,6 +632,8 @@ static void normalise_string(lexer_t* lexer)
+ 
+     lexer->buflen = compacted - lexer->buffer;
+   }
++
++  return true;
+ }
+ 
+ 
+@@ -633,7 +662,13 @@ static token_t* triple_string(lexer_t* lexer)
+         consume_chars(lexer, 1);
+       }
+ 
+-      normalise_string(lexer);
++      if(!normalise_string(lexer))
++      {
++        lex_error(lexer,
++          "Multi-line triple-quoted strings must start on a new line");
++        return make_token(lexer, TK_LEX_ERROR);
++      }
++
+       return make_token_with_text(lexer, TK_STRING);
+     }
+ 
+
+# ponylang__ponyc-2214
+diff --git a/src/libponyc/ast/lexer.c b/src/libponyc/ast/lexer.c
+index 24d67e9..3ede1ed 100644
+--- a/src/libponyc/ast/lexer.c
++++ b/src/libponyc/ast/lexer.c
+@@ -839,6 +839,7 @@ static token_t* character(lexer_t* lexer)
+ 
+   lexint_t value;
+   lexint_zero(&value);
++  bool have_value = false;
+ 
+   while(true)
+   {
+@@ -850,6 +851,13 @@ static token_t* character(lexer_t* lexer)
+     if(c == '\'')
+     {
+       consume_chars(lexer, 1);
++
++      if(!have_value)
++      {
++        lex_error(lexer, "Empty character literal");
++        return make_token(lexer, TK_LEX_ERROR);
++      }
++
+       token_t* t = make_token(lexer, TK_INT);
+       token_set_int(t, &value);
+       return t;
+@@ -858,12 +866,18 @@ static token_t* character(lexer_t* lexer)
+     if(c == '\\')
+       c = escape(lexer, false, false);
+     else
++    {
++      c = (unsigned char)c;
+       consume_chars(lexer, 1);
++    }
+ 
+     // Just ignore bad escapes here and carry on. They've already been
+     // reported and this allows catching later errors.
+     if(c >= 0)
++    {
+       lexint_char(&value, c);
++      have_value = true;
++    }
+ 
+     // TODO: Should we catch overflow and treat as an error?
+   }
+
+# ponylang__ponyc-2205
+diff --git a/src/libponyc/codegen/gencall.c b/src/libponyc/codegen/gencall.c
+index 1a7f180..889248f 100644
+--- a/src/libponyc/codegen/gencall.c
++++ b/src/libponyc/codegen/gencall.c
+@@ -991,27 +991,27 @@ static LLVMTypeRef ffi_return_type(compile_t* c, reach_type_t* t,
+   }
+ }
+ 
+-static LLVMValueRef declare_ffi_vararg(compile_t* c, const char* f_name,
+-  reach_type_t* t)
++static LLVMTypeRef ffi_vararg_type(compile_t* c, reach_type_t* t)
+ {
+   LLVMTypeRef r_type = ffi_return_type(c, t, false);
+-  LLVMTypeRef f_type = LLVMFunctionType(r_type, NULL, 0, true);
+-  LLVMValueRef func = LLVMAddFunction(c->module, f_name, f_type);
+-
+-  return func;
++  return LLVMFunctionType(r_type, NULL, 0, true);
+ }
+ 
+-static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
+-  reach_type_t* t, ast_t* args, bool intrinsic)
++static LLVMTypeRef ffi_type(compile_t* c, reach_type_t* t, ast_t* args,
++  bool intrinsic)
+ {
+   ast_t* last_arg = ast_childlast(args);
+ 
+   if((last_arg != NULL) && (ast_id(last_arg) == TK_ELLIPSIS))
+-    return declare_ffi_vararg(c, f_name, t);
++    return ffi_vararg_type(c, t);
+ 
+   int count = (int)ast_childcount(args);
+   size_t buf_size = count * sizeof(LLVMTypeRef);
+-  LLVMTypeRef* f_params = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++  LLVMTypeRef* f_params = NULL;
++
++  if(count > 0)
++    f_params = (LLVMTypeRef*)ponyint_pool_alloc_size(buf_size);
++
+   count = 0;
+ 
+   ast_t* arg = ast_child(args);
+@@ -1031,10 +1031,49 @@ static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
+ 
+   LLVMTypeRef r_type = ffi_return_type(c, t, intrinsic);
+   LLVMTypeRef f_type = LLVMFunctionType(r_type, f_params, count, false);
+-  LLVMValueRef func = LLVMAddFunction(c->module, f_name, f_type);
+ 
+-  ponyint_pool_free_size(buf_size, f_params);
+-  return func;
++  if(f_params != NULL)
++    ponyint_pool_free_size(buf_size, f_params);
++
++  return f_type;
++}
++
++static LLVMValueRef declare_ffi(compile_t* c, const char* f_name,
++  LLVMTypeRef f_type)
++{
++  return LLVMAddFunction(c->module, f_name, f_type);
++}
++
++static bool llvm_type_is_equal(LLVMTypeRef a, LLVMTypeRef b)
++{
++  if(a == b)
++    return true;
++
++  char* a_str = LLVMPrintTypeToString(a);
++  char* b_str = LLVMPrintTypeToString(b);
++  bool is_equal = (strcmp(a_str, b_str) == 0);
++  LLVMDisposeMessage(a_str);
++  LLVMDisposeMessage(b_str);
++
++  return is_equal;
++}
++
++static bool ffi_signature_matches(compile_t* c, ast_t* ast, const char* f_name,
++  LLVMValueRef func, LLVMTypeRef expected_type)
++{
++  LLVMTypeRef existing_type = LLVMGetElementType(LLVMTypeOf(func));
++
++  if(llvm_type_is_equal(existing_type, expected_type))
++    return true;
++
++  ast_t* decl = (ast_t*)ast_data(ast);
++  ast_t* error_at = (decl != NULL) ? decl : ast;
++
++  ast_error(c->opt->check.errors, error_at,
++    "FFI function '%s' has an incompatible declaration", f_name);
++  ast_error_continue(c->opt->check.errors, ast,
++    "the FFI function was previously declared with a different signature");
++  return false;
+ }
+ 
+ static LLVMValueRef cast_ffi_arg(compile_t* c, LLVMValueRef arg,
+@@ -1077,28 +1116,29 @@ LLVMValueRef gen_ffi(compile_t* c, ast_t* ast)
+   pony_assert(t != NULL);
+ 
+   // Get the function.
++  ast_t* decl = (ast_t*)ast_data(ast);
++  LLVMTypeRef expected_type;
+   LLVMValueRef func = LLVMGetNamedFunction(c->module, f_name);
+ 
+-  if(func == NULL)
++  if(decl != NULL)
+   {
+-    // If we have no prototype, declare one.
+-    ast_t* decl = (ast_t*)ast_data(ast);
+-
+-    if(decl != NULL)
+-    {
+-      // Define using the declared types.
+-      AST_GET_CHILDREN(decl, decl_id, decl_ret, decl_params, decl_err);
+-      err = (ast_id(decl_err) == TK_QUESTION);
+-      func = declare_ffi(c, f_name, t, decl_params, false);
+-    } else if(!strncmp(f_name, "llvm.", 5) || !strncmp(f_name, "internal.", 9)) {
+-      // Intrinsic, so use the exact types we supply.
+-      func = declare_ffi(c, f_name, t, args, true);
+-    } else {
+-      // Make it varargs.
+-      func = declare_ffi_vararg(c, f_name, t);
+-    }
++    // Define using the declared types.
++    AST_GET_CHILDREN(decl, decl_id, decl_ret, decl_params, decl_err);
++    err = (ast_id(decl_err) == TK_QUESTION);
++    expected_type = ffi_type(c, t, decl_params, false);
++  } else if(!strncmp(f_name, "llvm.", 5) || !strncmp(f_name, "internal.", 9)) {
++    // Intrinsic, so use the exact types we supply.
++    expected_type = ffi_type(c, t, args, true);
++  } else {
++    // Make it varargs.
++    expected_type = ffi_vararg_type(c, t);
+   }
+ 
++  if(func == NULL)
++    func = declare_ffi(c, f_name, expected_type);
++  else if(!ffi_signature_matches(c, ast, f_name, func, expected_type))
++    return NULL;
++
+   // Generate the arguments.
+   int count = (int)ast_childcount(args);
+   size_t buf_size = count * sizeof(LLVMValueRef);
+
+# ponylang__ponyc-2203
+diff --git a/src/libponyc/codegen/genbox.c b/src/libponyc/codegen/genbox.c
+index 6dfa6f2..38350bc 100644
+--- a/src/libponyc/codegen/genbox.c
++++ b/src/libponyc/codegen/genbox.c
+@@ -17,6 +17,31 @@ LLVMValueRef gen_box(compile_t* c, ast_t* type, LLVMValueRef value)
+   pony_assert(t != NULL);
+   compile_type_t* c_t = (compile_type_t*)t->c_type;
+ 
++  if(c_t->primitive == NULL)
++  {
++    reach_type_t* boxed_sub = NULL;
++    reach_type_t* sub;
++    size_t i = HASHMAP_BEGIN;
++
++    while((sub = reach_type_cache_next(&t->subtypes, &i)) != NULL)
++    {
++      compile_type_t* c_sub = (compile_type_t*)sub->c_type;
++
++      if(c_sub->primitive == l_type)
++      {
++        if(boxed_sub != NULL)
++          return NULL;
++
++        boxed_sub = sub;
++      }
++    }
++
++    if(boxed_sub == NULL)
++      return NULL;
++
++    return gen_box(c, boxed_sub->ast_cap, value);
++  }
++
+   if(l_type != c_t->primitive)
+     return NULL;
+ 
+
+# ponylang__ponyc-2201
+diff --git a/src/libponyc/pass/expr.c b/src/libponyc/pass/expr.c
+index 3247461..a4ac19b 100644
+--- a/src/libponyc/pass/expr.c
++++ b/src/libponyc/pass/expr.c
+@@ -201,6 +201,85 @@ bool is_typecheck_error(ast_t* type)
+   return false;
+ }
+ 
++static bool is_legal_dontcare_read(ast_t* ast)
++{
++  // We either are the LHS of an assignment or a tuple element. That tuple must
++  // either be a pattern or the LHS of an assignment. It can be embedded in
++  // other tuples, which may appear in sequences.
++
++  // '_' may be wrapped in a sequence.
++  ast_t* parent = ast_parent(ast);
++  if(ast_id(parent) == TK_SEQ)
++    parent = ast_parent(parent);
++
++  switch(ast_id(parent))
++  {
++    case TK_ASSIGN:
++    {
++      AST_GET_CHILDREN(parent, right, left);
++      if(ast == left)
++        return true;
++      return false;
++    }
++
++    case TK_TUPLE:
++    {
++      ast_t* grandparent = ast_parent(parent);
++
++      while((ast_id(grandparent) == TK_TUPLE) ||
++        (ast_id(grandparent) == TK_SEQ))
++      {
++        parent = grandparent;
++        grandparent = ast_parent(parent);
++      }
++
++      switch(ast_id(grandparent))
++      {
++        case TK_ASSIGN:
++        {
++          AST_GET_CHILDREN(grandparent, right, left);
++
++          if(parent == left)
++            return true;
++
++          break;
++        }
++
++        case TK_CASE:
++        {
++          AST_GET_CHILDREN(grandparent, pattern, guard, body);
++
++          if(parent == pattern)
++            return true;
++
++          break;
++        }
++
++        default: {}
++      }
++
++      break;
++    }
++
++    default: {}
++  }
++
++  return false;
++}
++
++static bool expr_check_dontcareref(pass_opt_t* opt, ast_t* ast)
++{
++  pony_assert(ast_id(ast) == TK_DONTCAREREF);
++
++  if(is_result_needed(ast) && !is_legal_dontcare_read(ast))
++  {
++    ast_error(opt->check.errors, ast, "can't read from '_'");
++    return false;
++  }
++
++  return expr_dontcareref(opt, ast);
++}
++
+ ast_result_t pass_pre_expr(ast_t** astp, pass_opt_t* options)
+ {
+   (void)options;
+@@ -270,7 +349,7 @@ ast_result_t pass_expr(ast_t** astp, pass_opt_t* options)
+     case TK_ARRAY:      r = expr_array(options, astp); break;
+ 
+     case TK_DONTCAREREF:
+-                        r = expr_dontcareref(options, ast); break;
++                        r = expr_check_dontcareref(options, ast); break;
+     case TK_TYPEREF:    r = expr_typeref(options, astp); break;
+     case TK_VARREF:
+     case TK_LETREF:     r = expr_localref(options, ast); break;
+diff --git a/src/libponyc/pass/verify.c b/src/libponyc/pass/verify.c
+index 512b223..445370c 100644
+--- a/src/libponyc/pass/verify.c
++++ b/src/libponyc/pass/verify.c
+@@ -2,7 +2,6 @@
+ #include "../verify/call.h"
+ #include "../verify/control.h"
+ #include "../verify/fun.h"
+-#include "expr.h"
+ #include "ponyassert.h"
+ 
+ 
+@@ -104,87 +103,6 @@ static bool verify_assign(pass_opt_t* opt, ast_t* ast)
+ }
+ 
+ 
+-static bool is_legal_dontcare_read(ast_t* ast)
+-{
+-  // We either are the LHS of an assignment or a tuple element. That tuple must
+-  // either be a pattern or the LHS of an assignment. It can be embedded in
+-  // other tuples, which may appear in sequences.
+-
+-  // '_' may be wrapped in a sequence.
+-  ast_t* parent = ast_parent(ast);
+-  if(ast_id(parent) == TK_SEQ)
+-    parent = ast_parent(parent);
+-
+-  switch(ast_id(parent))
+-  {
+-    case TK_ASSIGN:
+-    {
+-      AST_GET_CHILDREN(parent, right, left);
+-      if(ast == left)
+-        return true;
+-      return false;
+-    }
+-
+-    case TK_TUPLE:
+-    {
+-      ast_t* grandparent = ast_parent(parent);
+-
+-      while((ast_id(grandparent) == TK_TUPLE) ||
+-        (ast_id(grandparent) == TK_SEQ))
+-      {
+-        parent = grandparent;
+-        grandparent = ast_parent(parent);
+-      }
+-
+-      switch(ast_id(grandparent))
+-      {
+-        case TK_ASSIGN:
+-        {
+-          AST_GET_CHILDREN(grandparent, right, left);
+-
+-          if(parent == left)
+-            return true;
+-
+-          break;
+-        }
+-
+-        case TK_CASE:
+-        {
+-          AST_GET_CHILDREN(grandparent, pattern, guard, body);
+-
+-          if(parent == pattern)
+-            return true;
+-
+-          break;
+-        }
+-
+-        default: {}
+-      }
+-
+-      break;
+-    }
+-
+-    default: {}
+-  }
+-
+-  return false;
+-}
+-
+-
+-static bool verify_dontcareref(pass_opt_t* opt, ast_t* ast)
+-{
+-  pony_assert(ast_id(ast) == TK_DONTCAREREF);
+-
+-  if(is_result_needed(ast) && !is_legal_dontcare_read(ast))
+-  {
+-    ast_error(opt->check.errors, ast, "can't read from '_'");
+-    return false;
+-  }
+-
+-  return true;
+-}
+-
+-
+ ast_result_t pass_verify(ast_t** astp, pass_opt_t* options)
+ {
+   ast_t* ast = *astp;
+@@ -205,7 +123,6 @@ ast_result_t pass_verify(ast_t** astp, pass_opt_t* options)
+     case TK_FFICALL:      r = verify_ffi_call(options, ast); break;
+     case TK_TRY:
+     case TK_TRY_NO_CHECK: r = verify_try(options, ast); break;
+-    case TK_DONTCAREREF:  r = verify_dontcareref(options, ast); break;
+     case TK_ERROR:        ast_seterror(ast); break;
+ 
+     default:              ast_inheritflags(ast); break;
+
