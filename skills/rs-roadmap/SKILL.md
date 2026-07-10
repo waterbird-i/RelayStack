@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create a roadmap or substitute
-process directory inside the repository. Return the proposed personal record in
+If `<personal-root>` is not provided, do not create a roadmap or choose an
+undeclared personal storage location. Return the proposed personal record in
 the conversation and request or wait for a personal path. Continue any applicable
 updates to the five team owner doc categories normally.
 
@@ -49,7 +49,9 @@ that links to stable requirements, design, or architecture facts.
 
 ## Guardrails
 
-- Do not write the roadmap body into `docs/backlog/` or any repository directory.
+- Do not write the roadmap body into `docs/backlog/` or any team-maintained
+  project directory. A repo-root personal archive must stay under ignored
+  `project/roadmaps/`.
 - Do not describe `project/roadmaps/` as a team project directory.
 - Do not create speculative implementation details for every slice.
 - Do not treat the roadmap as architecture truth.

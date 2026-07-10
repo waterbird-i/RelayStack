@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create feature process notes or a
-substitute process directory inside the repository. Return personal process
+If `<personal-root>` is not provided, do not create feature process notes or
+choose an undeclared personal storage location. Return personal process
 content in the conversation and request or wait for a personal path. Continue
 formal `docs/design/` and other team owner doc updates normally.
 
@@ -18,7 +18,8 @@ Use this skill when the request adds a new capability.
 
 RelayStack feature work uses an approved team-owned design under `docs/design/`
 to drive implementation. Optional brainstorms, checklists, implementation notes,
-and acceptance notes stay outside the repository as personal process records.
+and acceptance notes stay under `<personal-root>/project/features/` as personal,
+Git-ignored process records.
 
 ## Do Not Use When
 
@@ -68,9 +69,10 @@ user-facing behavior needs API, type, permission, and doc changes, route to
 ## Personal Project Notes
 
 Optional feature process records belong in
-`<personal-root>/project/features/`, never in the team repository. The formal,
-approved implementation design belongs in `docs/design/`; no personal feature
-record may replace or override it. Personal records include:
+`<personal-root>/project/features/`, never in team-maintained project docs. When
+the repository root is the personal root, these records must remain ignored by
+Git. The formal, approved implementation design belongs in `docs/design/`; no
+personal feature record may replace or override it. Personal records include:
 
 - brainstorm trails
 - sub-agent records
@@ -80,8 +82,7 @@ record may replace or override it. Personal records include:
 - validation scratch notes
 
 If no personal project directory is provided, summarize the process in the final
-reply or handoff snapshot. Do not invent a process directory inside the team
-repository.
+reply or handoff snapshot. Do not invent an undeclared personal storage location.
 
 ## Rules
 

@@ -17,6 +17,13 @@ from pathlib import Path
 MISSING = "未发现"
 NOT_PROVIDED = "未提供"
 SAFE_TIMESTAMP = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
+TEAM_DOC_DIRS = (
+    "docs/context",
+    "docs/backlog",
+    "docs/requirements",
+    "docs/design",
+    "docs/architecture",
+)
 
 
 def run(command: list[str], cwd: Path) -> str:
@@ -60,13 +67,11 @@ def read_text(path: Path, max_chars: int = 2400) -> str:
     return text[:max_chars].rstrip() + "\n...（已截断）"
 
 
-def project_files(root: Path, name: str) -> str:
-    base = root / name
-    if not base.exists():
-        return MISSING
+def project_files(root: Path, names: tuple[str, ...]) -> str:
     files = sorted(
         str(path.relative_to(root))
-        for path in base.rglob("*")
+        for name in names
+        for path in (root / name).rglob("*")
         if path.is_file() and path.name != ".gitkeep"
     )
     return "\n".join(files) if files else MISSING
@@ -77,6 +82,9 @@ def status_files(status: str) -> list[str]:
         return []
     paths: list[str] = []
     for line in status.splitlines():
+        # run() strips the first line's leading space from porcelain output.
+        if len(line) >= 3 and line[0] in "MARCUD" and line[1] == " " and line[2] != " ":
+            line = " " + line
         if len(line) < 4:
             continue
         path = line[3:].strip()
@@ -176,8 +184,8 @@ def collect_evidence(root: Path) -> Evidence:
         diff_names=diff_names,
         changed_files=unique_lines(diff_names, extra=status_files(status)),
         readme=read_text(root / "README.md"),
-        docs=project_files(root, "docs"),
-        skills=project_files(root, "skills"),
+        docs=project_files(root, TEAM_DOC_DIRS),
+        skills=project_files(root, ("skills",)),
     )
 
 
@@ -398,7 +406,11 @@ def boundary_markdown(records: list[AgentRecord]) -> str:
 
 def evidence_map_markdown(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> str:
     changed_source = "git diff --name-only + git status --short"
-    docs_source = "docs/** + README.md + handoff/** + skills/**"
+    docs_source = (
+        "README.md 内容摘录 + docs/context/** + docs/backlog/** + "
+        "docs/requirements/** + docs/design/** + docs/architecture/** + "
+        "skills/** 文件路径清单"
+    )
     agent_source = "--agent-record" if records else MISSING
     return "\n".join(
         [
@@ -605,25 +617,46 @@ git log --oneline -n 5
 """
 
 
-def ensure_outside_repo(path: Path, root: Path) -> Path:
+def ensure_output_location(
+    path: Path,
+    root: Path,
+    allow_repo_personal: bool = False,
+) -> Path:
     resolved = path.resolve()
     resolved_root = root.resolve()
+    repo_personal_dir = (resolved_root / "project" / "handoffs").resolve()
+    if allow_repo_personal and resolved == repo_personal_dir:
+        ignored = subprocess.run(
+            ["git", "check-ignore", "-q", "--", "project/handoffs"],
+            cwd=resolved_root,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if ignored.returncode != 0:
+            raise ValueError("repo-local personal archive must be ignored by Git at /project/")
+        return resolved
     if resolved == resolved_root or resolved_root in resolved.parents:
         raise ValueError("snapshot output must be outside the repository root")
     return resolved
 
 
-def resolve_output_dir(args: argparse.Namespace, root: Path) -> Path:
+def resolve_output_dir(args: argparse.Namespace, root: Path) -> tuple[Path, bool]:
+    allow_repo_personal = False
     if args.output_dir:
         output_dir = Path(args.output_dir).expanduser()
         if not output_dir.is_absolute():
             output_dir = root / output_dir
     elif args.personal_root:
-        output_dir = Path(args.personal_root).expanduser() / "project" / "handoffs"
+        personal_root = Path(args.personal_root).expanduser()
+        if not personal_root.is_absolute():
+            personal_root = root / personal_root
+        personal_root = personal_root.resolve()
+        allow_repo_personal = personal_root == root.resolve()
+        output_dir = personal_root / "project" / "handoffs"
     else:
         raise ValueError("provide --personal-root or an explicit --output-dir")
 
-    return ensure_outside_repo(output_dir, root)
+    return ensure_output_location(output_dir, root, allow_repo_personal), allow_repo_personal
 
 
 def validate_timestamp(value: str) -> str:
@@ -638,9 +671,9 @@ def write_snapshot(args: argparse.Namespace, root: Path) -> Path:
     timestamp = validate_timestamp(
         args.timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
     )
-    output_dir = resolve_output_dir(args, root)
+    output_dir, allow_repo_personal = resolve_output_dir(args, root)
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_dir = ensure_outside_repo(output_dir, root)
+    output_dir = ensure_output_location(output_dir, root, allow_repo_personal)
     if output_dir.is_symlink() or not output_dir.is_dir():
         raise ValueError("snapshot output directory must be a real directory")
 
@@ -651,7 +684,7 @@ def write_snapshot(args: argparse.Namespace, root: Path) -> Path:
     evidence = collect_evidence(root)
     agent_records = collect_agent_records(args.agent_record, root)
     content = render(args, evidence, agent_records)
-    output_dir = ensure_outside_repo(output_dir, root)
+    output_dir = ensure_output_location(output_dir, root, allow_repo_personal)
 
     file_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     dir_flags = os.O_RDONLY
@@ -674,7 +707,7 @@ def write_snapshot(args: argparse.Namespace, root: Path) -> Path:
         fd = os.open(output.name, file_flags, 0o600, dir_fd=dir_fd)
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(content)
-        output_dir = ensure_outside_repo(output_dir, root)
+        output_dir = ensure_output_location(output_dir, root, allow_repo_personal)
         path_dir = output_dir.stat(follow_symlinks=False)
         if (opened_dir.st_dev, opened_dir.st_ino) != (path_dir.st_dev, path_dir.st_ino):
             raise ValueError("snapshot output directory changed during write")
@@ -716,7 +749,10 @@ def parser() -> argparse.ArgumentParser:
     output_group = p.add_mutually_exclusive_group()
     output_group.add_argument(
         "--personal-root",
-        help="personal root; writes to <personal-root>/project/handoffs",
+        help=(
+            "personal root; writes to <personal-root>/project/handoffs; "
+            "the Git root is allowed only when /project/ is ignored"
+        ),
     )
     output_group.add_argument(
         "--output-dir",
@@ -735,6 +771,13 @@ def self_test() -> None:
         sandbox = Path(temp)
         root = sandbox / "repo"
         root.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        (root / ".gitignore").write_text("/project/\n", encoding="utf-8")
+        (root / "README.md").write_text("test readme\n", encoding="utf-8")
+        (root / "docs" / "context").mkdir(parents=True)
+        (root / "docs" / "context" / "allowed.md").write_text("allowed\n", encoding="utf-8")
+        (root / "docs" / "dev").mkdir(parents=True)
+        (root / "docs" / "dev" / "excluded.md").write_text("excluded\n", encoding="utf-8")
         json_record = root / "worker-a.json"
         json_record.write_text(
             json.dumps(
@@ -826,12 +869,21 @@ Markdown record 可解析。
         assert output.name == "snapshot-20000101-000000.md"
         assert "# Handoff Snapshot: 测试任务" in text
         assert "## 0. 机器可读质量评分" in text
-        assert '"missing_count": 2' in text
+        assert '"missing_count": 1' in text
         assert '"evidence_freshness"' in text
         assert "scripts/check_snapshot_freshness.py" in text
         assert "schemas/agent-record.schema.json" in text
         assert "## 2. 工作区状态" in text
         assert "## 6. Evidence Map" in text
+        assert "README.md 内容摘录" in text
+        assert "docs/context/**" in text
+        assert "handoff/**" not in text
+        assert "docs/context/allowed.md" in text
+        assert "docs/dev/excluded.md" not in text
+        assert status_files("M .gitignore\n?? docs/new.md") == [
+            ".gitignore",
+            "docs/new.md",
+        ]
         assert "## 7. Risk Register" in text
         assert "## 8. Next Action Contract" in text
         assert "## 9. 项目上下文" in text
@@ -846,6 +898,42 @@ Markdown record 可解析。
         assert "## 13. Agent 并行边界" in text
         assert "潜在写入冲突" in text
         assert "reviewer_a, worker_a" in text
+
+        repo_args = parser().parse_args(
+            [
+                "--personal-root",
+                str(root),
+                "--timestamp",
+                "repo-personal",
+            ]
+        )
+        repo_output = write_snapshot(repo_args, root)
+        assert repo_output == (root / "project" / "handoffs" / "snapshot-repo-personal.md").resolve()
+        assert repo_output.is_file()
+
+        external_personal_args = parser().parse_args(
+            [
+                "--personal-root",
+                str(sandbox / "personal"),
+                "--timestamp",
+                "external-personal",
+            ]
+        )
+        external_personal_output = write_snapshot(external_personal_args, root)
+        assert external_personal_output == (
+            sandbox / "personal" / "project" / "handoffs" / "snapshot-external-personal.md"
+        ).resolve()
+
+        for invalid_args in [
+            ["--output-dir", str(root / "project" / "handoffs")],
+            ["--personal-root", str(root / "nested")],
+        ]:
+            try:
+                write_snapshot(parser().parse_args(invalid_args), root)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"expected repository-local output rejection: {invalid_args}")
 
 
 def main() -> int:

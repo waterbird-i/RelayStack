@@ -20,6 +20,8 @@ It does not implement work. It only routes.
 - Roadmap bodies, Feature process notes, Issue records, raw Knowledge, and
   Handoff Snapshots are personal records under
   `<personal-root>/project/{roadmaps,features,issues,knowledge,handoffs}/`.
+- The repository root may be the explicit `<personal-root>` when `/project/` is
+  ignored by Git. These records remain personal and must not be committed.
 - `docs/backlog/` may hold team-visible priorities and next steps, but not the
   roadmap body. A formal, approved feature design belongs in `docs/design/` and
   is the authoritative implementation and acceptance input; personal feature
@@ -39,8 +41,10 @@ Before answering:
    - `docs/requirements/`
    - `docs/design/`
    - `docs/architecture/`
-3. Check whether `project` exists. If it exists, treat it as legacy or
-   personal process memory, not as team attractor docs.
+3. Check whether `project` exists and whether Git ignores it. An ignored
+   `project/` is configured personal process memory. A tracked or unignored
+   `project/` is legacy or misconfigured process memory. Neither is a team
+   attractor doc.
 4. If the attractor docs are missing, route to `rs-onboard`.
 5. Read the user's request and pick one skill from the routing table.
 
@@ -58,7 +62,12 @@ team repo
 └── docs/architecture/  current technical structure and boundaries
 
 personal project notes
-└── project/features/, project/issues/, agent records, validation logs
+└── project/
+    ├── roadmaps/
+    ├── features/
+    ├── issues/
+    ├── knowledge/
+    └── handoffs/
 ```
 
 ## Routing Table

@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create implementation notes or a
-substitute process directory inside the repository. Return optional personal
+If `<personal-root>` is not provided, do not create implementation notes or
+choose an undeclared personal storage location. Return optional personal
 notes in the conversation and request or wait for a personal path. Continue code
 and applicable team owner doc updates normally.
 

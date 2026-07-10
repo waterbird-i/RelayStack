@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create issue analysis files or a
-substitute process directory inside the repository. Return the analysis in the
+If `<personal-root>` is not provided, do not create issue analysis files or
+choose an undeclared personal storage location. Return the analysis in the
 conversation and request or wait for a personal path. Continue any applicable
 updates to the five team owner doc categories normally.
 

@@ -66,7 +66,10 @@ docs/design/
 docs/architecture/
 ```
 
-Roadmap、Feature 和 Issue 的过程记录、原始 Knowledge、Handoff Snapshot 都是仓库外的个人记录。Feature 过程记录仅指 brainstorm、checklist、implementation notes 和可选的 acceptance notes，不包括正式 feature design：
+Roadmap、Feature 和 Issue 的过程记录、原始 Knowledge、Handoff Snapshot 都是
+`<personal-root>/project/` 下的个人记录，不属于团队维护的项目文档。本仓库将项目根目录
+作为 personal root，并通过 Git 忽略 `/project/`。Feature 过程记录仅指 brainstorm、
+checklist、implementation notes 和可选的 acceptance notes，不包括正式 feature design：
 
 ```text
 <personal-root>/project/
@@ -202,12 +205,13 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
   --validation "Read the snapshot and answer the handoff questions" \
-  --personal-root "$HOME/RelayStackRecords"
+  --personal-root "$PWD"
 ```
 
-`--personal-root` 会写入 `<personal-root>/project/handoffs`。为兼容旧用法仍保留
-显式 `--output-dir`，但解析后的路径必须位于仓库外。两个参数都未提供时，命令会
-报参数错误，不会默认写入仓库。
+`--personal-root` 会写入 `<personal-root>/project/handoffs`。当 `/project/` 已被
+Git 忽略时，它可以等于仓库根目录；其他仓库内 personal root 会被拒绝。为兼容旧用法
+仍保留显式 `--output-dir`，但解析后的路径必须位于仓库外。两个参数都未提供时，命令会
+报参数错误。
 
 可以附加 agent records：
 

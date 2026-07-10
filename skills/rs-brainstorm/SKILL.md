@@ -10,7 +10,7 @@ updated: 2026-07-10
 ## Missing Personal Root
 
 If `<personal-root>` is not provided, do not create a personal brainstorm or
-substitute process directory inside the repository. Return the brainstorm record
+choose an undeclared personal storage location. Return the brainstorm record
 in the conversation and request or wait for a personal path. Continue any
 applicable updates to the five team owner doc categories normally.
 
@@ -49,7 +49,8 @@ team design under `docs/design/`.
 
 ## Rules
 
-- Do not create team-repo brainstorm archives.
+- Keep brainstorm archives only under ignored personal `project/` paths, never
+  in tracked team docs.
 - Do not start implementation from this skill.
 - Do not force a clear request through brainstorming.
 - If the idea is a broken existing behavior, route to `rs-issue`.

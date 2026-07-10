@@ -239,7 +239,7 @@ const SnapshotScene = ({duration, index}: {duration: number; index: number}) => 
           }}
         >
           <div style={{color: colors.orange, fontSize: 32, fontWeight: 820}}>
-            handoff/snapshot-&lt;timestamp&gt;.md
+            project/handoffs/snapshot-&lt;timestamp&gt;.md
           </div>
           <div style={{display: 'grid', gap: 18, marginTop: 34}}>
             {items.map((item, itemIndex) => (

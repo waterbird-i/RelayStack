@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create raw trick notes or a
-substitute process directory inside the repository. Return the personal record in
+If `<personal-root>` is not provided, do not create raw trick notes or choose an
+undeclared personal storage location. Return the personal record in
 the conversation and request or wait for a personal path. Continue promoting
 stable knowledge to the applicable team owner docs normally.
 

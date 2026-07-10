@@ -1,8 +1,8 @@
 # RelayStack Product Direction
 
-> Status: brainstormed direction
+> Status: current requirement baseline
 > Date: 2026-06-23
-> Next step: split into a roadmap, then design the first skill
+> Storage: team-owned product requirements
 
 ## 1. Positioning
 
@@ -13,7 +13,7 @@ hackathon story is sharper:
 
 > RelayStack lets AI agents hand off work, not just finish tasks.
 
-Superpower makes agents more capable. RelayStable gives capable agents memory,
+Superpower makes agents more capable. RelayStack gives capable agents memory,
 boundaries, validation, and reviewability. RelayStack turns the current work
 state into a handoff snapshot the next person or agent can continue from.
 
@@ -40,7 +40,7 @@ The skill is invoked inside the agent workflow. It reads the current work state
 and writes a Markdown handoff snapshot:
 
 ```text
-handoff/snapshot-<timestamp>.md
+<personal-root>/project/handoffs/snapshot-<timestamp>.md
 ```
 
 The skill is useful when:

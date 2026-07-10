@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create personal fix notes or a
-substitute process directory inside the repository. Return those notes in the
+If `<personal-root>` is not provided, do not create personal fix notes or
+choose an undeclared personal storage location. Return those notes in the
 conversation and request or wait for a personal path. Continue code, verification,
 and applicable team owner doc updates normally.
 

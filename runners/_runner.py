@@ -74,7 +74,7 @@ def ensure_git_repo(workdir: Path) -> None:
         run(["git", "init", "-q"], workdir)
 
 
-def make_handoff(task_dir: Path, workdir: Path) -> tuple[Path, float, int]:
+def make_handoff(task_dir: Path, workdir: Path, output_dir: Path) -> tuple[Path, float, int]:
     ensure_git_repo(workdir)
     handoff_note = read_text(task_dir / "handoff.md").strip() or "未提供"
     started = time.monotonic()
@@ -96,6 +96,8 @@ def make_handoff(task_dir: Path, workdir: Path) -> tuple[Path, float, int]:
             "按 instruction.md 完成最小实现",
             "--validation",
             "bash test.sh",
+            "--output-dir",
+            str(output_dir),
             "--timestamp",
             "benchmark",
         ],
@@ -103,11 +105,21 @@ def make_handoff(task_dir: Path, workdir: Path) -> tuple[Path, float, int]:
     )
     if result.returncode != 0:
         raise SystemExit(result.stdout)
-    snapshot = workdir / "handoff" / "snapshot-benchmark.md"
+    output_lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if not output_lines:
+        raise SystemExit("handoff generator did not report a snapshot path")
+    snapshot = Path(output_lines[-1])
+    if not snapshot.is_file():
+        raise SystemExit(f"handoff generator did not create snapshot: {snapshot}")
     return snapshot, round(time.monotonic() - started, 3), len(read_text(snapshot))
 
 
-def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, Path | None, float | None, int | None]:
+def build_prompt(
+    task_dir: Path,
+    workdir: Path,
+    handoff_output_dir: Path,
+    runner_name: str,
+) -> tuple[str, Path | None, float | None, int | None]:
     instruction = read_text(task_dir / "instruction.md")
     metrics_note = "\n".join(
         [
@@ -123,7 +135,11 @@ def build_prompt(task_dir: Path, workdir: Path, runner_name: str) -> tuple[str, 
     if runner_name == "no_handoff":
         return instruction + metrics_note, None, None, None
 
-    snapshot, snapshot_elapsed, snapshot_chars = make_handoff(task_dir, workdir)
+    snapshot, snapshot_elapsed, snapshot_chars = make_handoff(
+        task_dir,
+        workdir,
+        handoff_output_dir,
+    )
     task_handoff = read_text(task_dir / "handoff.md").strip()
     prompt = "\n\n".join(
         [
@@ -459,15 +475,26 @@ def run_task(
 ) -> dict[str, object]:
     task_dir = task_dir.resolve()
     started = time.monotonic()
-    tmp = tempfile.TemporaryDirectory(prefix=f"rsbench-{task_dir.name}-")
-    workdir = Path(tmp.name)
+    tmp: tempfile.TemporaryDirectory[str] | None = tempfile.TemporaryDirectory(
+        prefix=f"rsbench-{task_dir.name}-"
+    )
+    run_root = Path(tmp.name)
     if keep_workdir:
         tmp.cleanup()
-        workdir = Path(tempfile.mkdtemp(prefix=f"rsbench-{task_dir.name}-"))
+        tmp = None
+        run_root = Path(tempfile.mkdtemp(prefix=f"rsbench-{task_dir.name}-"))
+    workdir = run_root / "workdir"
+    workdir.mkdir()
+    handoff_output_dir = run_root / "handoffs"
 
     copy_initial_repo(task_dir, workdir)
     provenance = load_provenance(task_dir)
-    prompt, snapshot, snapshot_elapsed, snapshot_chars = build_prompt(task_dir, workdir, runner_name)
+    prompt, snapshot, snapshot_elapsed, snapshot_chars = build_prompt(
+        task_dir,
+        workdir,
+        handoff_output_dir,
+        runner_name,
+    )
     prompt_path = workdir / "prompt.md"
     metrics_path = workdir / "agent-metrics.json"
     prompt_path.write_text(prompt, encoding="utf-8")
@@ -536,7 +563,7 @@ def run_task(
             snapshot,
             seed,
         )
-    if not keep_workdir:
+    if tmp is not None:
         tmp.cleanup()
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     return result

@@ -10,7 +10,7 @@ updated: 2026-07-10
 ## Missing Personal Root
 
 If `<personal-root>` is not provided, do not create optional feature process
-notes or a substitute process directory inside the repository. Return those
+notes or choose an undeclared personal storage location. Return those
 notes in the conversation and request or wait for a personal path. Always create
 or update the formal team design under `docs/design/` normally.
 

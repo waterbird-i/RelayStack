@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create an issue report or substitute
-process directory inside the repository. Return the report in the conversation
+If `<personal-root>` is not provided, do not create an issue report or choose an
+undeclared personal storage location. Return the report in the conversation
 and request or wait for a personal path. Continue any applicable updates to the
 five team owner doc categories normally.
 
@@ -18,7 +18,8 @@ Use this skill to record the problem before root-cause analysis.
 
 The report is personal process memory. Keep it in
 `<personal-root>/project/issues/`. It is not a team-maintained project directory
-and must not be written into the repository.
+and must remain ignored by Git and uncommitted when the repository root is the
+personal root.
 
 ## Workflow
 

@@ -3,3 +3,4 @@ __pycache__/
 .codegraph/
 video/node_modules/
 video/out/
+/project/

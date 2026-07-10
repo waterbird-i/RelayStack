@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create an acceptance note or a
-substitute process directory inside the repository. Return the optional personal
+If `<personal-root>` is not provided, do not create an acceptance note or
+choose an undeclared personal storage location. Return the optional personal
 note in the conversation and request or wait for a personal path. Still write the
 formal acceptance result to the applicable team owner docs.
 
@@ -69,4 +69,5 @@ Optional:
 - Do not mark work accepted without verification evidence.
 - Do not update docs with intended behavior that the code does not implement.
 - Do not leave formal acceptance results only in chat or personal notes.
-- Do not create a separate acceptance archive in the repository.
+- Keep optional acceptance archives only under ignored `project/features/`,
+  never in `docs/` or another tracked path.

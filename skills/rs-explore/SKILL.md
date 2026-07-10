@@ -9,8 +9,8 @@ updated: 2026-07-10
 
 ## Missing Personal Root
 
-If `<personal-root>` is not provided, do not create raw knowledge notes or a
-substitute process directory inside the repository. Return the evidence notes in
+If `<personal-root>` is not provided, do not create raw knowledge notes or
+choose an undeclared personal storage location. Return the evidence notes in
 the conversation and request or wait for a personal path. Continue durable team
 owner doc updates normally.
 
