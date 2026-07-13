@@ -8,13 +8,43 @@
 
 [观看 RelayStack 项目介绍视频](reports/assets/relaystack-intro.mp4)
 
-RelayStack 是一组 repo-local skills，也是一套 AI 辅助开发的交接协议。
-它把聊天上下文、本地 Git 证据、项目文档和 agent 记录整理成一份 Markdown
-snapshot，让下一个人或 agent 不读完整历史会话也能继续工作。
+RelayStack 是一套让 AI 研发过程能够**收敛、验收、交接和续写**的工作流协议。
 
-它不是 agent 编排器或任务系统。
+它的核心逻辑是：
 
-安装一组 repo-local skills，运行`rs-handoff`，让下一次交接真的可用。
+> 模糊过程可以很复杂，但团队长期保留的事实必须少、稳定、可验证。
+
+团队仓库只承认五类长期事实：
+
+| 文档 | 回答的问题 |
+|---|---|
+| `docs/context/` | 这个项目必须遵守什么 |
+| `docs/backlog/` | 接下来真正要做什么 |
+| `docs/requirements/` | 产品能力和行为约束是什么 |
+| `docs/design/` | 这个 Feature 获批后应该怎样工作 |
+| `docs/architecture/` | 当前代码结构、边界和契约是什么 |
+
+它们叫“attractor”，可以理解成“稳定信息的吸引子”：不管信息最初来自 brainstorm、
+排障、实现还是 Agent 探索，确认后都要收敛到固定 owner，而不是不断产生 `plans/`、
+`notes/`、`agent-logs/` 等无人维护的新目录。
+
+与此同时，过程信息放在被 Git 忽略的个人目录：
+
+```text
+<personal-root>/project/
+├── roadmaps/
+├── features/
+├── issues/
+├── knowledge/
+└── handoffs/
+```
+
+这样做是为了同时满足两个目标：
+
+- Agent 可以保留详细推理、checklist、失败假设和执行记录。
+- 团队仓库不会被临时过程污染，后续人员只需要阅读稳定事实。
+
+个人笔记永远不能替代团队权威文档。
 
 ## 为什么需要它
 
