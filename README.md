@@ -220,15 +220,15 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --stage "MVP implementation" \
   --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
-  --validation "Read the snapshot and answer the handoff questions" \
-  --personal-root "$PWD"
+  --validation "Read the snapshot and answer the handoff questions"
 ```
 
 `--personal-root` writes to `<personal-root>/project/handoffs`. It may equal the
 repository root because `/project/` is ignored by Git; other repository-local
 personal roots are rejected. An explicit `--output-dir` remains available for
-compatibility, but it must resolve outside the repository. The command fails
-when neither option is provided.
+compatibility, but it must resolve outside the repository. When neither option
+is provided, the command uses the current project root and writes under its
+ignored `/project/handoffs/` directory.
 
 Attach optional agent records:
 

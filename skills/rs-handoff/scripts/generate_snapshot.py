@@ -654,7 +654,8 @@ def resolve_output_dir(args: argparse.Namespace, root: Path) -> tuple[Path, bool
         allow_repo_personal = personal_root == root.resolve()
         output_dir = personal_root / "project" / "handoffs"
     else:
-        raise ValueError("provide --personal-root or an explicit --output-dir")
+        allow_repo_personal = True
+        output_dir = root.resolve() / "project" / "handoffs"
 
     return ensure_output_location(output_dir, root, allow_repo_personal), allow_repo_personal
 
@@ -899,17 +900,20 @@ Markdown record 可解析。
         assert "潜在写入冲突" in text
         assert "reviewer_a, worker_a" in text
 
-        repo_args = parser().parse_args(
-            [
-                "--personal-root",
-                str(root),
-                "--timestamp",
-                "repo-personal",
-            ]
-        )
+        repo_args = parser().parse_args(["--timestamp", "repo-personal"])
         repo_output = write_snapshot(repo_args, root)
         assert repo_output == (root / "project" / "handoffs" / "snapshot-repo-personal.md").resolve()
         assert repo_output.is_file()
+
+        unignored_root = sandbox / "unignored-repo"
+        unignored_root.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=unignored_root, check=True)
+        try:
+            write_snapshot(parser().parse_args([]), unignored_root)
+        except ValueError as exc:
+            assert "must be ignored by Git" in str(exc)
+        else:
+            raise AssertionError("expected default repo-local output ignore rejection")
 
         external_personal_args = parser().parse_args(
             [

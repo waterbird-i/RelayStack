@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Brainstorm
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create a personal brainstorm or
-choose an undeclared personal storage location. Return the brainstorm record
-in the conversation and request or wait for a personal path. Continue any
-applicable updates to the five team owner doc categories normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill when the idea is not clear enough to design or build.
 

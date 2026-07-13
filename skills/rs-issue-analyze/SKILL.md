@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Issue Analyze
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create issue analysis files or
-choose an undeclared personal storage location. Return the analysis in the
-conversation and request or wait for a personal path. Continue any applicable
-updates to the five team owner doc categories normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill after an issue report exists.
 

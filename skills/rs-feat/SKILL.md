@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Feat
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create feature process notes or
-choose an undeclared personal storage location. Return personal process
-content in the conversation and request or wait for a personal path. Continue
-formal `docs/design/` and other team owner doc updates normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill when the request adds a new capability.
 
@@ -80,9 +80,6 @@ personal feature record may replace or override it. Personal records include:
 - implementation notes
 - acceptance notes
 - validation scratch notes
-
-If no personal project directory is provided, summarize the process in the final
-reply or handoff snapshot. Do not invent an undeclared personal storage location.
 
 ## Rules
 

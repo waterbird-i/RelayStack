@@ -234,14 +234,13 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
   --stage "MVP implementation" \
   --owner "current agent" \
   --next-step "Give the snapshot to the next owner" \
-  --validation "Read the snapshot and answer the handoff questions" \
-  --personal-root "$PWD"
+  --validation "Read the snapshot and answer the handoff questions"
 ```
 
 `--personal-root` 会写入 `<personal-root>/project/handoffs`。当 `/project/` 已被
 Git 忽略时，它可以等于仓库根目录；其他仓库内 personal root 会被拒绝。为兼容旧用法
 仍保留显式 `--output-dir`，但解析后的路径必须位于仓库外。两个参数都未提供时，命令会
-报参数错误。
+直接使用当前项目根目录，并写入其已忽略的 `/project/handoffs/`。
 
 可以附加 agent records：
 

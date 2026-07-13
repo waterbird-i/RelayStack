@@ -20,8 +20,11 @@ It does not implement work. It only routes.
 - Roadmap bodies, Feature process notes, Issue records, raw Knowledge, and
   Handoff Snapshots are personal records under
   `<personal-root>/project/{roadmaps,features,issues,knowledge,handoffs}/`.
-- The repository root may be the explicit `<personal-root>` when `/project/` is
-  ignored by Git. These records remain personal and must not be committed.
+- `<personal-root>` defaults to the current project root: use the Git repository
+  top-level when available, otherwise use the current working directory. Do not
+  ask the user to choose it.
+- Before writing personal records, ensure `/project/` is ignored by Git. These
+  records remain personal and must not be committed.
 - `docs/backlog/` may hold team-visible priorities and next steps, but not the
   roadmap body. A formal, approved feature design belongs in `docs/design/` and
   is the authoritative implementation and acceptance input; personal feature

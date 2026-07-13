@@ -23,7 +23,9 @@ docs/architecture/
 ```
 
 These are the only team-maintained project doc directories RelayStack creates
-or recommends committing. Configure or ask for a personal root for:
+or recommends committing. The personal root is the current project root: use
+the Git repository top-level when available, otherwise use the current working
+directory. Do not ask the user to choose it. Personal records belong under:
 
 ```text
 <personal-root>/project/
@@ -34,12 +36,9 @@ or recommends committing. Configure or ask for a personal root for:
 └── handoffs/
 ```
 
-The repository root may be selected explicitly as the personal root only when
-`/project/` is ignored by Git. In that configuration, keep these directories
-under the ignored `/project/` tree and never commit them. Otherwise keep the
-personal root outside the repository. Do not choose an undeclared personal
-storage location. Do not move or delete pre-existing legacy process files
-during onboarding without an explicit migration request.
+Keep these directories under the ignored `/project/` tree and never commit
+them. Do not move or delete pre-existing legacy process files during onboarding
+without an explicit migration request.
 
 ## Workflow
 
@@ -52,9 +51,10 @@ during onboarding without an explicit migration request.
 3. If the user asks for audit only, stop at a migration map and create nothing.
 4. If the five directories are missing, create them with short `README.md`
    ownership notes.
-5. Ask for or discover the personal-root choice. When the user explicitly
-   chooses the repository root, add `/project/` to `.gitignore` before creating
-   `project/{roadmaps,features,issues,knowledge,handoffs}/`.
+5. Use the current project root as the personal root. Add `/project/` to the
+   project-root `.gitignore` before creating
+   `project/{roadmaps,features,issues,knowledge,handoffs}/`. Do not ask the user
+   to choose a personal root.
 6. If older docs already exist, propose a migration map before moving anything.
 7. Keep heavy process records in the user's personal project directory, not the
    team documentation:
@@ -62,8 +62,9 @@ during onboarding without an explicit migration request.
    - issue records in `project/issues/`
    - sub-agent records
    - validation scratch notes
-8. Record the selected storage contract in `docs/context/` so later skills do
-   not have to infer it.
+8. Record only the stable `/project/` storage contract in `docs/context/` so
+   later skills do not have to infer it. Do not add a `RelayStack 个人存储根目录`
+   field or a `TODO: 待确认` placeholder to a context `README.md`.
 9. Report what was created, what was left in place, and which `rs-*` skill to
    use next.
 
@@ -71,5 +72,6 @@ during onboarding without an explicit migration request.
 
 - Do not move or delete existing docs without user confirmation.
 - Never commit `project/` as team documentation.
-- Do not fill project facts with guesses. Use `TODO: 待确认` when needed.
+- Do not fill project facts with guesses. Use `TODO: 待确认` when needed, except
+  for the personal root, which always defaults to the current project root.
 - Keep the skeleton small enough that a team will actually maintain it.

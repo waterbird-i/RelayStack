@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Feat Impl
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create implementation notes or
-choose an undeclared personal storage location. Return optional personal
-notes in the conversation and request or wait for a personal path. Continue code
-and applicable team owner doc updates normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill when the formal feature design under `docs/design/` is approved.
 That team owner doc is the authoritative implementation input. Personal records

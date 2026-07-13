@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Explore
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create raw knowledge notes or
-choose an undeclared personal storage location. Return the evidence notes in
-the conversation and request or wait for a personal path. Continue durable team
-owner doc updates normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill when the user asks how something works or wants evidence before
 designing or fixing.

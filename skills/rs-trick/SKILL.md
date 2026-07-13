@@ -7,12 +7,12 @@ updated: 2026-07-10
 
 # RS Trick
 
-## Missing Personal Root
+## Personal Root Default
 
-If `<personal-root>` is not provided, do not create raw trick notes or choose an
-undeclared personal storage location. Return the personal record in
-the conversation and request or wait for a personal path. Continue promoting
-stable knowledge to the applicable team owner docs normally.
+If `<personal-root>` is not provided, use the current project root: the Git
+repository top-level when available, otherwise the current working directory.
+Do not ask the user for a personal path. Keep personal records under the ignored
+`/project/` tree.
 
 Use this skill for prescriptive knowledge: "when doing X, use Y".
 
