@@ -1,8 +1,8 @@
 ---
 name: rs-issue
 description: Fix a RelayStack issue while preserving root cause notes privately and updating only durable team attractor docs after the fix.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Issue
@@ -16,7 +16,7 @@ Do not ask the user for a personal path. Keep personal records under the ignored
 
 Use this skill when existing behavior is broken, incorrect, or risky.
 
-The fix should leave two kinds of memory:
+The fix may leave two kinds of memory when they are useful:
 
 - personal process memory in `<personal-root>/project/issues/`
 - durable team truth in the attractor docs
@@ -43,7 +43,8 @@ The fix should leave two kinds of memory:
 6. Run the smallest check that would fail if the bug returned.
 7. Record detailed report / analysis / fix-note in the user's personal project
    directory under `project/issues/` when one is provided.
-8. Update only durable team attractor docs:
+8. Decide whether the fix changed a durable team fact. Update zero, one, or
+   multiple applicable attractor docs:
    - `docs/backlog/`: issue status and verification
    - `docs/requirements/`: changed or clarified expected behavior
    - `docs/design/`: changed supported behavior or state
@@ -77,6 +78,7 @@ default:
 - Create issue process records under `project/issues/` in the user's personal
   project directory when available.
 - Do not treat `project/issues/` records as team-maintained docs.
+- Do not update docs solely because this skill ran.
 - Do not hide a behavior or architecture change only in the private notes.
 - Do not broaden the fix into a new feature. Open a feature path instead.
 - If the fix changes expected behavior, update requirements through `rs-req`.

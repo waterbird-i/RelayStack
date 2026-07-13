@@ -1,8 +1,8 @@
 ---
 name: rs-explore
 description: Explore code or docs to answer a focused question and preserve reusable evidence.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Explore
@@ -24,7 +24,8 @@ designing or fixing.
 3. Read real code or files.
 4. Put the short answer first.
 5. List only evidence that supports the answer.
-6. If the conclusion is durable, update the right attractor doc.
+6. If the conclusion adds durable team facts, update zero, one, or multiple
+   applicable attractor docs.
 7. Put raw evidence notes in `<personal-root>/project/knowledge/`; use
    `rs-handoff` only for a personal continuation snapshot.
 

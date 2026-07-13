@@ -24,6 +24,21 @@ docs/architecture/
 Do not add another project-document category under `docs/`. Route a document to
 one of these owners or keep it as personal process memory.
 
+## Documentation Trigger
+
+Invoking a RelayStack skill does not automatically require a team-doc update.
+At the end of the work, determine whether it produced durable facts that future
+contributors need. The correct result may be:
+
+- no `docs/` change when no durable team fact changed;
+- one owner-doc change when the fact has one clear owner; or
+- multiple owner-doc changes when the work genuinely changes several contracts.
+
+Do not create placeholder entries or touch all five directories merely to prove
+that documentation was considered. Documentation-specific requests routed to
+skills such as `rs-req`, `rs-arch`, `rs-guide`, or `rs-libdoc` are different:
+the requested document is their deliverable.
+
 ## Personal Process Memory
 
 For this repository, the repository root is the explicitly selected personal
@@ -39,8 +54,8 @@ project/
 ```
 
 These files are local process records. They must not be committed or treated as
-team source of truth. Promote durable conclusions into one of the five team doc
-directories.
+team source of truth. Promote a durable conclusion only when future contributors
+need it, and only to the applicable team-doc directories.
 
 ## Adoption History
 

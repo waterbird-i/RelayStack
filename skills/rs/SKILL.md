@@ -1,8 +1,8 @@
 ---
 name: rs
 description: RelayStack root entry. Use when the user says rs, asks which RelayStack skill to use, wants the system overview, or gives an open-ended request that should be routed to an rs-* skill.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS
@@ -29,8 +29,15 @@ It does not implement work. It only routes.
   roadmap body. A formal, approved feature design belongs in `docs/design/` and
   is the authoritative implementation and acceptance input; personal feature
   notes cannot replace it.
-- Promote stable knowledge into one of the five team doc categories; keep raw
-  exploration and experience in personal `project/knowledge/`.
+- When stable knowledge adds durable team truth, promote it into the applicable
+  team doc categories; keep raw exploration and experience in personal
+  `project/knowledge/`.
+- Invoking a skill does not by itself require a `docs/` update. After the work,
+  decide whether it produced durable team facts and update zero, one, or
+  multiple applicable owner docs. Never touch every owner directory merely to
+  show that documentation was considered.
+- A documentation-specific skill such as `rs-req`, `rs-arch`, `rs-guide`, or
+  `rs-libdoc` still produces the document explicitly requested by the user.
 
 ## Quick Scan
 

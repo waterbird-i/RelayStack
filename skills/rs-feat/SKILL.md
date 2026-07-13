@@ -1,8 +1,8 @@
 ---
 name: rs-feat
 description: Start and guide a RelayStack feature change. Use when adding a new capability and the team repository should converge on docs/context, docs/backlog, docs/requirements, docs/design, and docs/architecture instead of storing full process archives.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Feat
@@ -48,7 +48,8 @@ user-facing behavior needs API, type, permission, and doc changes, route to
    project notes, not in the team repository.
 4. If the request is too large for one complete slice, route to `rs-roadmap`.
 5. Implement the smallest complete slice.
-6. After implementation, update only the affected attractor docs:
+6. After implementation, decide whether any durable team fact changed. Update
+   zero, one, or multiple affected attractor docs as warranted:
    - `docs/backlog/`: status, owner, next action, verification
    - `docs/requirements/`: settled behavior or acceptance criteria
    - `docs/design/`: final app behavior and user flow
@@ -87,6 +88,7 @@ personal feature record may replace or override it. Personal records include:
   personal project directory when available.
 - Do not treat `project/features/` records as team-maintained docs.
 - Do not store full design/checklist/acceptance archives in `docs/`.
+- Do not update docs solely because this skill ran.
 - Do not update attractor docs with guesses. Write `未发现` or ask for the
   missing fact when it blocks safe work.
 - If the work is actually a bug or regression, use `rs-issue`.

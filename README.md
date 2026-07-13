@@ -91,11 +91,12 @@ they do not include the formal feature design:
 prose stays personal. A formal, approved feature design must live at
 `docs/design/{slug}.md`, or follow the directory's existing naming convention.
 It is the authoritative input for implementation and acceptance; personal
-feature records cannot replace or override it. Formal acceptance results are
-written back to the applicable five team doc categories, while a personal
-acceptance note is optional. Promote stable knowledge into one of the five team
-doc categories and keep raw exploration or experience in
-`<personal-root>/project/knowledge/`.
+feature records cannot replace or override it. Skill invocation alone does not
+require a `docs/` update. After each task, update zero, one, or multiple owner
+docs only when durable team facts changed. Formal acceptance is always reported
+to the user, while owner docs change only when the result affects their durable
+facts; a personal acceptance note is optional. Keep raw exploration or
+experience in `<personal-root>/project/knowledge/`.
 
 RelayStack uses these owner docs for facts that should survive the current
 session:

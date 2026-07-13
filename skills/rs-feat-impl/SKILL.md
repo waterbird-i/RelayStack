@@ -1,8 +1,8 @@
 ---
 name: rs-feat-impl
 description: Implement a feature from an approved team-owned design under docs/design/.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Feat Impl
@@ -48,7 +48,7 @@ Checks:
 - command: result
 
 Docs Updated:
-- docs/design/... or none yet
+- docs/design/... | none
 ```
 
 ## Guardrails

@@ -1,8 +1,8 @@
 ---
 name: rs-issue-fix
-description: Apply a confirmed issue fix, verify it, and update durable RelayStack attractor docs.
-version: "0.1.0"
-updated: 2026-07-10
+description: Apply a confirmed issue fix, verify it, and update RelayStack attractor docs only when durable facts changed.
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Issue Fix
@@ -24,7 +24,8 @@ Use this skill when the root cause and fix direction are confirmed.
 4. Verify the original reproduction no longer fails.
 5. Run scoped regression checks for the impact area.
 6. Write detailed fix notes to `<personal-root>/project/issues/` when available.
-7. Update durable attractor docs:
+7. Decide whether the fix changed a durable team fact. Update zero, one, or
+   multiple applicable attractor docs:
    - `docs/backlog/`: issue status and verification
    - `docs/requirements/`: clarified expected behavior
    - `docs/design/`: changed supported behavior
@@ -46,7 +47,7 @@ Checks:
 - ...
 
 Docs Updated:
-- ...
+- ... | none
 
 Skipped:
 - ...
@@ -58,5 +59,6 @@ Next Skill:
 ## Rules
 
 - Do not include unrelated cleanup.
+- Do not update docs solely because this skill ran.
 - Do not introduce a new abstraction unless it is required to fix the root cause.
 - If the fix reveals a new capability gap, route that gap to `rs-feat`.

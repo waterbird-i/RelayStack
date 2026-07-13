@@ -113,8 +113,10 @@ checklist、implementation notes 和可选的 acceptance notes，不包括正式
 `docs/backlog/` 可以保存团队可见的优先级和下一步，但 roadmap 正文必须留在个人记录中。
 正式、获批并驱动实现的 feature design 必须位于 `docs/design/{slug}.md`，或遵循该目录
 已有命名约定。它是实现和验收的权威输入，任何个人 feature 记录都不能替代或覆盖它。
-正式验收结果必须回写适用的五类团队文档；个人 acceptance note 仅为可选过程记录。
-稳定 Knowledge 必须提升到五类团队文档之一，原始探索和经验保留在
+触发 skill 本身不要求修改 `docs/`。每次任务结束后，只在产生了需要团队长期保留的稳定事实时，
+更新零个、一个或多个适用的 owner docs，不为证明“考虑过文档”而机械修改全部五类目录。
+正式验收结果始终向用户报告；只有结果改变了稳定事实时才回写对应团队文档。个人
+acceptance note 仅为可选过程记录，原始探索和经验保留在
 `<personal-root>/project/knowledge/`。
 
 RelayStack 用这些 owner docs 保存需要跨会话保留的事实：

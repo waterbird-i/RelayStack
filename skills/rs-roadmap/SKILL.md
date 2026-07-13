@@ -1,8 +1,8 @@
 ---
 name: rs-roadmap
 description: Plan RelayStack work that is too large for one feature, keeping roadmap prose personal and docs/backlog team-facing.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.1"
+updated: 2026-07-13
 ---
 
 # RS Roadmap
@@ -38,8 +38,11 @@ that links to stable requirements, design, or architecture facts.
 3. Split the goal into independently deliverable feature slices.
 4. Order by dependency and earliest useful value.
 5. Write the roadmap body to `<personal-root>/project/roadmaps/{slug}.md`.
-6. Update `docs/backlog/` only with team-visible priority, status, and next step.
-7. Promote stable capability or structure facts to requirements or architecture.
+6. Update `docs/backlog/` only when the roadmap creates or changes a
+   team-visible priority, status, or next step.
+7. Promote stable capability or structure facts to requirements or architecture
+   only when those durable facts changed. A roadmap may require zero, one, or
+   multiple team-doc updates.
 8. Hand the first slice to `rs-feat-design`.
 
 ## Outputs
