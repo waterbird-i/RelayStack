@@ -1,8 +1,8 @@
 ---
 name: rs-brainstorm
-description: RelayStack discussion entry for unclear ideas. Triage to rs-feat-design, a personal feature brainstorm note, or rs-roadmap.
-version: "0.1.0"
-updated: 2026-07-10
+description: RelayStack discussion entry for unclear ideas. Triage to rs-feat-ff, rs-feat-design, or rs-roadmap with one optional personal record.
+version: "0.1.2"
+updated: 2026-07-23
 ---
 
 # RS Brainstorm
@@ -34,23 +34,46 @@ team design under `docs/design/`.
 
 ## Workflow
 
-1. Read existing attractor docs:
-   - `docs/context/`
-   - `docs/backlog/`
-   - `docs/requirements/`
-   - `docs/design/`
-   - `docs/architecture/`
+1. Read `docs/context/` and only directly related owner docs needed to
+   understand the proposal.
 2. Reframe the user's proposal as the underlying problem.
-3. Offer 2-3 concrete directions when helpful.
-4. Decide the triage case.
-5. If a note is needed, write it only to the user's personal project notes when
-   a path is provided.
-6. Update team docs only after a stable fact emerges.
+3. Identify goal, success condition, non-goals, scope, and unresolved
+   terminology or contract questions.
+4. Decide the triage case:
+   - one coherent feature with a clear boundary -> `rs-feat-design`;
+   - multiple independently deliverable slices or dependency ordering ->
+     `rs-roadmap`;
+   - still too ambiguous to classify -> keep the discussion in the single
+     personal feature record.
+5. Keep discussion evidence in at most one
+   `<personal-root>/project/features/{slug}.md` record only when cross-round
+   memory is useful. Do not create one for a one-turn clarification.
+6. Do not update team docs from brainstorming. Stable documentation is decided
+   once at the appropriate terminal stage.
 
 ## Rules
 
-- Keep brainstorm archives only under ignored personal `project/` paths, never
-  in tracked team docs.
+- Keep brainstorm material only in the single ignored personal record
+  `<personal-root>/project/features/{slug}.md`, never in tracked team docs.
+- The personal record is non-authoritative and cannot replace
+  `docs/design/{slug}.md`.
 - Do not start implementation from this skill.
 - Do not force a clear request through brainstorming.
 - If the idea is a broken existing behavior, route to `rs-issue`.
+
+## Output
+
+```text
+Route Recommendation
+- Detected intent: unclear proposal
+- Evidence: <request and targeted context paths>
+- Next skill: <exactly one rs-* skill>
+- Gate: <none | user confirmation | design approval>
+- Missing fact: <none | one fact>
+
+Documentation Decision
+- Process record: none | project/features/{slug}.md
+- Team docs: none
+- Reason: discussion remains personal until a later route creates an approved
+  durable fact
+```

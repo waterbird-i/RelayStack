@@ -1,8 +1,8 @@
 ---
 name: rs-decide
 description: Record an already-made RelayStack technical decision, constraint, or convention.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.2"
+updated: 2026-07-23
 ---
 
 # RS Decide
@@ -21,10 +21,13 @@ future contributors.
 
 ## Destination
 
-- `docs/context/`: project-wide constraints, conventions, workflow decisions
-- `docs/architecture/`: architecture and technical structure decisions
-- `docs/requirements/`: product or capability boundary decisions
-- `docs/design/`: user-facing behavior decisions
+Choose exactly one canonical owner for each settled fact:
+
+- `docs/context/`: project-wide constraints, conventions, workflow decisions;
+- `docs/backlog/`: settled team priority, owner, status, or next-action decisions;
+- `docs/architecture/`: current architecture and technical structure decisions;
+- `docs/requirements/`: product or capability boundary decisions;
+- `docs/design/`: approved user-facing behavior decisions.
 
 ## Workflow
 
@@ -41,6 +44,7 @@ future contributors.
    - alternatives considered
    - consequences
    - where future work should look
+5. Link to related owner docs instead of repeating their facts.
 
 ## Rules
 
@@ -48,3 +52,12 @@ future contributors.
 - Do not overwrite an old decision silently; mark it superseded or add a new
   decision note.
 - Do not invent rationale when it is unknown.
+
+## Output
+
+```text
+Documentation Decision
+- Process record: none
+- Team docs: none | <one canonical owner path per distinct decision fact>
+- Reason: <settled decision that future contributors must follow | no durable decision fact changed>
+```

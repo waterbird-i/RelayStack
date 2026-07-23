@@ -1,8 +1,8 @@
 ---
 name: rs-issue-report
-description: Turn a fuzzy problem report into a reproducible RelayStack issue report.
-version: "0.1.0"
-updated: 2026-07-10
+description: Optionally structure reproduction evidence for a RelayStack issue without forcing a multi-stage record.
+version: "0.1.3"
+updated: 2026-07-23
 ---
 
 # RS Issue Report
@@ -14,12 +14,14 @@ repository top-level when available, otherwise the current working directory.
 Do not ask the user for a personal path. Keep personal records under the ignored
 `/project/` tree.
 
-Use this skill to record the problem before root-cause analysis.
+Use this optional helper when reproduction evidence needs a structured record or
+the user explicitly asks for an issue report. It is not a required step before
+diagnosis or a fix.
 
-The report is personal process memory. Keep it in
-`<personal-root>/project/issues/`. It is not a team-maintained project directory
-and must remain ignored by Git and uncommitted when the repository root is the
-personal root.
+If persistence is useful, the report is a section of the single personal issue
+record `<personal-root>/project/issues/{slug}.md`. It is not a team-maintained
+project directory and must remain ignored by Git. Otherwise return the evidence
+without creating a file.
 
 ## Workflow
 
@@ -32,7 +34,7 @@ Ask one question at a time:
 5. Where did it happen?
 6. How severe is it?
 
-Then decide:
+Then recommend one next step when needed:
 
 - simple, root cause obvious, low risk -> `rs-issue-fix`
 - unclear, risky, or multi-candidate -> `rs-issue-analyze`
@@ -40,18 +42,34 @@ Then decide:
 ## Output
 
 ```markdown
-# {slug} Issue Report
+---
+id: {slug}
+backlinks:
+  - <related docs, records, or handoff snapshots>
+---
 
-## Observed
-## Reproduction
-## Expected
-## Actual
-## Environment
-## Severity
+# {slug}
+
+## Report
+### Observed
+### Reproduction
+### Expected
+### Actual
+### Environment
+### Severity
+```
+
+```text
+Documentation Decision
+- Process record: none | project/issues/{slug}.md
+- Team docs: none
+- Reason: report is personal evidence; durable facts wait for the confirmed fix
 ```
 
 ## Rules
 
 - Report symptoms, not guessed causes.
 - Do not fix from this skill.
+- Do not create a separate report file when the issue record already exists.
+- Do not create a personal record merely because this helper ran.
 - If it is a new capability request, route to `rs-feat`.

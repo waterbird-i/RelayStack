@@ -1,8 +1,8 @@
 ---
 name: rs-feat-accept
 description: Validate feature implementation against the approved team design and update applicable team owner docs when durable facts changed.
-version: "0.1.1"
-updated: 2026-07-13
+version: "0.1.4"
+updated: 2026-07-23
 ---
 
 # RS Feat Accept
@@ -16,35 +16,46 @@ Do not ask the user for a personal path. Keep personal records under the ignored
 
 Use this skill after feature implementation.
 
-The acceptance baseline is the approved team-owned design under `docs/design/`.
-Acceptance must be reported to the user. Update team owner docs only when the
-result changes a durable team fact; the correct docs update count may be zero,
-one, or multiple. A personal acceptance note under
-`<personal-root>/project/features/` is optional process memory and is never the
-official result.
+The acceptance baseline is the approved team-owned design under `docs/design/`
+when the feature required design. For `rs-feat-ff`, use the explicit user
+request, stated success condition, implementation diff, and verification
+evidence. Acceptance must always be reported. This is the single point at which
+feature work decides whether durable team documentation changes are required.
 
 ## Inputs
 
-- approved `docs/design/{slug}.md`, or the project's existing design filename
+- approved `docs/design/{slug}.md` when one exists, otherwise the fast-path
+  request and success condition
 - current implementation diff
 - verification evidence
-- related team owner docs
+- the matching current-work-state backlinks and `context_manifest`, when
+  present
+- only related owner-doc sections needed to assess durable facts
+- the optional single personal feature record
+  `<personal-root>/project/features/{slug}.md`
 
 ## Workflow
 
-1. Read the approved team design and current diff.
-2. Verify behavior against its acceptance criteria.
+1. Read the acceptance baseline and current diff.
+2. Verify behavior against the design acceptance criteria or fast-path success
+   condition.
 3. Check that non-goals stayed out.
-4. Decide whether the result changes durable team facts. If so, record only
-   those facts in the applicable owner docs:
-   - `docs/backlog/`: status, verification, and next step
-   - `docs/requirements/`: settled capability behavior
-   - `docs/design/`: accepted behavior, deviations, or follow-up decisions
-   - `docs/architecture/`: real structural changes
-   - `docs/context/`: durable workflow or operating facts
-5. Report remaining gaps and route unresolved defects to `rs-issue`.
-6. Optionally save a personal acceptance note under
-   `<personal-root>/project/features/`.
+4. Classify every discovered change:
+   - task-local or contained change -> no team doc;
+   - project-wide rule or mandatory verification contract -> `docs/context/`;
+   - team-visible priority, owner, or next action -> `docs/backlog/`;
+   - durable capability or user-visible acceptance constraint ->
+     `docs/requirements/`;
+   - approved feature behavior or user flow -> `docs/design/`;
+   - implemented structure, data flow, or integration boundary ->
+     `docs/architecture/`.
+5. Make exactly one `Documentation Decision`. Give each fact one canonical
+   owner and update only the minimal owner doc paths. Link across owners instead
+   of duplicating facts.
+6. Report remaining gaps and route unresolved defects to `rs-issue`.
+7. Append acceptance evidence, if useful, to the existing or explicitly needed
+   single personal feature record instead of creating a separate acceptance
+   record. A one-turn feature normally has no process record.
 
 ## Output
 
@@ -52,27 +63,25 @@ Required:
 
 ```text
 Acceptance: pass | partial | fail
-Team Docs Updated:
-- docs/... | none
+
+Documentation Decision
+- Process record: none | project/features/{slug}.md
+- Team docs: none | docs/...
+- Reason: <durable fact, or why no team fact changed>
+
 Verification:
 - command: result
 Remaining Gaps:
 - item
 ```
 
-Optional:
-
-```text
-<personal-root>/project/features/{slug}-acceptance-note.md
-```
-
 ## Guardrails
 
-- Do not treat a personal acceptance note as the official acceptance result.
+- Do not treat a personal feature record as the official acceptance result.
 - Do not mark work accepted without verification evidence.
-- Do not update docs solely because this skill ran.
+- Make exactly one documentation decision per acceptance.
 - Do not update docs with intended behavior that the code does not implement.
 - Always report the acceptance result to the user, even when no owner doc needs
   to change.
-- Keep optional acceptance archives only under ignored `project/features/`,
-  never in `docs/` or another tracked path.
+- Never create a separate design, checklist, or acceptance archive for the same
+  feature under `project/features/`.

@@ -1,8 +1,8 @@
 ---
 name: rs-feat
-description: Start and guide a RelayStack feature change. Use when adding a new capability and the team repository should converge on docs/context, docs/backlog, docs/requirements, docs/design, and docs/architecture instead of storing full process archives.
-version: "0.1.1"
-updated: 2026-07-13
+description: Route a RelayStack feature change through the smallest safe path without implementing or writing owner docs.
+version: "0.1.4"
+updated: 2026-07-23
 ---
 
 # RS Feat
@@ -17,9 +17,10 @@ Do not ask the user for a personal path. Keep personal records under the ignored
 Use this skill when the request adds a new capability.
 
 RelayStack feature work uses an approved team-owned design under `docs/design/`
-to drive implementation. Optional brainstorms, checklists, implementation notes,
-and acceptance notes stay under `<personal-root>/project/features/` as personal,
-Git-ignored process records.
+only when the feature has an approval-worthy behavior or contract decision.
+Clear, bounded, low-risk work may use `rs-feat-ff`. Optional process evidence
+stays in one Git-ignored personal feature record; one-turn work normally has no
+record.
 
 ## Do Not Use When
 
@@ -33,35 +34,34 @@ user-facing behavior needs API, type, permission, and doc changes, route to
 
 ## Workflow
 
-1. Read the attractor docs before implementation:
-   - `docs/context/`
-   - `docs/backlog/`
-   - `docs/requirements/`
-   - `docs/design/`
-   - `docs/architecture/`
+1. Read `docs/context/`; when the matching current-work-state exists, read its
+   `backlinks` and `context_manifest`; then read only slug-matched or directly
+   related requirements, backlog, design, or architecture docs.
 2. State what is known, missing, and affected:
-   - what should be built
-   - why it matters now
-   - which existing design or architecture it touches
-   - whether `rs-req`, `rs-arch`, or `rs-roadmap` should run first
-3. If the request is still unclear, keep brainstorming in the user's personal
-   project notes, not in the team repository.
-4. If the request is too large for one complete slice, route to `rs-roadmap`.
-5. Implement the smallest complete slice.
-6. After implementation, decide whether any durable team fact changed. Update
-   zero, one, or multiple affected attractor docs as warranted:
-   - `docs/backlog/`: status, owner, next action, verification
-   - `docs/requirements/`: settled behavior or acceptance criteria
-   - `docs/design/`: final app behavior and user flow
-   - `docs/architecture/`: real structure, boundaries, or contracts
-7. Use `rs-handoff` when another person or agent needs to continue.
+   - goal and success condition
+   - existing terminology or contract touched
+   - whether the fast-path gate passes
+   - whether design, an explicit requirements pass, or roadmap is required
+3. Route according to the scope gate:
+   - one small, clear, low-risk slice with no new terminology and no
+     cross-module contract change -> `rs-feat-ff`;
+   - a reusable user-observable capability contract is missing -> `rs-req`;
+   - one coherent feature that needs an approval-worthy decision ->
+     `rs-feat-design`;
+   - multiple independently deliverable slices or dependency ordering ->
+     `rs-roadmap`.
+4. Do not implement or update team docs from this routing skill.
+5. Route completed implementation to `rs-feat-accept`, where one final
+   `Documentation Decision` is made after evidence is available.
+6. Use `rs-handoff` only when another person or agent needs to continue.
 
 ## Routes
 
 | Current state | Route |
 |---|---|
 | idea is fuzzy | `rs-brainstorm` |
-| clear feature, needs formal team design | `rs-feat-design` |
+| clear feature, fails the fast-path gate and needs formal design | `rs-feat-design` |
+| reusable capability contract is missing | `rs-req` |
 | approved design exists under `docs/design/` | `rs-feat-impl` |
 | implementation is done | `rs-feat-accept` |
 | tiny, clear, low-risk change | `rs-feat-ff` |
@@ -69,27 +69,40 @@ user-facing behavior needs API, type, permission, and doc changes, route to
 
 ## Personal Project Notes
 
-Optional feature process records belong in
-`<personal-root>/project/features/`, never in team-maintained project docs. When
-the repository root is the personal root, these records must remain ignored by
-Git. The formal, approved implementation design belongs in `docs/design/`; no
-personal feature record may replace or override it. Personal records include:
+The optional feature process record is one personal file:
 
-- brainstorm trails
-- sub-agent records
-- temporary checklists
-- implementation notes
-- acceptance notes
-- validation scratch notes
+```text
+<personal-root>/project/features/{slug}.md
+```
+
+It is non-authoritative and must remain ignored by Git. It may contain
+brainstorm context, checklists, implementation notes, acceptance evidence, and
+backlinks, but it must never replace the approved team design. Do not create a
+separate acceptance archive for the same feature.
 
 ## Rules
 
-- Create feature process records under `project/features/` in the user's
-  personal project directory when available.
-- Do not treat `project/features/` records as team-maintained docs.
+- Create at most one feature process record:
+  `<personal-root>/project/features/{slug}.md`.
+- Do not create that record for a one-turn task unless the user asks for a
+  durable process note or another owner must continue.
+- Do not treat the personal feature record as a team-maintained doc or as the
+  authoritative design.
 - Do not store full design/checklist/acceptance archives in `docs/`.
-- Do not update docs solely because this skill ran.
+- Do not update team docs from this routing skill; acceptance makes the single
+  documentation decision.
 - Do not update attractor docs with guesses. Write `未发现` or ask for the
   missing fact when it blocks safe work.
 - If the work is actually a bug or regression, use `rs-issue`.
 - Keep validation scoped. Do not run full TypeScript checks unless the user asks.
+
+## Output
+
+```text
+Route Recommendation
+- Detected intent: new capability
+- Evidence: <context, state, and request paths>
+- Next skill: <exactly one rs-* skill>
+- Gate: <none | user confirmation | design approval>
+- Missing fact: <none | one fact>
+```

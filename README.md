@@ -50,18 +50,20 @@ RelayStack keeps that boundary explicit:
 ## How It Works
 
 ```text
-current work state
-├── manual fields: goal, stage, owner, blocker, risk, next step
+current workspace evidence
+├── live current-work-state: the only active state, when continuation needs it
+│   └── id/work id, stage, owner, next action, fingerprint, context manifest
 ├── local Git evidence: status, diff summary, changed files, recent commits
-├── stable project docs: context, backlog, requirements, design, architecture
+├── related owner docs only: context first, then the touched owner scope
 └── optional agent records: worker notes, reviewer notes, conflict notes
+    ↓ rs-handoff
+<personal-root>/project/handoffs/snapshot-<timestamp>.md (read-only transfer artifact)
     ↓
-<personal-root>/project/handoffs/snapshot-<timestamp>.md
-    ↓
-next person or agent continues the work
+rs-continue validates the snapshot, claims the live state, and updates that one
+state; rs-finish-work closes it
 ```
 
-The only team-maintained project documentation committed to the repository is:
+The only team-maintained project-document categories are:
 
 ```text
 docs/context/
@@ -71,12 +73,22 @@ docs/design/
 docs/architecture/
 ```
 
-Roadmaps, feature and issue process records, raw knowledge, and handoff snapshots
-are personal records under `<personal-root>/project/`, not team-maintained
-project documentation. In this repository, the repository root is the personal
-root and `/project/` is ignored by Git. Feature process records mean
-brainstorms, checklists, implementation notes, and optional acceptance notes;
-they do not include the formal feature design:
+`docs/context/` is the mandatory project-wide entry point. `docs/backlog/`,
+`docs/requirements/`, `docs/design/`, and `docs/architecture/` are lazy:
+read or create them only when a task produces a durable fact in their scope. A
+missing optional owner directory is not an onboarding failure. The owner
+triggers are `context` for project-wide rules, `backlog` for ongoing team
+coordination, `requirements` for reusable
+user-observable capability contracts, `design` for approval-worthy
+pre-implementation choices, and `architecture` for implemented technical
+boundaries.
+
+Roadmaps, optional feature and issue process records, raw knowledge, and handoff
+snapshots are personal records under `<personal-root>/project/`, not
+team-maintained project documentation. In this repository, the repository root
+is the personal root and `/project/` is ignored by Git. A multi-stage work item
+may use at most one process record; one-turn work defaults to no record. The
+formal feature design is never stored in the personal record:
 
 ```text
 <personal-root>/project/
@@ -88,30 +100,33 @@ they do not include the formal feature design:
 ```
 
 `docs/backlog/` may hold team-visible priorities and next steps, but roadmap
-prose stays personal. A formal, approved feature design must live at
-`docs/design/{slug}.md`, or follow the directory's existing naming convention.
-It is the authoritative input for implementation and acceptance; personal
-feature records cannot replace or override it. Skill invocation alone does not
-require a `docs/` update. After each task, update zero, one, or multiple owner
-docs only when durable team facts changed. Formal acceptance is always reported
-to the user, while owner docs change only when the result affects their durable
-facts; a personal acceptance note is optional. Keep raw exploration or
-experience in `<personal-root>/project/knowledge/`.
+prose stays personal. A formal feature design is required only when the work
+has an approval-worthy behavior, state, permission, migration, terminology, or
+cross-module contract decision. When required, it lives at
+`docs/design/{slug}.md` and is the authoritative implementation and acceptance
+input; a personal feature record cannot replace it. Clear, bounded, low-risk
+work may proceed without a design.
 
-RelayStack uses these owner docs for facts that should survive the current
-session:
+Skill invocation alone does not require a `docs/` update. Each durable fact has
+one canonical owner; other documents link to that owner instead of copying the
+fact. Update multiple owners only when multiple distinct facts or contracts
+changed. Formal acceptance is always reported, including when no team doc is
+updated.
 
-```text
-docs/context/
-docs/backlog/
-docs/requirements/
-docs/design/
-docs/architecture/
-```
+When a multi-stage work item needs personal memory, use at most one process
+record:
+`project/features/{slug}.md`, `project/issues/{slug}.md`, or
+`project/roadmaps/{slug}.md`. Issue evidence may append Report, Analysis, Fix,
+and Verification sections to that same record, but none of those sections is a
+mandatory stage. Use the shared `id` / `backlinks` header and do not rename
+historical files just to backfill it. One-turn work needs no process record by
+default. `project/knowledge/` is reserved for standalone raw evidence or
+explicitly requested reusable notes; it is not a second process record for the
+same work item.
 
 Temporary plans, process notes, and agent scratch work stay out of the team
-repository until they become stable facts. When the work moves, put the useful
-parts into a handoff snapshot.
+repository until they become stable facts. When the work moves, put process
+evidence and next actions into a handoff snapshot.
 
 ## Design Entities
 
@@ -124,9 +139,10 @@ parts into a handoff snapshot.
 | Architecture | Current technical structure, boundaries, and integration points |
 | Roadmap | Decomposition for work too large for one feature pass |
 | Feature | A staged path for designing, implementing, and accepting new capability |
-| Issue | A root-cause path for reporting, analyzing, and fixing broken behavior |
+| Issue | An optional evidence and fix path for broken behavior |
 | Knowledge | Reusable lessons, recipes, decisions, and code exploration evidence |
 | Handoff Snapshot | The transfer artifact that lets the next owner continue safely |
+| Current Work State | The live personal state for one active work item |
 
 ## Workflows
 
@@ -134,12 +150,14 @@ parts into a handoff snapshot.
 adopt repo       rs-onboard
 fuzzy idea       rs-brainstorm → rs-feat / rs-roadmap
 large work       rs-roadmap → smaller feature passes
-new capability   rs-feat → rs-feat-design → rs-feat-impl → rs-feat-accept
+new capability   rs-feat → rs-feat-ff or rs-feat-design → rs-feat-impl → rs-feat-accept
 fast feature     rs-feat-ff
-broken behavior  rs-issue-report → rs-issue-analyze → rs-issue-fix
+broken behavior  rs-issue (report/analyze/fix helpers only when needed)
 knowledge        rs-learn / rs-trick / rs-decide / rs-explore
 public docs      rs-guide / rs-libdoc
 handoff          rs-handoff
+continue work    rs-continue
+finish work      rs-finish-work
 ```
 
 ## Handoff Snapshot
@@ -173,6 +191,14 @@ The top of each snapshot also includes a machine-readable quality block: missing
 handoff questions, Evidence Map coverage, Next Action Contract completeness, and
 the current Git evidence fingerprint. Use `scripts/check_snapshot_freshness.py`
 to detect whether the workspace diff changed after snapshot generation.
+
+When machine-consumable continuation is needed, the one live
+current-work-state carries its `context manifest` so the next owner can read
+only the docs, code, and evidence this round needs. A snapshot can still be
+generated without creating live state. `rs-continue` validates the snapshot and
+then consumes only an active state with a non-empty manifest; it claims the next
+step and rewrites that one state. `rs-finish-work` closes the live state and
+leaves the next step as handoff or knowledge sediment.
 
 When multiple agent records are attached, the snapshot also includes an
 `Agent parallel boundary` section: write scopes, adoption state, conflicts,
@@ -244,6 +270,7 @@ Useful checks:
 ```bash
 python3 scripts/install_skills.py --self-test
 python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
+python3 skills/rs-handoff/scripts/manage_work_state.py --self-test
 ```
 
 ## Skill Overview
@@ -261,18 +288,20 @@ It routes to the smallest useful entry point.
 | Feature Flow | `rs-feat` | Entry point for new capability work |
 |  | `rs-feat-design` | Create the formal team-owned design under `docs/design/` |
 |  | `rs-feat-impl` | Implement from the approved team design |
-|  | `rs-feat-accept` | Verify against that design and write formal results to team owner docs |
+|  | `rs-feat-accept` | Verify the implementation and make one documentation decision when durable facts changed |
 |  | `rs-feat-ff` | Fast path for tiny clear features |
 | Issue Flow | `rs-issue` | Entry point for broken behavior |
-|  | `rs-issue-report` | Turn a suspected bug into a reproducible report |
-|  | `rs-issue-analyze` | Find root cause, assess risk, and propose a fix |
-|  | `rs-issue-fix` | Apply a confirmed fix and record validation |
+|  | `rs-issue-report` | Optional: record structured reproduction evidence |
+|  | `rs-issue-analyze` | Optional: diagnose an unclear or risky root cause |
+|  | `rs-issue-fix` | Apply a confirmed fix and make one documentation decision |
 | Knowledge | `rs-learn` | Capture reusable lessons from work already done |
 |  | `rs-trick` | Capture reusable coding recipes or library usage |
 |  | `rs-decide` | Record settled technical decisions and long-term constraints |
 | Exploration & Docs | `rs-explore` | Preserve focused code exploration evidence |
 |  | `rs-guide` / `rs-libdoc` | Write task-oriented guides or API/reference docs |
 | Handoff | `rs-handoff` | Generate a snapshot for the next person or agent |
+|  | `rs-continue` | Consume a fresh snapshot and claim the one active state |
+|  | `rs-finish-work` | Close the one active state after verification |
 
 ## Compared With
 

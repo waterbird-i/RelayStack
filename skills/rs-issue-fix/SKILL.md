@@ -1,8 +1,8 @@
 ---
 name: rs-issue-fix
-description: Apply a confirmed issue fix, verify it, and update RelayStack attractor docs only when durable facts changed.
-version: "0.1.1"
-updated: 2026-07-13
+description: Apply a confirmed issue fix, verify it, and make one durable-documentation decision.
+version: "0.1.4"
+updated: 2026-07-23
 ---
 
 # RS Issue Fix
@@ -19,17 +19,25 @@ Use this skill when the root cause and fix direction are confirmed.
 ## Workflow
 
 1. Read the issue report and analysis when available.
-2. Re-read affected code and attractor docs.
+2. Read `docs/context/`, current-work-state when relevant, its backlinks and
+   context manifest, then only the owner docs directly affected by the fix.
 3. Make the narrowest root-cause fix.
 4. Verify the original reproduction no longer fails.
 5. Run scoped regression checks for the impact area.
-6. Write detailed fix notes to `<personal-root>/project/issues/` when available.
-7. Decide whether the fix changed a durable team fact. Update zero, one, or
-   multiple applicable attractor docs:
-   - `docs/backlog/`: issue status and verification
-   - `docs/requirements/`: clarified expected behavior
-   - `docs/design/`: changed supported behavior
-   - `docs/architecture/`: stable boundary or contract exposed by the fix
+6. Append Fix and Verification sections only to an existing or explicitly
+   requested single `<personal-root>/project/issues/{slug}.md` record. A
+   one-turn fix normally creates no process record.
+7. Make exactly one `Documentation Decision` after verification:
+   - task-local fix -> no team doc;
+   - changed a reusable user-observable capability contract ->
+     `docs/requirements/`;
+   - corrected an existing approved feature behavior or state -> `docs/design/`;
+   - exposed a stable implemented technical boundary or contract ->
+     `docs/architecture/`;
+   - created an ongoing team coordination need -> `docs/backlog/`;
+   - changed a project-wide rule or verification contract -> `docs/context/`.
+   Update only the minimal owner paths and link across owners instead of copying
+   the same fact.
 
 ## Do Not Use When
 
@@ -40,25 +48,49 @@ Use this skill when the root cause and fix direction are confirmed.
 ## Final Output
 
 ```markdown
-Changed Files:
+## Fix
+
+### Changed Files
 - ...
 
-Checks:
+### Implementation
 - ...
 
-Docs Updated:
+### Docs Updated
 - ... | none
 
-Skipped:
+### Skipped
+- ... | none
+
+### Next Skill
 - ...
 
-Next Skill:
+## Verification
+
+### Reproduction Check
 - ...
+
+### Regression Checks
+- ...
+
+### Result
+- ...
+
+### Remaining Risks
+- ...
+```
+
+```text
+Documentation Decision
+- Process record: none | project/issues/{slug}.md
+- Team docs: none | docs/...
+- Reason: <durable fact, or why no team fact changed>
 ```
 
 ## Rules
 
 - Do not include unrelated cleanup.
 - Do not update docs solely because this skill ran.
+- Do not create separate report, analysis, or fix files for one issue.
 - Do not introduce a new abstraction unless it is required to fix the root cause.
 - If the fix reveals a new capability gap, route that gap to `rs-feat`.

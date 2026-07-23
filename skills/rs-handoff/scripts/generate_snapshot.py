@@ -13,6 +13,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from work_state_lib import (
+    load_current_work_state,
+    normalize_list,
+    summarize_current_work_state,
+    write_current_work_state,
+)
+
 
 MISSING = "未发现"
 NOT_PROVIDED = "未提供"
@@ -68,13 +75,76 @@ def read_text(path: Path, max_chars: int = 2400) -> str:
 
 
 def project_files(root: Path, names: tuple[str, ...]) -> str:
-    files = sorted(
-        str(path.relative_to(root))
-        for name in names
-        for path in (root / name).rglob("*")
-        if path.is_file() and path.name != ".gitkeep"
-    )
-    return "\n".join(files) if files else MISSING
+    files: set[str] = set()
+    for name in names:
+        path = root / name
+        if path.is_file() and path.name != ".gitkeep":
+            files.add(str(path.relative_to(root)))
+            continue
+        if not path.is_dir():
+            continue
+        for child in path.rglob("*"):
+            if child.is_file() and child.name != ".gitkeep":
+                files.add(str(child.relative_to(root)))
+    return "\n".join(sorted(files)) if files else MISSING
+
+
+def owner_doc_path(root: Path, value: str) -> str | None:
+    candidate = Path(value)
+    if candidate.is_absolute():
+        return None
+    resolved_root = root.resolve()
+    resolved = (root / candidate).resolve()
+    try:
+        relative = resolved.relative_to(resolved_root)
+    except ValueError:
+        return None
+    if not relative.parts:
+        return None
+    owner_root = "/".join(relative.parts[:2]) if len(relative.parts) >= 2 else relative.parts[0]
+    if owner_root not in TEAM_DOC_DIRS:
+        return None
+    return str(relative)
+
+
+def selected_owner_docs(
+    root: Path,
+    work_state: object | None = None,
+    explicit_paths: list[str] | None = None,
+) -> tuple[str, ...]:
+    """Select only context plus paths named by the active work item."""
+    selected: set[str] = {"docs/context"}
+    for value in explicit_paths or []:
+        path = owner_doc_path(root, value)
+        if path:
+            selected.add(path)
+
+    data = getattr(work_state, "data", {})
+    if not isinstance(data, dict):
+        data = {}
+    manifest = data.get("context_manifest", {})
+    if isinstance(manifest, dict):
+        for value in normalize_list(manifest.get("docs")):
+            path = owner_doc_path(root, value)
+            if path:
+                selected.add(path)
+    for value in normalize_list(data.get("linked_docs") or data.get("backlinks")):
+        path = owner_doc_path(root, value)
+        if path:
+            selected.add(path)
+
+    # A state id is a cheap exact lookup for the matching owner document. It
+    # avoids scanning optional owner directories while still finding a related
+    # design or architecture file when the manifest is being bootstrapped.
+    for key in ("id", "work_id"):
+        slug = str(data.get(key) or "").strip()
+        if not slug or slug in {MISSING, NOT_PROVIDED} or Path(slug).name != slug:
+            continue
+        for owner_dir in TEAM_DOC_DIRS:
+            candidate = root / owner_dir / f"{slug}.md"
+            if candidate.is_file():
+                selected.add(str(candidate.relative_to(root)))
+    return tuple(sorted(selected))
 
 
 def status_files(status: str) -> list[str]:
@@ -172,7 +242,7 @@ def present(value: object) -> bool:
     return True
 
 
-def collect_evidence(root: Path) -> Evidence:
+def collect_evidence(root: Path, doc_paths: tuple[str, ...] | None = None) -> Evidence:
     status = run(["git", "status", "--short"], root)
     diff_names = run(["git", "diff", "--name-only"], root)
     return Evidence(
@@ -184,7 +254,7 @@ def collect_evidence(root: Path) -> Evidence:
         diff_names=diff_names,
         changed_files=unique_lines(diff_names, extra=status_files(status)),
         readme=read_text(root / "README.md"),
-        docs=project_files(root, TEAM_DOC_DIRS),
+        docs=project_files(root, doc_paths or ("docs/context",)),
         skills=project_files(root, ("skills",)),
     )
 
@@ -404,14 +474,61 @@ def boundary_markdown(records: list[AgentRecord]) -> str:
     return "\n".join(lines)
 
 
-def evidence_map_markdown(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> str:
-    changed_source = "git diff --name-only + git status --short"
-    docs_source = (
-        "README.md 内容摘录 + docs/context/** + docs/backlog/** + "
-        "docs/requirements/** + docs/design/** + docs/architecture/** + "
-        "skills/** 文件路径清单"
+def inline_items(items: object) -> str:
+    clean = normalize_list(items)
+    return ", ".join(clean) if clean else MISSING
+
+
+def current_work_state_markdown(work_state: dict[str, object]) -> str:
+    fresh = work_state.get("fresh")
+    freshness = "fresh" if fresh else "stale"
+    if not work_state.get("present"):
+        freshness = MISSING
+    return "\n".join(
+        [
+            f"- 状态文件：{work_state.get('path', MISSING)}",
+            f"- ID：{work_state.get('id', MISSING)}",
+            f"- 工作 ID：{work_state.get('work_id', MISSING)}",
+            f"- 阶段：{work_state.get('stage', MISSING)}",
+            f"- 状态：{work_state.get('status', MISSING)}",
+            f"- 生命周期：{work_state.get('lifecycle_state', MISSING)}",
+            f"- 负责人：{work_state.get('owner', MISSING)}",
+            f"- 下一步：{work_state.get('next_action', MISSING)}",
+            f"- 下一阶段：{work_state.get('next_phase', MISSING)}",
+            f"- 推荐 skill：{work_state.get('next_skill', MISSING)}",
+            f"- 认领人：{work_state.get('claimed_by', MISSING)}",
+            f"- 认领时间：{work_state.get('claimed_at', MISSING)}",
+            f"- 关联 docs：{inline_items(work_state.get('linked_docs'))}",
+            f"- 新鲜度：{freshness} ({work_state.get('fresh_reason', MISSING)})",
+            f"- 警告：{inline_items(work_state.get('warnings'))}",
+        ]
     )
+
+
+def context_manifest_markdown(work_state: dict[str, object]) -> str:
+    manifest = work_state.get("context_manifest", {})
+    if not isinstance(manifest, dict):
+        manifest = {}
+    return "\n".join(
+        [
+            f"- docs：{inline_items(manifest.get('docs'))}",
+            f"- code：{inline_items(manifest.get('code'))}",
+            f"- evidence：{inline_items(manifest.get('evidence'))}",
+        ]
+    )
+
+
+def evidence_map_markdown(
+    args: argparse.Namespace,
+    evidence: Evidence,
+    records: list[AgentRecord],
+    work_state: dict[str, object],
+) -> str:
+    changed_source = "git diff --name-only + git status --short"
+    docs_source = "README.md 内容摘录 + 本轮选中的 owner-doc 路径清单"
     agent_source = "--agent-record" if records else MISSING
+    state_source = work_state.get("path", "project/handoffs/current-work-state.md")
+    manifest_present = bool(work_state.get("context_manifest_present"))
     return "\n".join(
         [
             f"- 当前目标：{args.goal}",
@@ -420,12 +537,25 @@ def evidence_map_markdown(args: argparse.Namespace, evidence: Evidence, records:
             f"- 当前阶段：{args.stage}",
             "  - 证据来源：用户输入 `--stage`",
             "  - 可信度：高" if args.stage != NOT_PROVIDED else "  - 可信度：未验证",
+            f"- 当前工作状态：{state_source}",
+            "  - 证据来源：current-work-state 机器可读状态块"
+            if work_state.get("present")
+            else "  - 证据来源：未发现",
+            "  - 可信度：高" if work_state.get("present") else "  - 可信度：未验证",
+            f"- Context Manifest：docs/code/evidence = {context_manifest_markdown(work_state).replace(chr(10), '; ')}",
+            "  - 证据来源：current-work-state.context_manifest"
+            if manifest_present
+            else "  - 证据来源：未发现",
+            "  - 可信度：高" if manifest_present else "  - 可信度：未验证",
             f"- 主要改动文件：{evidence.changed_files}",
             f"  - 证据来源：{changed_source}",
             "  - 可信度：高" if evidence.changed_files != MISSING else "  - 可信度：未验证",
             f"- 项目上下文：{docs_source}",
             "  - 证据来源：本地文件系统",
             "  - 可信度：高",
+            f"- 选中的 owner docs：{evidence.docs}",
+            "  - 证据来源：docs/context、current-work-state manifest/backlinks 或 work-id 精确匹配",
+            "  - 可信度：高" if evidence.docs != MISSING else "  - 可信度：未验证",
             f"- Agent 记录：{agent_source}",
             "  - 证据来源：本地 agent record 文件" if records else "  - 证据来源：未发现",
             "  - 可信度：高" if records else "  - 可信度：未验证",
@@ -460,7 +590,12 @@ def next_action_contract_markdown(args: argparse.Namespace) -> str:
     )
 
 
-def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> dict[str, object]:
+def quality_report(
+    args: argparse.Namespace,
+    evidence: Evidence,
+    records: list[AgentRecord],
+    work_state: dict[str, object],
+) -> dict[str, object]:
     handoff_questions = {
         "current_goal": present(args.goal),
         "completed_work": present(args.completed),
@@ -475,6 +610,8 @@ def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[A
         "current_stage": present(args.stage),
         "changed_files": evidence.changed_files != MISSING,
         "project_context": evidence.readme != MISSING or evidence.docs != MISSING or evidence.skills != MISSING,
+        "current_work_state": bool(work_state.get("present")),
+        "context_manifest": bool(work_state.get("context_manifest_present")),
     }
     if records:
         evidence_claims["agent_records"] = True
@@ -494,6 +631,13 @@ def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[A
     ]
     return {
         "schema_version": 1,
+        "task": args.task,
+        "manual_fields": {
+            "goal": args.goal,
+            "stage": args.stage,
+            "owner": args.owner,
+            "next_step": args.next_step,
+        },
         "score": round(sum(score_parts) / len(score_parts) * 100),
         "handoff_questions": {
             "total": len(handoff_questions),
@@ -516,6 +660,8 @@ def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[A
             "records": len(records),
             "warnings": [warning for record in records for warning in record.warnings],
         },
+        "current_work_state": work_state,
+        "context_manifest": work_state.get("context_manifest", {"docs": [], "code": [], "evidence": []}),
         "evidence_freshness": {
             "status": "fresh_at_generation",
             "fingerprint": evidence_fingerprint(evidence),
@@ -525,14 +671,40 @@ def quality_report(args: argparse.Namespace, evidence: Evidence, records: list[A
     }
 
 
-def quality_json(args: argparse.Namespace, evidence: Evidence, records: list[AgentRecord]) -> str:
-    return json.dumps(quality_report(args, evidence, records), ensure_ascii=False, indent=2, sort_keys=True)
+def quality_json(
+    args: argparse.Namespace,
+    evidence: Evidence,
+    records: list[AgentRecord],
+    work_state: dict[str, object],
+) -> str:
+    return json.dumps(
+        quality_report(args, evidence, records, work_state),
+        ensure_ascii=False,
+        indent=2,
+        sort_keys=True,
+    )
 
 
-def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[AgentRecord]) -> str:
+def render(
+    args: argparse.Namespace,
+    evidence: Evidence,
+    agent_records: list[AgentRecord],
+    work_state: dict[str, object],
+) -> str:
     blocker = args.blocker or MISSING
     risk = args.risk or MISSING
-    can_continue = "是" if blocker == MISSING else "需要处理阻塞"
+    if blocker != MISSING:
+        can_continue = "需要处理阻塞"
+    elif not work_state.get("present"):
+        can_continue = "需要先建立 current-work-state"
+    elif not work_state.get("context_manifest_present"):
+        can_continue = "需要先补齐 current-work-state.context_manifest"
+    elif not work_state.get("fresh"):
+        can_continue = "需要先刷新 current-work-state"
+    elif work_state.get("lifecycle_state") == "finished" or work_state.get("status") == "finished":
+        can_continue = "当前状态已关闭"
+    else:
+        can_continue = "是"
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return f"""# Handoff Snapshot: {args.task}
@@ -541,7 +713,7 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 
 ## 0. 机器可读质量评分
 ```json
-{quality_json(args, evidence, agent_records)}
+{quality_json(args, evidence, agent_records, work_state)}
 ```
 
 ## 1. 当前目标
@@ -550,7 +722,10 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 - 负责人：{args.owner}
 - 是否可继续：{can_continue}
 
-## 2. 工作区状态
+## 2. 当前工作状态
+{current_work_state_markdown(work_state)}
+
+## 3. 工作区状态
 - 工作区：`{evidence.root}`
 - 分支：{evidence.branch}
 - 最近提交：
@@ -562,27 +737,30 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 - 主要改动文件：
 {code_block(evidence.changed_files)}
 
-## 3. 已完成
+## 4. 已完成
 {bullet(args.completed)}
 
-## 4. 未完成
+## 5. 未完成
 {bullet(args.unfinished)}
 
-## 5. 阻塞与风险
+## 6. 阻塞与风险
 - 阻塞：{blocker}
 - 风险：{risk}
 - 需要用户确认：{args.needs_confirmation}
 
-## 6. Evidence Map
-{evidence_map_markdown(args, evidence, agent_records)}
+## 7. Context Manifest
+{context_manifest_markdown(work_state)}
 
-## 7. Risk Register
+## 8. Evidence Map
+{evidence_map_markdown(args, evidence, agent_records, work_state)}
+
+## 9. Risk Register
 {risk_register_markdown(args)}
 
-## 8. Next Action Contract
+## 10. Next Action Contract
 {next_action_contract_markdown(args)}
 
-## 9. 项目上下文
+## 11. 项目上下文
 - README：
 {code_block(evidence.readme)}
 - docs：
@@ -590,7 +768,7 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 - skills：
 {code_block(evidence.skills)}
 
-## 10. Agent 交接信息
+## 12. Agent 交接信息
 - 参与代理与结论：
 {bullet(args.agent_summary)}
 - Agent records：
@@ -599,12 +777,12 @@ def render(args: argparse.Namespace, evidence: Evidence, agent_records: list[Age
 {bullet(args.reusable_finding)}
 - 修改原因：{args.why}
 
-## 11. 下一步
+## 13. 下一步
 1. 下一步动作：{args.next_step}
 2. 验证方式：{args.validation}
 3. 完成标志：{args.done_when}
 
-## 12. 复现命令
+## 14. 复现命令
 ```bash
 git status --short
 git diff --stat
@@ -612,7 +790,7 @@ git diff --name-only
 git log --oneline -n 5
 ```
 
-## 13. Agent 并行边界
+## 15. Agent 并行边界
 {boundary_markdown(agent_records)}
 """
 
@@ -682,9 +860,12 @@ def write_snapshot(args: argparse.Namespace, root: Path) -> Path:
     if output.exists() or output.is_symlink():
         raise ValueError(f"snapshot target already exists or is a symlink: {output}")
 
-    evidence = collect_evidence(root)
+    work_state = load_current_work_state(root)
+    selected_docs = selected_owner_docs(root, work_state, args.context_doc)
+    evidence = collect_evidence(root, selected_docs)
+    work_state_summary = summarize_current_work_state(work_state, root, evidence_fingerprint(evidence))
     agent_records = collect_agent_records(args.agent_record, root)
-    content = render(args, evidence, agent_records)
+    content = render(args, evidence, agent_records, work_state_summary)
     output_dir = ensure_output_location(output_dir, root, allow_repo_personal)
 
     file_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
@@ -747,6 +928,12 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--agent-record", action="append", default=[])
     p.add_argument("--agent-summary", action="append", default=[])
     p.add_argument("--reusable-finding", action="append", default=[])
+    p.add_argument(
+        "--context-doc",
+        action="append",
+        default=[],
+        help="explicit related owner-doc path; may be repeated",
+    )
     output_group = p.add_mutually_exclusive_group()
     output_group.add_argument(
         "--personal-root",
@@ -779,6 +966,8 @@ def self_test() -> None:
         (root / "docs" / "context" / "allowed.md").write_text("allowed\n", encoding="utf-8")
         (root / "docs" / "dev").mkdir(parents=True)
         (root / "docs" / "dev" / "excluded.md").write_text("excluded\n", encoding="utf-8")
+        (root / "docs" / "design").mkdir(parents=True)
+        (root / "docs" / "design" / "unselected.md").write_text("unselected\n", encoding="utf-8")
         json_record = root / "worker-a.json"
         json_record.write_text(
             json.dumps(
@@ -824,6 +1013,35 @@ verification:
 Markdown record 可解析。
 """,
             encoding="utf-8",
+        )
+        initial_evidence = collect_evidence(root)
+        initial_fingerprint = evidence_fingerprint(initial_evidence)
+        write_current_work_state(
+            root / "project" / "handoffs" / "current-work-state.md",
+            {
+                "schema_version": 1,
+                "work_id": "snapshot-contract",
+                "stage": "implement",
+                "owner": "current agent",
+                "next_action": "accept",
+                "next_skill": "rs-feat-accept",
+                "status": "active",
+                "claimed_by": "current agent",
+                "claimed_at": "2000-01-01 00:00:00",
+                "updated_at": "2000-01-01 00:00:00",
+                "evidence_fingerprint": initial_fingerprint,
+                "current_fingerprint": initial_fingerprint,
+                "linked_docs": ["docs/context/allowed.md"],
+                "backlinks": ["docs/context/allowed.md"],
+                "context_manifest": {
+                    "docs": ["docs/context/allowed.md"],
+                    "code": ["skills/rs-handoff/scripts/generate_snapshot.py"],
+                    "evidence": ["git status --short", "git diff --stat"],
+                },
+                "context_manifest_present": True,
+                "notes": ["self-test state"],
+                "warnings": [],
+            },
         )
         args = parser().parse_args(
             [
@@ -874,20 +1092,29 @@ Markdown record 可解析。
         assert '"evidence_freshness"' in text
         assert "scripts/check_snapshot_freshness.py" in text
         assert "schemas/agent-record.schema.json" in text
-        assert "## 2. 工作区状态" in text
-        assert "## 6. Evidence Map" in text
+        assert "- 是否可继续：是" in text
+        assert "## 2. 当前工作状态" in text
+        assert "snapshot-contract" in text
+        assert '"id": "snapshot-contract"' in text
+        assert '"next_phase": "accept"' in text
+        assert '"lifecycle_state": "active"' in text
+        assert "rs-feat-accept" in text
+        assert "## 3. 工作区状态" in text
+        assert "## 7. Context Manifest" in text
+        assert "## 8. Evidence Map" in text
         assert "README.md 内容摘录" in text
-        assert "docs/context/**" in text
+        assert "docs/context/**" not in text
         assert "handoff/**" not in text
         assert "docs/context/allowed.md" in text
+        assert "docs/design/unselected.md" not in text
         assert "docs/dev/excluded.md" not in text
         assert status_files("M .gitignore\n?? docs/new.md") == [
             ".gitignore",
             "docs/new.md",
         ]
-        assert "## 7. Risk Register" in text
-        assert "## 8. Next Action Contract" in text
-        assert "## 9. 项目上下文" in text
+        assert "## 9. Risk Register" in text
+        assert "## 10. Next Action Contract" in text
+        assert "## 11. 项目上下文" in text
         assert "git status --short" in text
         assert "完成脚本渲染" in text
         assert "为关键结论附证据来源" in text
@@ -896,7 +1123,7 @@ Markdown record 可解析。
         assert "reviewer_a" in text
         assert "记录文件不存在：missing.json" in text
         assert "已采纳输出" in text
-        assert "## 13. Agent 并行边界" in text
+        assert "## 15. Agent 并行边界" in text
         assert "潜在写入冲突" in text
         assert "reviewer_a, worker_a" in text
 

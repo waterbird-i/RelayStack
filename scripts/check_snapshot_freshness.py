@@ -47,14 +47,47 @@ def fingerprint(root: Path, exclude: Path | None = None) -> str:
 
 
 def quality_block(snapshot: Path) -> dict[str, object]:
-    text = snapshot.read_text(encoding="utf-8")
+    text = snapshot.read_text(encoding="utf-8", errors="replace")
     match = re.search(r"(?s)^## 0\. 机器可读质量评分\s*```json\s*(.*?)\s*```", text, re.MULTILINE)
     if not match:
-        raise SystemExit(f"{snapshot}: missing machine-readable quality block")
-    data = json.loads(match.group(1))
+        raise ValueError("missing machine-readable quality block")
+    try:
+        data = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"quality block JSON invalid: {exc.msg}") from exc
     if not isinstance(data, dict):
-        raise SystemExit(f"{snapshot}: quality block must be a JSON object")
+        raise ValueError("quality block must be a JSON object")
     return data
+
+
+def state_flags(data: dict[str, object]) -> tuple[bool, bool]:
+    state = data.get("current_work_state", {})
+    if not isinstance(state, dict):
+        return False, False
+    return bool(state.get("present")), bool(state.get("context_manifest_present"))
+
+
+def emit_result(
+    snapshot: Path,
+    status: str,
+    reason: str,
+    current: str,
+    expected: object = None,
+    data: dict[str, object] | None = None,
+) -> int:
+    state_present, manifest_present = state_flags(data or {})
+    payload = {
+        "snapshot": str(snapshot),
+        "fresh": status == "fresh",
+        "status": status,
+        "reason": reason,
+        "snapshot_fingerprint": expected,
+        "current_fingerprint": current,
+        "current_work_state_present": state_present,
+        "context_manifest_present": manifest_present,
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    return 0 if payload["fresh"] else 1
 
 
 def main() -> int:
@@ -63,20 +96,28 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args()
 
-    data = quality_block(args.snapshot)
+    root = args.root.resolve()
+    snapshot = args.snapshot
+    current = fingerprint(root, snapshot.resolve())
+
+    try:
+        data = quality_block(snapshot)
+    except FileNotFoundError:
+        return emit_result(snapshot, "missing_snapshot", "snapshot file not found", current)
+    except OSError as exc:
+        return emit_result(snapshot, "unreadable_snapshot", str(exc), current)
+    except ValueError as exc:
+        return emit_result(snapshot, "malformed_snapshot", str(exc), current)
+
     freshness = data.get("evidence_freshness", {})
     if not isinstance(freshness, dict):
-        raise SystemExit(f"{args.snapshot}: missing evidence_freshness object")
+        return emit_result(snapshot, "missing_freshness", "missing evidence_freshness object", current, data=data)
     expected = freshness.get("fingerprint")
-    current = fingerprint(args.root, args.snapshot.resolve())
-    result = {
-        "snapshot": str(args.snapshot),
-        "fresh": expected == current,
-        "snapshot_fingerprint": expected,
-        "current_fingerprint": current,
-    }
-    print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
-    return 0 if result["fresh"] else 1
+    if not expected:
+        return emit_result(snapshot, "missing_fingerprint", "missing evidence_freshness.fingerprint", current, expected, data)
+    if expected == current:
+        return emit_result(snapshot, "fresh", "matching fingerprint", current, expected, data)
+    return emit_result(snapshot, "stale", "fingerprint mismatch", current, expected, data)
 
 
 if __name__ == "__main__":

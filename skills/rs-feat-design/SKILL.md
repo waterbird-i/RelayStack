@@ -1,8 +1,8 @@
 ---
 name: rs-feat-design
-description: Create or update the approved team-owned feature design under docs/design/ as the authoritative implementation input.
-version: "0.1.0"
-updated: 2026-07-10
+description: Create one approved team-owned feature design under docs/design/ when the approval gate requires it.
+version: "0.1.3"
+updated: 2026-07-23
 ---
 
 # RS Feat Design
@@ -16,36 +16,60 @@ Do not ask the user for a personal path. Keep personal records under the ignored
 
 Use this skill after a feature is clear enough to design.
 
+A request passes the design gate when its goal, success condition, one-feature
+boundary, and non-goals are clear enough to approve behavior and contracts. If
+they remain unclear, route to `rs-brainstorm`. If multiple independently
+deliverable slices or dependency ordering are visible, route to `rs-roadmap`.
+Tiny, clear, low-risk work with no new terminology and no cross-module contract
+change routes to `rs-feat-ff` instead.
+
+Do not equate invoking this skill with a design requirement. If the approval
+gate does not pass, stop before writing and route to `rs-feat-ff` (or back to
+`rs-feat` for clarification).
+
 The formal design that is reviewed, approved, and used to drive implementation
-is a team owner doc at `docs/design/{slug}.md`, or the existing project naming
-convention within `docs/design/`. Personal feature records under
+is exactly one team owner doc at `docs/design/{slug}.md`, or the existing project
+naming convention within `docs/design/`. Personal feature records under
 `<personal-root>/project/features/` are optional process notes only. They may
-contain brainstorms, checklists, implementation notes, or acceptance notes, but
-must not be the authoritative design or the sole implementation input.
+contain working evidence, but must not be the authoritative design or the sole
+implementation input.
 
 ## Inputs
 
+Read only directly related source material:
+
 - `docs/context/`
-- related `docs/requirements/`, `docs/architecture/`, and `docs/backlog/`
-- existing team design docs under `docs/design/`
-- optional personal brainstorm notes
+- the matching `current-work-state` backlinks and `context_manifest`, when
+  present
+- related `docs/requirements/`, `docs/architecture/`, or `docs/backlog/`
+- the directly relevant existing team design under `docs/design/`
+- the single optional personal feature record
+  `<personal-root>/project/features/{slug}.md`
+
+Do not read unrelated owner directories merely because they exist.
 
 ## Workflow
 
 1. Confirm one feature scope and explicit non-goals.
-2. Draft or update the formal design in `docs/design/{slug}.md`, following the
-   directory's existing naming convention when one exists.
-3. Cover current behavior, target behavior, user flow, contracts, affected
+2. If a reusable, long-lived, user-observable capability contract is missing,
+   stop and route explicitly to `rs-req`; do not create a requirements document
+   as a side effect.
+3. Link existing requirements for goals and acceptance criteria, and link
+   existing architecture docs for technical constraints and impact. Do not copy
+   either owner into the design.
+4. Draft or update the one formal design in `docs/design/{slug}.md`, following
+   the directory's existing naming convention when one exists.
+5. Cover current behavior, target behavior, user flow, contracts, affected
    modules, rollout, acceptance criteria, risks, and verification.
-4. Update requirements or architecture only when the design settles durable
-   capability or structural facts.
-5. Get the team design approved before routing to `rs-feat-impl`.
-6. Optionally keep checklists or working notes in
-   `<personal-root>/project/features/`; label them non-authoritative.
+6. Get the team design approved before routing to `rs-feat-impl`.
+7. Do not update requirements or architecture from this skill. Record possible
+   post-implementation facts as candidates for `rs-feat-accept`.
+8. Keep any working evidence in the single personal feature record and label
+   it non-authoritative.
 
 ## Output
 
-Required authoritative output:
+When the approval gate passes, the single authoritative output is:
 
 ```text
 docs/design/{slug}.md
@@ -54,7 +78,14 @@ docs/design/{slug}.md
 Optional personal process records:
 
 ```text
-<personal-root>/project/features/
+<personal-root>/project/features/{slug}.md
+```
+
+```text
+Documentation Decision
+- Process record: none | project/features/{slug}.md
+- Team docs: none | docs/design/{slug}.md
+- Reason: <design gate passed and an approval-worthy behavior/contract needs one design | design not needed; route to rs-feat-ff>
 ```
 
 ## Design Shape
@@ -82,5 +113,6 @@ Optional personal process records:
 - Do not use a personal checklist or note as the sole implementation input.
 - Do not implement from this skill.
 - Do not hide contract changes inside implementation notes.
+- Do not update requirements or architecture from this skill.
 - If the work requires multiple independently deliverable slices, route to
   `rs-roadmap` before writing feature-level design.

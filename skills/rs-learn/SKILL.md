@@ -1,8 +1,8 @@
 ---
 name: rs-learn
 description: Capture a pitfall or good practice discovered during RelayStack work.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.2"
+updated: 2026-07-23
 ---
 
 # RS Learn
@@ -28,7 +28,7 @@ Use this skill when a feature, issue, or exploration produced reusable learning.
 - `<personal-root>/project/knowledge/`: raw story, failed attempts, and incident context.
 - Team docs: only the stable lesson future work should reuse.
 
-Stable lessons usually update:
+Stable lessons may update exactly one canonical owner:
 
 - `docs/context/` for project-wide gotchas or workflow facts
 - `docs/architecture/` for module-boundary lessons
@@ -40,9 +40,20 @@ Stable lessons usually update:
 2. Check whether the lesson is already captured.
 3. Write the shortest reusable lesson.
 4. Link to the feature, issue, or handoff snapshot when useful.
+5. Make one Documentation Decision. Keep incident context personal; promote
+   only the shortest reusable fact to its one owner.
 
 ## Rules
 
 - Do not archive one-off noise in team docs.
 - Do not invent lessons to make a task look complete.
 - If the lesson is actually a rule, use `rs-decide`.
+
+## Output
+
+```text
+Documentation Decision
+- Process record: none | project/knowledge/{slug}.md
+- Team docs: none | <one canonical owner path>
+- Reason: <reusable lesson, or why it remains personal>
+```

@@ -1,16 +1,18 @@
 ---
 name: rs-req
 description: Maintain RelayStack requirements attractor docs under docs/requirements/.
-version: "0.1.0"
-updated: 2026-07-10
+version: "0.1.2"
+updated: 2026-07-23
 ---
 
 # RS Req
 
 Use this skill to maintain `docs/requirements/`.
 
-Requirements explain what capability should exist, why it matters, expected
-behavior, and explicit non-goals. They do not describe implementation steps.
+Requirements explain a reusable, long-lived capability contract: what users
+should be able to observe, why it matters, expected behavior, and explicit
+non-goals. They do not describe implementation steps and are not required for a
+task-local change.
 
 ## Modes
 
@@ -20,11 +22,9 @@ behavior, and explicit non-goals. They do not describe implementation steps.
 
 ## Workflow
 
-1. Read:
-   - `docs/context/`
-   - existing `docs/requirements/`
-   - related `docs/design/`
-   - related `docs/backlog/`
+1. Read `docs/context/`, the directly related requirement when it exists, and
+   only linked design or backlog entries needed to resolve the capability
+   contract.
 2. Lock one capability and one mode.
 3. Draft or update one requirement document.
 4. Keep implementation details out. Move technical structure to `rs-arch`.
@@ -52,3 +52,16 @@ behavior, and explicit non-goals. They do not describe implementation steps.
 - Do not invent user stories.
 - Do not write implementation details.
 - Do not update code from this skill.
+- Do not create design or architecture docs from this skill; link to their
+  canonical owners when the requirement depends on them.
+- A design may link this requirement's goals and acceptance criteria; do not
+  duplicate them in `docs/design/`.
+
+## Output
+
+```text
+Documentation Decision
+- Process record: none
+- Team docs: none | docs/requirements/{slug}.md
+- Reason: <explicit durable capability or user-visible constraint request | no requirement fact changed>
+```

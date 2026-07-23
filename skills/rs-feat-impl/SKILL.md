@@ -1,8 +1,8 @@
 ---
 name: rs-feat-impl
-description: Implement a feature from an approved team-owned design under docs/design/.
-version: "0.1.1"
-updated: 2026-07-13
+description: Implement and verify a feature from an approved team-owned design under docs/design/.
+version: "0.1.4"
+updated: 2026-07-23
 ---
 
 # RS Feat Impl
@@ -22,21 +22,29 @@ or override the approved design.
 ## Inputs
 
 - approved `docs/design/{slug}.md`, or the project's existing design filename
-- related `docs/context/`, `docs/requirements/`, and `docs/architecture/`
-- optional personal checklist or implementation notes
+- only related owner-doc sections needed to resolve implementation contracts
+- the single optional personal feature record
+  `<personal-root>/project/features/{slug}.md`
 
 ## Workflow
 
 1. Read the approved team design under `docs/design/`.
-2. Re-read the related team owner docs before editing.
+2. Read the matching current-work-state backlinks and `context_manifest` when
+   present, then only the related requirements, architecture, backlog, and
+   context sections needed for implementation.
 3. Implement in the approved design order.
 4. Stop if reality contradicts the design; update the team design through
    `rs-feat-design` before continuing.
 5. Keep the diff as small as possible.
 6. Run the smallest checks that prove the slice works.
-7. Summarize changed files and checks.
-8. Optionally save non-authoritative implementation notes under
-   `<personal-root>/project/features/`.
+7. Summarize changed files, checks, and candidate durable facts discovered by
+   the implementation.
+8. Append implementation evidence, if needed, only to the existing or explicitly
+   requested `<personal-root>/project/features/{slug}.md` record. Do not create a
+   record for a one-turn implementation merely because this skill ran.
+9. Route the completed implementation to `rs-feat-accept`.
+
+`rs-feat-impl` never creates or updates team docs.
 
 ## Output
 
@@ -47,8 +55,14 @@ Changed Files:
 Checks:
 - command: result
 
-Docs Updated:
-- docs/design/... | none
+Candidate Durable Facts:
+- fact | none
+
+Documentation Decision
+- Process record: none | project/features/{slug}.md
+- Team docs: none
+- Reason: implementation only records candidate facts; rs-feat-accept makes the
+  one final owner decision after acceptance evidence
 ```
 
 ## Guardrails
@@ -56,5 +70,5 @@ Docs Updated:
 - Do not implement from a personal brainstorm, checklist, or feature note alone.
 - Do not expand scope during implementation.
 - Do not fix unrelated bugs; route them to `rs-issue`.
-- Do not update stable owner docs until implementation facts are real.
+- Do not create or update team docs.
 - Do not skip verification because the diff is small.

@@ -75,18 +75,19 @@ RelayStack 把这条边界写清楚：
 ## 它怎么工作
 
 ```text
-当前工作状态
-├── 手动字段：目标、阶段、owner、阻塞、风险、下一步
+当前工作区证据
+├── live current-work-state：需要续写时唯一的活动状态
+│   └── id/work id、stage、owner、next action、证据指纹、context manifest
 ├── 本地 Git 证据：status、diff 摘要、改动文件、最近提交
-├── 稳定项目文档：context、backlog、requirements、design、architecture
+├── 相关 owner 文档：先读 context，再读本轮触达的 owner
 └── 可选 agent 记录：worker 结论、reviewer 结论、冲突说明
+    ↓ rs-handoff
+<personal-root>/project/handoffs/snapshot-<timestamp>.md（只读交接产物）
     ↓
-<personal-root>/project/handoffs/snapshot-<timestamp>.md
-    ↓
-下一个人或 agent 继续工作
+rs-continue 校验 snapshot 后认领并更新唯一 live 状态；rs-finish-work 关闭它
 ```
 
-仓库中由团队维护、可提交的项目文档只有：
+仓库中由团队维护、可提交的项目文档只使用以下五类 owner：
 
 ```text
 docs/context/
@@ -96,10 +97,17 @@ docs/design/
 docs/architecture/
 ```
 
-Roadmap、Feature 和 Issue 的过程记录、原始 Knowledge、Handoff Snapshot 都是
+`docs/context/` 是项目级上下文的必读入口。`docs/backlog/`、`docs/requirements/`、
+`docs/design/`、`docs/architecture/` 按需读取、按需创建；只有任务产生了该范围内的稳定事实
+时才触达。缺少某个可选 owner 目录不代表仓库尚未接入。
+owner 的触发条件分别是：`context` 记录项目级规则，`backlog` 记录持续的团队协调，
+`requirements` 记录可复用的用户可观察能力契约，`design` 记录实现前需要批准的取舍，
+`architecture` 记录实现后真实的技术边界。
+
+Roadmap、可选的 Feature 和 Issue 过程记录、原始 Knowledge、Handoff Snapshot 都是
 `<personal-root>/project/` 下的个人记录，不属于团队维护的项目文档。本仓库将项目根目录
-作为 personal root，并通过 Git 忽略 `/project/`。Feature 过程记录仅指 brainstorm、
-checklist、implementation notes 和可选的 acceptance notes，不包括正式 feature design：
+作为 personal root，并通过 Git 忽略 `/project/`。多阶段工作最多维护一个个人记录；单轮工作
+默认不创建记录。正式 feature design 不放在个人记录中：
 
 ```text
 <personal-root>/project/
@@ -111,26 +119,23 @@ checklist、implementation notes 和可选的 acceptance notes，不包括正式
 ```
 
 `docs/backlog/` 可以保存团队可见的优先级和下一步，但 roadmap 正文必须留在个人记录中。
-正式、获批并驱动实现的 feature design 必须位于 `docs/design/{slug}.md`，或遵循该目录
-已有命名约定。它是实现和验收的权威输入，任何个人 feature 记录都不能替代或覆盖它。
-触发 skill 本身不要求修改 `docs/`。每次任务结束后，只在产生了需要团队长期保留的稳定事实时，
-更新零个、一个或多个适用的 owner docs，不为证明“考虑过文档”而机械修改全部五类目录。
-正式验收结果始终向用户报告；只有结果改变了稳定事实时才回写对应团队文档。个人
-acceptance note 仅为可选过程记录，原始探索和经验保留在
-`<personal-root>/project/knowledge/`。
+只有需求存在需要人工批准的行为、状态、权限、迁移、术语或跨模块契约取舍时，才要求正式
+feature design。需要 design 时，它必须位于 `docs/design/{slug}.md`，并作为实现和验收的
+权威输入；清晰、局部、低风险的需求可以不生成 design。
 
-RelayStack 用这些 owner docs 保存需要跨会话保留的事实：
+触发 skill 本身不要求修改 `docs/`。每条稳定事实只有一个 canonical owner，其他文档只链接
+到该 owner，不复制或重新定义事实。只有多个彼此独立的事实或契约分别变化时，才更新多个
+owner docs。正式验收结果始终向用户报告，包括团队文档无需修改的情况。
 
-```text
-docs/context/
-docs/backlog/
-docs/requirements/
-docs/design/
-docs/architecture/
-```
+需要个人记忆时，多阶段工作最多维护一个过程记录：`project/features/{slug}.md`、
+`project/issues/{slug}.md` 或 `project/roadmaps/{slug}.md`。Issue 的 Report、Analysis、
+Fix 和 Verification 可以按需追加到同一个文件，但都不是必经阶段。个人记录使用统一的
+`id` / `backlinks` 头部，不为此批量改名历史文件；单轮小任务默认不创建个人记录。
+`project/knowledge/` 仅用于独立的原始证据或明确要求的可复用笔记，不作为同一工作项的第二份
+过程记录。
 
-临时计划、过程记录和 agent 草稿在变成稳定事实前，不塞进团队仓库。
-需要换人接手时，把有用部分放进 handoff snapshot。
+临时计划、过程记录和 agent 草稿在变成稳定事实前，不塞进团队仓库。需要换人接手时，
+把过程证据和下一步动作放进 handoff snapshot。
 
 ## 设计实体
 
@@ -143,9 +148,10 @@ docs/architecture/
 | Architecture | 当前技术结构、边界和集成点 |
 | Roadmap | 把单个 feature 接不住的大目标拆小 |
 | Feature | 新能力从设计、实现到验收的阶段化路径 |
-| Issue | 问题从报告、根因分析到定点修复的路径 |
+| Issue | 问题证据与定点修复的可选路径 |
 | Knowledge | 可复用的经验、技巧、决策和代码探索证据 |
 | Handoff Snapshot | 让下一个 owner 安全继续工作的交接产物 |
+| Current Work State | 一个活跃 work item 的 live 个人状态 |
 
 ## 工作流
 
@@ -153,12 +159,14 @@ docs/architecture/
 接入仓库      rs-onboard
 模糊想法      rs-brainstorm → rs-feat / rs-roadmap
 大型工作      rs-roadmap → 更小的 feature pass
-新增能力      rs-feat → rs-feat-design → rs-feat-impl → rs-feat-accept
+新增能力      rs-feat → rs-feat-ff 或 rs-feat-design → rs-feat-impl → rs-feat-accept
 轻量特性      rs-feat-ff
-问题修复      rs-issue-report → rs-issue-analyze → rs-issue-fix
+问题修复      rs-issue（按需调用 report/analyze/fix 辅助 skill）
 知识沉淀      rs-learn / rs-trick / rs-decide / rs-explore
 对外文档      rs-guide / rs-libdoc
 工作交接      rs-handoff
+继续工作      rs-continue
+结束工作      rs-finish-work
 ```
 
 ## Handoff Snapshot
@@ -189,6 +197,11 @@ docs/architecture/
 snapshot 顶部还包含机器可读质量块，记录 7 个交接问题缺了几个、Evidence Map
 是否覆盖核心结论、Next Action Contract 是否完整，以及当前 Git diff 的证据指纹。
 后续可用 `scripts/check_snapshot_freshness.py` 判断 snapshot 生成后工作区证据是否已变化。
+
+需要机器可消费的续写状态时，唯一的 live current-work-state 会携带 `context manifest`，
+让下一位只读这轮真正需要的 docs、code 和 evidence；普通 snapshot 也可以在不创建 live
+状态时生成。`rs-continue` 先校验 snapshot，再消费 active 且 manifest 非空的 live 状态，
+认领下一步并重写这一个状态；`rs-finish-work` 则关闭它，把后续动作留给 handoff 或知识沉淀。
 
 当附加多个 agent records 时，snapshot 还会生成 `Agent 并行边界`，记录写入范围、
 采纳状态、冲突、验证结果和文件范围重叠警告。
@@ -257,6 +270,7 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
 ```bash
 python3 scripts/install_skills.py --self-test
 python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
+python3 skills/rs-handoff/scripts/manage_work_state.py --self-test
 ```
 
 ## 技能总览
@@ -273,18 +287,20 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 | 特性流程 | `rs-feat` | 新特性子流程入口 |
 |  | `rs-feat-design` | 在 `docs/design/` 创建正式团队 design |
 |  | `rs-feat-impl` | 按获批的团队 design 实现 |
-|  | `rs-feat-accept` | 对照团队 design 验收，并把正式结果回写团队 owner docs |
+|  | `rs-feat-accept` | 验收实现，仅在产生稳定事实时做一次文档决策 |
 |  | `rs-feat-ff` | 小而清晰的特性直通车 |
 | 问题流程 | `rs-issue` | 已有行为出问题时的入口 |
-|  | `rs-issue-report` | 把疑似 bug 落成可复现 report |
-|  | `rs-issue-analyze` | 找根因、评估风险、给修复方案 |
-|  | `rs-issue-fix` | 定点修复并记录验证结果 |
+|  | `rs-issue-report` | 可选：记录结构化复现证据 |
+|  | `rs-issue-analyze` | 可选：诊断不清晰或高风险根因 |
+|  | `rs-issue-fix` | 应用已确认的修复并做一次文档决策 |
 | 知识沉淀 | `rs-learn` | 沉淀可复用经验 |
 |  | `rs-trick` | 沉淀可复用编程模式或库用法 |
 |  | `rs-decide` | 记录已拍板的技术决策和长期约束 |
 | 探索 & 文档 | `rs-explore` | 定向代码探索，并沉淀证据 |
 |  | `rs-guide` / `rs-libdoc` | 写对外指南或 API / 库参考文档 |
 | 交接 | `rs-handoff` | 生成给下一个人或 agent 的 handoff snapshot |
+|  | `rs-continue` | 消费新鲜 snapshot 并认领唯一活动状态 |
+|  | `rs-finish-work` | 验证后关闭唯一活动状态 |
 
 ## 与其他工具对比
 

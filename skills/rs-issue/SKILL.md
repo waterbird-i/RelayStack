@@ -1,8 +1,8 @@
 ---
 name: rs-issue
-description: Fix a RelayStack issue while preserving root cause notes privately and updating only durable team attractor docs after the fix.
-version: "0.1.1"
-updated: 2026-07-13
+description: Route a RelayStack issue to the smallest safe diagnostic or fix path without implementing or writing owner docs.
+version: "0.1.4"
+updated: 2026-07-23
 ---
 
 # RS Issue
@@ -16,72 +16,121 @@ Do not ask the user for a personal path. Keep personal records under the ignored
 
 Use this skill when existing behavior is broken, incorrect, or risky.
 
-The fix may leave two kinds of memory when they are useful:
+Issue work may leave two kinds of memory when they are explicitly useful:
 
 - personal process memory in `<personal-root>/project/issues/`
 - durable team truth in the attractor docs
 
 ## Do Not Use When
 
-- The root cause and fix direction are already confirmed; use `rs-issue-fix`.
 - The problem is a new capability request; use `rs-feat`.
-- The only need is to capture a reproducible report; use `rs-issue-report`.
+- The user explicitly asks for structured reproduction evidence; use the
+  optional `rs-issue-report` helper.
+- Root cause and fix direction are already confirmed; route to `rs-issue-fix`.
 
 ## Workflow
 
-1. Read the attractor docs before issue work:
-   - `docs/context/`
-   - `docs/architecture/`
-   - `docs/design/`
-   - `docs/backlog/`
-   - `docs/requirements/`
-2. Define the expected behavior from requirements or design. If it is missing,
-   call that out before editing.
+1. Read `docs/context/`, current-work-state when relevant, its backlinks and
+   context manifest, and only directly related owner docs.
+2. Define the expected behavior from requirements, design, or current code. If
+   the reusable user-observable contract is missing, route explicitly to
+   `rs-req` instead of guessing.
 3. Reproduce or inspect the failure with the cheapest local evidence available.
-4. Trace the real call path and every relevant caller before editing shared code.
-5. Fix the root cause at the narrowest shared point.
-6. Run the smallest check that would fail if the bug returned.
-7. Record detailed report / analysis / fix-note in the user's personal project
-   directory under `project/issues/` when one is provided.
-8. Decide whether the fix changed a durable team fact. Update zero, one, or
-   multiple applicable attractor docs:
-   - `docs/backlog/`: issue status and verification
-   - `docs/requirements/`: changed or clarified expected behavior
-   - `docs/design/`: changed supported behavior or state
-   - `docs/architecture/`: root cause that exposes a stable boundary or contract
-9. Use `rs-handoff` when the fix needs to be handed to another owner.
+4. Route by the user's need and the evidence available:
+   - structured reproduction evidence is requested or needed for handoff ->
+     `rs-issue-report`;
+   - root cause is unclear, risky, or has multiple candidates ->
+     `rs-issue-analyze`;
+   - root cause and fix direction are confirmed -> `rs-issue-fix`;
+   - another owner must continue -> `rs-handoff`.
+5. Do not implement or update team docs from this routing skill.
 
 ## Routes
 
 | Current state | Route |
 |---|---|
-| issue is not yet reproducible | `rs-issue-report` |
-| report exists, root cause unclear | `rs-issue-analyze` |
+| structured reproduction evidence is needed | `rs-issue-report` |
+| root cause is unclear or risky | `rs-issue-analyze` |
 | root cause and fix are confirmed | `rs-issue-fix` |
 | fix is complete and needs handoff | `rs-handoff` |
 | problem is actually a new capability | `rs-feat` |
 
-## Personal Project Notes
+## Shared Issue Record Contract
 
-Keep these in `project/issues/` inside the user's personal project directory by
-default:
+For an issue that explicitly needs a persistent process record, use at most one
+file:
 
-- reproduction transcript
-- failed hypotheses
-- stack traces
-- logs
-- sub-agent analysis
-- fix-note details that are only useful for this incident
+```text
+<personal-root>/project/issues/{slug}.md
+```
+
+Append only the sections that are useful, in this order:
+
+```markdown
+# {slug}
+
+## Report
+### Observed
+### Reproduction
+### Expected
+### Actual
+### Environment
+### Severity
+
+## Analysis
+### Key Locations
+### Failure Path
+### Root Cause
+### Impact
+### Fix Options
+### Recommended Fix
+
+## Fix
+### Changed Files
+### Implementation
+### Docs Updated
+### Skipped
+### Next Skill
+
+## Verification
+### Reproduction Check
+### Regression Checks
+### Result
+### Remaining Risks
+```
+
+The record is personal, ignored, and non-authoritative. Do not create separate
+report, analysis, or fix files for the same issue.
+
+New issue process records should start with the shared personal record header.
+Use the file stem as `id`, and use `backlinks` for related reports, analyses,
+fix notes, handoff snapshots, or owner docs. Do not mass-migrate old records.
 
 ## Rules
 
-- Create issue process records under `project/issues/` in the user's personal
-  project directory when available.
+- Create at most one issue process record under
+  `<personal-root>/project/issues/{slug}.md` only when the user requests a
+  record, another owner must continue, or cross-round evidence is genuinely
+  useful. A one-turn issue defaults to no record.
 - Do not treat `project/issues/` records as team-maintained docs.
-- Do not update docs solely because this skill ran.
+- Do not update team docs from this routing skill; the confirmed fix makes one
+  Documentation Decision.
 - Do not hide a behavior or architecture change only in the private notes.
 - Do not broaden the fix into a new feature. Open a feature path instead.
-- If the fix changes expected behavior, update requirements through `rs-req`.
-- If the fix changes a stable boundary, update architecture through `rs-arch`.
+- If the fix changes a reusable user-observable capability contract, route the
+  requirements update through `rs-req`.
+- If the fix changes an implemented stable boundary, route the architecture
+  update through `rs-arch`.
 - Do not update attractor docs with guesses. Only write stable facts.
 - Keep validation scoped. Do not run full TypeScript checks unless the user asks.
+
+## Output
+
+```text
+Route Recommendation
+- Detected intent: existing behavior is broken
+- Evidence: <context, state, code, and request paths>
+- Next skill: <exactly one rs-* skill>
+- Gate: <none | user confirmation | root-cause confirmation>
+- Missing fact: <none | one fact>
+```

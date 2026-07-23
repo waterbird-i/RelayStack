@@ -60,10 +60,8 @@ The skill should collect only cheap, local evidence:
 - `git diff --name-only`
 - `git log --oneline -n 5`
 - `docs/context/**`, if present
-- `docs/backlog/**`, if present
-- `docs/requirements/**`, if present
-- `docs/design/**`, if present
-- `docs/architecture/**`, if present
+- owner-doc paths directly related to the current task, as named by the live
+  context manifest, backlinks, or an exact work-item slug
 - Visible agent task records or sub-agent summaries, if the environment exposes them
 - Personal project notes, if the user explicitly points to them
 
@@ -80,6 +78,39 @@ The generated handoff snapshot should answer:
 5. 有哪些风险或阻塞？
 6. 下一步做什么？
 7. 怎么验证完成？
+
+## 6. Continuity Contract
+
+RelayStack should keep one lightweight live current-work-state for the active
+work item when there is a useful handoff in flight.
+
+The state should stay personal, not team-owned, and should live at
+`project/handoffs/current-work-state.md`.
+
+It should record:
+
+- `id` as the canonical personal-record identifier
+- `work_id`
+- `stage`
+- `owner`
+- `next_action`
+- `evidence_fingerprint`
+- `backlinks` for related docs or personal records
+- `linked_docs`
+- `context_manifest` split into `docs` / `code` / `evidence`
+- `status` / lifecycle state for active versus finished work
+- optional claim metadata such as `claimed_by` and `claimed_at`
+
+`id` mirrors `work_id` when both are present, and `backlinks` mirrors
+`linked_docs` for compatibility with existing snapshots. The next owner must
+verify freshness and the non-empty context manifest before claiming the next
+step. A finished state must not be treated as active work. The product must stay
+skill-first and must not become a task platform, workflow engine, or team
+journal.
+
+The live state is the only active-work state. Timestamped snapshots are
+personal transfer artifacts and do not create a second workflow state or a
+default scan of all owner directories.
 
 Suggested template:
 
@@ -108,12 +139,9 @@ Suggested template:
 - 风险：
 - 需要用户确认：
 
-## 6. Attractor Docs 上下文
-- context：
-- backlog：
-- requirements：
-- design：
-- architecture：
+## 6. Related Owner Docs 上下文
+- `docs/context/`：
+- 本轮直接相关的 owner docs：
 - 关键注意事项：
 
 ## 7. Agent 交接信息
@@ -135,7 +163,7 @@ git log --oneline -n 5
 ```
 ````
 
-## 6. Non-goals
+## 7. Non-goals
 
 The MVP should not include:
 
@@ -149,7 +177,7 @@ The MVP should not include:
 - Task management system
 - Hard dependency on an LLM API
 
-## 7. Demo
+## 8. Demo
 
 The strongest hackathon demo is a handoff test:
 
@@ -182,7 +210,7 @@ next small step.
 Show the handoff score and close on verifiable agent delivery.
 ```
 
-## 8. Success Metric
+## 9. Success Metric
 
 Primary metric:
 
@@ -193,7 +221,7 @@ handoff success rate = correctly answered handoff questions / total handoff ques
 This is stronger than generated lines of code, token count, or vague efficiency
 claims. The product succeeds when the next owner can continue the work.
 
-## 9. Biggest Risk
+## 10. Biggest Risk
 
 The biggest risk is being understood as a summary generator.
 
