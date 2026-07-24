@@ -225,8 +225,23 @@ The JSON AgentRecord contract lives at `schemas/agent-record.schema.json`.
 
 ## Quick Start
 
-RelayStack is installed as a Codex plugin. Install the plugin from its plugin
-source or marketplace; the plugin exposes the complete `rs-*` skill group.
+RelayStack is distributed through the
+[RelayStack Marketplace](https://github.com/waterbird-i/relaystack-marketplace).
+Add the marketplace once, then install the plugin:
+
+```bash
+codex plugin marketplace add waterbird-i/relaystack-marketplace
+codex plugin add relaystack@relaystack
+```
+
+Confirm that Codex reports `relaystack@relaystack` as `installed, enabled`:
+
+```bash
+codex plugin list
+```
+
+Restart Codex or open a new task after installation. The plugin exposes the
+complete `rs-*` skill group.
 
 For local plugin development, install the repository as a local plugin in
 Codex. The repository validator is available for source-checkout development:

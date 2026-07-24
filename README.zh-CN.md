@@ -227,8 +227,22 @@ JSON 形态的 AgentRecord 契约见 `schemas/agent-record.schema.json`。
 
 ## 快速开始
 
-RelayStack 以 Codex 插件形式安装。请从插件源或 marketplace 安装；安装后
-插件会统一暴露完整的 `rs-*` skill 组。
+RelayStack 通过
+[RelayStack Marketplace](https://github.com/waterbird-i/relaystack-marketplace)
+发布。先添加一次 marketplace，再安装插件：
+
+```bash
+codex plugin marketplace add waterbird-i/relaystack-marketplace
+codex plugin add relaystack@relaystack
+```
+
+确认 Codex 已将 `relaystack@relaystack` 标记为 `installed, enabled`：
+
+```bash
+codex plugin list
+```
+
+安装后请重启 Codex 或开启新任务。插件会统一暴露完整的 `rs-*` skill 组。
 
 本地开发时，可以在 Codex 中把当前仓库作为本地插件安装。源码开发时可使用
 下面的插件校验器：
