@@ -29,7 +29,7 @@ create a task platform, or rewrite personal notes into team truth.
 3. Close the state with:
 
 ```bash
-python3 skills/rs-handoff/scripts/manage_work_state.py \
+python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
   --state project/handoffs/current-work-state.md \
   finish \
   <snapshot.md> \

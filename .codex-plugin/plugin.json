@@ -1,0 +1,35 @@
+{
+  "name": "relaystack",
+  "version": "0.2.0",
+  "description": "Evidence-driven project workflows and agent handoffs for AI-assisted software work.",
+  "author": {
+    "name": "RelayStack"
+  },
+  "homepage": "https://github.com/waterbird-i/RelayStack",
+  "repository": "https://github.com/waterbird-i/RelayStack",
+  "license": "MIT",
+  "keywords": [
+    "relaystack",
+    "handoff",
+    "workflow",
+    "project-context",
+    "agent-collaboration",
+    "software-development"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RelayStack",
+    "shortDescription": "Evidence-driven project workflows and agent handoffs",
+    "longDescription": "Use RelayStack to route project work, preserve context, record decisions, and generate verifiable handoff snapshots across agents and sessions.",
+    "developerName": "RelayStack",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": "Use RelayStack to route this task or create a handoff snapshot for the current project",
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

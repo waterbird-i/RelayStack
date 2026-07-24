@@ -29,7 +29,7 @@ permission model, database, or team journal.
 5. Claim the next step with:
 
 ```bash
-python3 skills/rs-handoff/scripts/manage_work_state.py \
+python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
   --state project/handoffs/current-work-state.md \
   continue \
   <snapshot.md> \

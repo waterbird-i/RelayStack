@@ -227,8 +227,18 @@ JSON 形态的 AgentRecord 契约见 `schemas/agent-record.schema.json`。
 
 ## 快速开始
 
-RelayStack 的日常入口是仓库内 skills。先把它们安装到
-`$CODEX_HOME/skills` 或 `~/.codex/skills`：
+RelayStack 以 Codex 插件形式安装。请从插件源或 marketplace 安装；安装后
+插件会统一暴露完整的 `rs-*` skill 组。
+
+本地开发时，可以在 Codex 中把当前仓库作为本地插件安装。源码开发时可使用
+下面的插件校验器：
+
+```bash
+python3 scripts/validate_plugin.py
+```
+
+无法加载插件的旧环境仍可使用兼容复制器，但它安装的是单个 skill，而不是
+RelayStack 插件：
 
 ```bash
 python3 scripts/install_skills.py --all
@@ -269,6 +279,7 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
 
 ```bash
 python3 scripts/install_skills.py --self-test
+python3 scripts/validate_plugin.py
 python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 python3 skills/rs-handoff/scripts/manage_work_state.py --self-test
 ```

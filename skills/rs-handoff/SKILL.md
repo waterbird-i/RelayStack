@@ -66,8 +66,11 @@ still reports the snapshot path and does not claim a live-state update.
 
 ## Command
 
+插件安装后，请使用当前已安装 RelayStack 插件目录下的脚本；下面的
+`<relaystack-plugin>` 表示插件安装目录，不是当前业务仓库：
+
 ```bash
-python3 skills/rs-handoff/scripts/generate_snapshot.py \
+python3 <relaystack-plugin>/skills/rs-handoff/scripts/generate_snapshot.py \
   --task "RelayStack MVP" \
   --goal "Generate one useful handoff snapshot" \
   --stage "MVP implementation" \
@@ -77,12 +80,12 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
 ```
 
 ```bash
-python3 skills/rs-handoff/scripts/manage_work_state.py \
+python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
   --state project/handoffs/current-work-state.md \
   continue \
   <snapshot.md>
 
-python3 skills/rs-handoff/scripts/manage_work_state.py \
+python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
   --state project/handoffs/current-work-state.md \
   finish \
   <snapshot.md> \
