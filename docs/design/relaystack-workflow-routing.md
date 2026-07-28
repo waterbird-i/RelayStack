@@ -21,7 +21,7 @@ This design takes the useful Trellis shape without importing its runtime:
 - keep one live state source for an active handoff;
 - create stage artifacts only when their gate is needed;
 - let implementation produce evidence and candidate facts;
-- make one closeout decision after the evidence is available.
+- assess documentation impact after the evidence is available.
 
 RelayStack does not add `.odd` state, odd-flow memory, a task graph, or a second
 workflow runtime.
@@ -136,8 +136,8 @@ archive. A one-turn feature or issue defaults to no personal record.
   architecture source or an explicit architecture route.
 - `rs-feat-impl` implements and verifies only. It reports candidate durable
   facts and does not write team docs.
-- `rs-feat-accept` verifies the implementation once and makes the single final
-  Documentation Decision. Task-local changes produce no team doc; non-local
+- `rs-feat-accept` verifies the implementation and assesses documentation
+  impact. Task-local changes produce no team doc; non-local
   changes update only the triggered owner paths.
 
 ### Issue Flow
@@ -148,8 +148,8 @@ archive. A one-turn feature or issue defaults to no personal record.
   evidence must be recorded or the user asks for a report.
 - `rs-issue-analyze` is an optional diagnostic helper for unclear, risky, or
   multi-candidate root causes. It does not require a report to exist.
-- `rs-issue-fix` applies a confirmed narrow fix, verifies it, and makes one final
-  Documentation Decision.
+- `rs-issue-fix` applies a confirmed narrow fix, verifies it, and assesses any
+  documentation impact.
 - Report, Analysis, Fix, and Verification evidence, when retained, belongs in
   the one personal issue record.
 
@@ -169,37 +169,29 @@ archive. A one-turn feature or issue defaults to no personal record.
 `rs`, `rs-feat`, and `rs-issue` are pure routers. Each one:
 
 - reads targeted context and relevant continuation state;
-- recommends exactly one next skill, or asks one blocking question;
+- recommends a clear next skill when evidence supports one, otherwise explains
+  the plausible routes or asks one blocking question;
 - names the evidence and gate behind that recommendation;
 - does not implement code, create process records, or update team owner docs.
 
-The common routing output is:
-
-```text
-Route Recommendation
-- Detected intent: <feature | issue | handoff | other>
-- Evidence: <paths, state fields, or user facts>
-- Next skill: <exactly one rs-* skill>
-- Gate: <none | user confirmation | design approval | root-cause confirmation>
-- Missing fact: <none | one fact needed before continuing>
-```
+Routing responses have no common field layout. They should communicate the
+recommendation, supporting evidence, gates, and missing facts only to the extent
+those details help the user understand or continue the work.
 
 Stage skills remain directly callable when the user explicitly requests them or
 when the route has already established their gate.
 
-## Documentation Decision
+## Documentation Impact
 
-The first stage that writes a process or team artifact returns exactly one
-decision for that write. Pure routers and read-only exploration do not invent a
-decision. A later terminal stage may replace a deferred implementation note
-with the final decision, but it must not create a second record.
+The first stage that writes a process or team artifact explains what it wrote
+and why when that information is useful to the result. Pure routers and
+read-only exploration do not invent documentation impact. A later terminal
+stage may replace a deferred implementation note with the final owner update,
+but it must not create a second record.
 
-```text
-Documentation Decision
-- Process record: none | <one path>
-- Team docs: none | <one or more owner paths>
-- Reason: <durable fact, or why no stable fact changed>
-```
+There is no required title, field set, ordering, or placeholder value for this
+explanation. A task with no documentation impact does not need a dedicated
+documentation statement.
 
 The process path is `none` for one-turn work. If a record already exists, append
 to it; never create a second feature, issue, roadmap, checklist, analysis, or
@@ -244,9 +236,9 @@ The following fixed scenarios define the expected lifecycle:
    only; no empty optional owner directories.
 9. A stale state, missing manifest, broken backlink, or state/design conflict:
    continuation stops with an explicit missing/unknown fact.
-10. Every write-capable scenario returns one `Documentation Decision` whose
-    process record is `none` or the one canonical personal path and whose team
-    docs list is `none` or the minimal owner paths.
+10. A write-capable scenario reports created or updated artifacts when useful,
+    using the canonical personal path or minimal team owner paths without a
+    prescribed response format.
 
 Each scenario records pass, fail, or missing evidence in ignored
 `project/knowledge/`; it does not create a tracked test document.

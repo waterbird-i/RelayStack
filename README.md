@@ -8,14 +8,14 @@
 
 [Watch the RelayStack introduction video](reports/assets/relaystack-intro.mp4)
 
-RelayStack is a Codex plugin that provides evidence-driven project workflows
-and handoff skills for AI-assisted software work. It turns chat context, local
-Git evidence, project docs, and agent records into a Markdown snapshot that the
-next person or agent can use without reading the whole previous session.
+RelayStack is a repo-local skill suite and handoff protocol for AI-assisted
+software work. It turns chat context, local Git evidence, project docs, and
+agent records into a Markdown snapshot that the next person or agent can use
+without reading the whole previous session.
 
 It is not an agent orchestrator, task tracker, web app, or workflow platform.
-The first useful version stays small: install one plugin, use its skill group,
-run one snapshot generator, and make the next handoff usable.
+The first useful version stays small: load the skills, run one snapshot
+generator, and make the next handoff usable.
 
 ## Why It Exists
 
@@ -225,37 +225,16 @@ The JSON AgentRecord contract lives at `schemas/agent-record.schema.json`.
 
 ## Quick Start
 
-RelayStack is distributed through the
-[RelayStack Marketplace](https://github.com/waterbird-i/relaystack-marketplace).
-Add the marketplace once, then install the plugin:
-
-```bash
-codex plugin marketplace add waterbird-i/relaystack-marketplace
-codex plugin add relaystack@relaystack
-```
-
-Confirm that Codex reports `relaystack@relaystack` as `installed, enabled`:
-
-```bash
-codex plugin list
-```
-
-Restart Codex or open a new task after installation. The plugin exposes the
-complete `rs-*` skill group.
-
-For local plugin development, install the repository as a local plugin in
-Codex. The repository validator is available for source-checkout development:
-
-```bash
-python3 scripts/validate_plugin.py
-```
-
-Older environments that cannot load plugins can use the compatibility copier,
-but this installs individual skills rather than the RelayStack plugin:
+From the RelayStack repository root, copy the skills into the skill directory
+used by your agent host:
 
 ```bash
 python3 scripts/install_skills.py --all
 ```
+
+The installer defaults to `$CODEX_HOME/skills` or `~/.codex/skills`. Use
+`--dest <path>` for another host that supports `SKILL.md`. This copies the
+individual skills; RelayStack is not currently installed as a Codex plugin.
 
 In Codex, use `rs` when you are not sure which RelayStack skill fits. Use
 `rs-handoff` when you want a handoff snapshot for the current workspace.
@@ -294,7 +273,6 @@ Useful checks:
 
 ```bash
 python3 scripts/install_skills.py --self-test
-python3 scripts/validate_plugin.py
 python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 python3 skills/rs-handoff/scripts/manage_work_state.py --self-test
 ```

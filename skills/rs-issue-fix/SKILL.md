@@ -1,8 +1,8 @@
 ---
 name: rs-issue-fix
-description: Apply a confirmed issue fix, verify it, and make one durable-documentation decision.
+description: Apply a confirmed issue fix, verify it, and assess documentation impact.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Issue Fix
@@ -27,7 +27,7 @@ Use this skill when the root cause and fix direction are confirmed.
 6. Append Fix and Verification sections only to an existing or explicitly
    requested single `<personal-root>/project/issues/{slug}.md` record. A
    one-turn fix normally creates no process record.
-7. Make exactly one `Documentation Decision` after verification:
+7. After verification, assess documentation impact:
    - task-local fix -> no team doc;
    - changed a reusable user-observable capability contract ->
      `docs/requirements/`;
@@ -45,47 +45,11 @@ Use this skill when the root cause and fix direction are confirmed.
 - Expected behavior is missing; use `rs-req`.
 - The problem is actually a new capability gap; use `rs-feat`.
 
-## Final Output
+## Communication
 
-```markdown
-## Fix
-
-### Changed Files
-- ...
-
-### Implementation
-- ...
-
-### Docs Updated
-- ... | none
-
-### Skipped
-- ... | none
-
-### Next Skill
-- ...
-
-## Verification
-
-### Reproduction Check
-- ...
-
-### Regression Checks
-- ...
-
-### Result
-- ...
-
-### Remaining Risks
-- ...
-```
-
-```text
-Documentation Decision
-- Process record: none | project/issues/{slug}.md
-- Team docs: none | docs/...
-- Reason: <durable fact, or why no team fact changed>
-```
+Describe the fix and verification in the form most useful for the issue.
+Mention changed files, documentation impact, remaining risks, or a next skill
+when relevant, without a fixed heading, field list, or order.
 
 ## Rules
 

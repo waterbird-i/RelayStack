@@ -2,7 +2,7 @@
 name: rs-decide
 description: Record an already-made RelayStack technical decision, constraint, or convention.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Decide
@@ -53,11 +53,6 @@ Choose exactly one canonical owner for each settled fact:
   decision note.
 - Do not invent rationale when it is unknown.
 
-## Output
-
-```text
-Documentation Decision
-- Process record: none
-- Team docs: none | <one canonical owner path per distinct decision fact>
-- Reason: <settled decision that future contributors must follow | no durable decision fact changed>
-```
+Communicate the settled decision, owner path, rationale, and consequences in
+the form most useful for future contributors. Do not use a fixed response
+template.

@@ -2,7 +2,7 @@
 name: rs-feat-impl
 description: Implement and verify a feature from an approved team-owned design under docs/design/.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Feat Impl
@@ -46,24 +46,11 @@ or override the approved design.
 
 `rs-feat-impl` never creates or updates team docs.
 
-## Output
+## Communication
 
-```text
-Changed Files:
-- path: purpose
-
-Checks:
-- command: result
-
-Candidate Durable Facts:
-- fact | none
-
-Documentation Decision
-- Process record: none | project/features/{slug}.md
-- Team docs: none
-- Reason: implementation only records candidate facts; rs-feat-accept makes the
-  one final owner decision after acceptance evidence
-```
+Summarize the implementation in the form that best fits the change. Include
+changed files, verification, candidate durable facts, or personal-record
+impact when useful, but do not follow a fixed heading, field list, or order.
 
 ## Guardrails
 

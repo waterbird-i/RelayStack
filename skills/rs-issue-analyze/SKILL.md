@@ -2,7 +2,7 @@
 name: rs-issue-analyze
 description: Optionally diagnose an unclear or risky RelayStack issue and propose a fix without requiring a report record.
 version: "0.1.3"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Issue Analyze
@@ -32,31 +32,10 @@ an existing issue record; a report section is not required.
    `<personal-root>/project/issues/{slug}.md` record.
 8. Wait for user confirmation before editing.
 
-## Output
-
-```markdown
----
-id: {slug}
-backlinks:
-  - <related issue report, owner docs, or handoff snapshots>
----
-
-## Analysis
-
-### Key Locations
-### Failure Path
-### Root Cause
-### Impact
-### Fix Options
-### Recommended Fix
-```
-
-```text
-Documentation Decision
-- Process record: none | project/issues/{slug}.md
-- Team docs: none
-- Reason: analysis is personal evidence until a confirmed fix changes a durable fact
-```
+Communicate the diagnosis, evidence, alternatives, recommendation, and
+remaining uncertainty in the form most useful for the issue. If analysis is
+persisted, append the useful facts to the existing issue record without
+requiring a fixed response template.
 
 ## Rules
 

@@ -2,7 +2,7 @@
 name: rs-feat-design
 description: Create one approved team-owned feature design under docs/design/ when the approval gate requires it.
 version: "0.1.3"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Feat Design
@@ -67,26 +67,12 @@ Do not read unrelated owner directories merely because they exist.
 8. Keep any working evidence in the single personal feature record and label
    it non-authoritative.
 
-## Output
+## Communication
 
-When the approval gate passes, the single authoritative output is:
-
-```text
-docs/design/{slug}.md
-```
-
-Optional personal process records:
-
-```text
-<personal-root>/project/features/{slug}.md
-```
-
-```text
-Documentation Decision
-- Process record: none | project/features/{slug}.md
-- Team docs: none | docs/design/{slug}.md
-- Reason: <design gate passed and an approval-worthy behavior/contract needs one design | design not needed; route to rs-feat-ff>
-```
+After the approval gate passes, communicate the approved design path and any
+useful personal record or documentation impact in whatever form fits the work.
+The design document remains the authoritative artifact, but the response has
+no required title, field set, ordering, or placeholder values.
 
 ## Design Shape
 

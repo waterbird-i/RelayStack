@@ -2,7 +2,7 @@
 name: rs-trick
 description: Capture a reusable programming pattern, library usage, or technical recipe for RelayStack work.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Trick
@@ -22,7 +22,7 @@ Use this skill for prescriptive knowledge: "when doing X, use Y".
 - Team docs only when the trick is stable enough that future contributors should
   follow it.
 
-Map a stable trick into exactly one canonical owner:
+Map a stable trick into one canonical owner:
 
 - `docs/context/` for workflow or command recipes
 - `docs/architecture/` for implementation patterns
@@ -37,8 +37,8 @@ Map a stable trick into exactly one canonical owner:
 2. Verify it against real code or a real command.
 3. Record when to use it and when not to use it.
 4. Add a small example only if it is real.
-5. Make one Documentation Decision and link to existing owner facts instead of
-   copying them.
+5. Link to existing owner facts instead of copying them, and communicate any
+   documentation impact in the form most useful for the recipe.
 
 ## Rules
 
@@ -46,11 +46,5 @@ Map a stable trick into exactly one canonical owner:
 - Do not duplicate existing docs.
 - Do not turn a trick into a permanent rule; use `rs-decide` for that.
 
-## Output
-
-```text
-Documentation Decision
-- Process record: none | project/knowledge/{slug}.md
-- Team docs: none | <one canonical owner path>
-- Reason: <verified reusable recipe, or why it remains personal>
-```
+Communicate the recipe, evidence, applicability, and documentation impact in
+the form most useful for reuse. Do not use a fixed response template.

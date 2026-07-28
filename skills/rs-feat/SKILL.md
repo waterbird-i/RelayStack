@@ -2,7 +2,7 @@
 name: rs-feat
 description: Route a RelayStack feature change through the smallest safe path without implementing or writing owner docs.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Feat
@@ -51,8 +51,8 @@ user-facing behavior needs API, type, permission, and doc changes, route to
    - multiple independently deliverable slices or dependency ordering ->
      `rs-roadmap`.
 4. Do not implement or update team docs from this routing skill.
-5. Route completed implementation to `rs-feat-accept`, where one final
-   `Documentation Decision` is made after evidence is available.
+5. Route completed implementation to `rs-feat-accept`, where documentation
+   impact is assessed after evidence is available.
 6. Use `rs-handoff` only when another person or agent needs to continue.
 
 ## Routes
@@ -89,20 +89,13 @@ separate acceptance archive for the same feature.
 - Do not treat the personal feature record as a team-maintained doc or as the
   authoritative design.
 - Do not store full design/checklist/acceptance archives in `docs/`.
-- Do not update team docs from this routing skill; acceptance makes the single
-  documentation decision.
+- Do not update team docs from this routing skill; acceptance assesses any
+  documentation impact.
 - Do not update attractor docs with guesses. Write `未发现` or ask for the
   missing fact when it blocks safe work.
 - If the work is actually a bug or regression, use `rs-issue`.
 - Keep validation scoped. Do not run full TypeScript checks unless the user asks.
 
-## Output
-
-```text
-Route Recommendation
-- Detected intent: new capability
-- Evidence: <context, state, and request paths>
-- Next skill: <exactly one rs-* skill>
-- Gate: <none | user confirmation | design approval>
-- Missing fact: <none | one fact>
-```
+Present the route in whatever form best fits the request. Make the evidence,
+gate, missing facts, and next step clear when they matter; do not use a fixed
+heading, field list, or order.

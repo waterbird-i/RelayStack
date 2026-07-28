@@ -2,7 +2,7 @@
 name: rs-continue
 description: Consume a fresh RelayStack handoff snapshot, claim the active current-work-state, and route to the next stage.
 version: "0.1.1"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Continue
@@ -43,15 +43,9 @@ python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
 7. Route to the single `next_skill` from the updated state. The expected
    continuation phases are `design`, `implement`, `accept`, `handoff`, or
    `sediment`.
-8. Only after the active state is successfully claimed, report the updated state
-   path, the chosen next skill, any missing fact, and:
-
-```text
-Documentation Decision
-- Process record: project/handoffs/current-work-state.md
-- Team docs: none
-- Reason: continuing work updates personal live state only.
-```
+8. Only after the active state is successfully claimed, communicate the updated
+   state path, chosen next skill, and any missing fact in the form most useful
+   for continuation. Do not use a fixed response template.
 
 ## Guardrails
 

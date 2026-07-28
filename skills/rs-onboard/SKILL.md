@@ -2,7 +2,7 @@
 name: rs-onboard
 description: Onboard a repository into RelayStack by establishing project context and auditing optional owner docs.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Onboard
@@ -78,14 +78,6 @@ without an explicit migration request.
 - Keep the adoption skeleton limited to context and the ignore rule; create
   optional owner docs only for an actual durable fact.
 
-## Output
-
-```text
-Created:
-- docs/context/relaystack-adoption.md | .gitignore rule | none
-
-Documentation Decision
-- Process record: none
-- Team docs: none | docs/context/relaystack-adoption.md
-- Reason: <establish project-wide storage and owner routing rules | audit-only; no files created>
-```
+Communicate what was created, what was preserved, and the useful next step in
+the form that best fits the onboarding result. Mention documentation impact
+only when relevant, without a fixed response template.

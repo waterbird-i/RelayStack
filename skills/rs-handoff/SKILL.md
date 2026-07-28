@@ -2,7 +2,7 @@
 name: rs-handoff
 description: Generate a personal RelayStack handoff snapshot from current workspace evidence.
 version: "0.1.3"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Handoff
@@ -38,8 +38,8 @@ The state must already be active and carry a non-empty context manifest before
 until a new live item is created.
 
 A snapshot may still be generated without creating or updating live state. In
-that case it remains a read-only transfer artifact; the Documentation Decision
-still reports the snapshot path and does not claim a live-state update.
+that case it remains a read-only transfer artifact; report the snapshot path
+without claiming a live-state update.
 
 ## Inputs
 
@@ -62,7 +62,8 @@ still reports the snapshot path and does not claim a live-state update.
 5. If the next owner is taking over, check freshness first, then use the lightweight state manager to `continue` or `finish` the live state.
 6. Pass each available agent record with `--agent-record`.
 7. Read the generated snapshot and verify concrete evidence, the context manifest, and next actions.
-8. Report the snapshot path, remaining unknowns, and one Documentation Decision.
+8. Report the snapshot path and remaining unknowns in the form most useful to
+   the next owner.
 
 ## Command
 
@@ -100,11 +101,7 @@ the repository root and rejected because they remain inside it. When neither
 output option is supplied, the command defaults to the current project root and
 writes under its ignored `/project/handoffs/` directory.
 
-## Output
-
-```text
-<personal-root>/project/handoffs/snapshot-<timestamp>.md
-```
+## Snapshot Contract
 
 The snapshot reads `docs/context/` and only the owner-doc paths named by the
 current work state's manifest, backlinks, or the current work item's slug. The
@@ -118,14 +115,9 @@ When a live state exists, its `id` should reuse the canonical slug or file stem,
 its `backlinks` should point at the stable related docs or records, and the live
 state must stay active for consume to proceed.
 
-```text
-Documentation Decision
-- Process record: project/handoffs/snapshot-<timestamp>.md
-- Team docs: none
-- Reason: timestamped personal transfer artifact; current-work-state is updated
-  only when machine-consumable continuation is needed and remains the only live
-  state source.
-```
+Communicate the snapshot path, evidence quality, current-state impact, and any
+unknowns in the form best suited to the transfer. Do not use a fixed response
+template.
 
 ## Guardrails
 

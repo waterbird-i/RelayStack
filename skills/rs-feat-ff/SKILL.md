@@ -2,7 +2,7 @@
 name: rs-feat-ff
 description: Fast RelayStack feature path for tiny changes that do not need a design phase.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Feat FF
@@ -51,15 +51,6 @@ Use this skill when the request is small, clear, and low risk.
   merely because this skill ran.
 - Do not use this for multi-step or ambiguous work.
 
-## Output
-
-```text
-Checks:
-- command: result
-
-Documentation Decision
-- Process record: none | project/features/{slug}.md
-- Team docs: none
-- Reason: fast-path implementation produces no durable team fact; final owner
-  promotion is decided once by rs-feat-accept
-```
+Communicate the result in the form that best fits the small change. Include
+verification or documentation impact when relevant, without a fixed response
+template.

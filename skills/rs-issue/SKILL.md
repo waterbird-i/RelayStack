@@ -2,7 +2,7 @@
 name: rs-issue
 description: Route a RelayStack issue to the smallest safe diagnostic or fix path without implementing or writing owner docs.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Issue
@@ -113,8 +113,8 @@ fix notes, handoff snapshots, or owner docs. Do not mass-migrate old records.
   record, another owner must continue, or cross-round evidence is genuinely
   useful. A one-turn issue defaults to no record.
 - Do not treat `project/issues/` records as team-maintained docs.
-- Do not update team docs from this routing skill; the confirmed fix makes one
-  Documentation Decision.
+- Do not update team docs from this routing skill; the confirmed fix assesses
+  any documentation impact.
 - Do not hide a behavior or architecture change only in the private notes.
 - Do not broaden the fix into a new feature. Open a feature path instead.
 - If the fix changes a reusable user-observable capability contract, route the
@@ -124,13 +124,6 @@ fix notes, handoff snapshots, or owner docs. Do not mass-migrate old records.
 - Do not update attractor docs with guesses. Only write stable facts.
 - Keep validation scoped. Do not run full TypeScript checks unless the user asks.
 
-## Output
-
-```text
-Route Recommendation
-- Detected intent: existing behavior is broken
-- Evidence: <context, state, code, and request paths>
-- Next skill: <exactly one rs-* skill>
-- Gate: <none | user confirmation | root-cause confirmation>
-- Missing fact: <none | one fact>
-```
+Present the route in whatever form best fits the issue. Make the evidence,
+confidence, missing facts, and next step clear when they matter; do not use a
+fixed heading, field list, or order.

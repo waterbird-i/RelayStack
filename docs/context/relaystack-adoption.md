@@ -60,9 +60,8 @@ The only creation/update trigger for each owner is:
 
 Invoking a RelayStack skill does not automatically require a team-doc update.
 At the first write-capable terminal stage, determine whether it produced durable
-facts that future contributors need and return one Documentation Decision. A
-later acceptance or fix stage may make the final promotion decision. The correct
-result may be:
+facts that future contributors need. A later acceptance or fix stage may make
+the final promotion decision. The correct result may be:
 
 - no `docs/` change when no durable team fact changed;
 - one owner-doc change when the fact has one clear owner; or
@@ -112,18 +111,13 @@ Report, Analysis, Fix, and Verification are optional sections, not mandatory
 issue stages. A small issue may go directly to a confirmed fix. A one-turn
 feature or issue does not create a personal record by default.
 
-At the first write-capable terminal stage, return one `Documentation Decision`:
-
-```text
-Documentation Decision
-- Process record: none | <path>
-- Team docs: none | <path...>
-- Reason: <durable fact, or why no team fact changed>
-```
-
-The decision is about actual facts, not about which skills ran. Pure routers and
-read-only exploration do not fabricate a decision. Existing historical records
-are not renamed or merged to satisfy this lifecycle.
+RelayStack does not prescribe a response template. When a task creates or
+updates a personal process record or team-owned document, explain the relevant
+path and reason in the form that best fits the result. When no documentation is
+affected, no dedicated documentation section is required. Documentation choices
+are about actual facts, not about which skills ran. Pure routers and read-only
+exploration do not fabricate a choice. Existing historical records are not
+renamed or merged to satisfy this lifecycle.
 
 ## Personal Process Memory
 

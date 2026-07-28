@@ -2,7 +2,7 @@
 name: rs-guide
 description: Write external-facing how-to documentation from RelayStack attractor docs and real code.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Guide
@@ -37,19 +37,11 @@ contract.
 3. Check for existing guide content.
 4. Write steps the reader can actually follow.
 5. Keep implementation rationale out unless the reader needs it.
-6. Return one Documentation Decision with the exact target path.
+6. Communicate the guide path and documentation impact when they are useful;
+   do not require a fixed response shape.
 
 ## Rules
 
 - Do not copy internal design notes into guides.
 - Do not invent API behavior.
 - If the doc is reference-oriented, use `rs-libdoc`.
-
-## Output
-
-```text
-Documentation Decision
-- Process record: none
-- Team docs: none | <one canonical guide path>
-- Reason: <explicit task-oriented documentation request for the selected reader | no guide fact changed>
-```

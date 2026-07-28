@@ -2,7 +2,7 @@
 name: rs-explore
 description: Explore code or docs to answer a focused question and preserve reusable evidence.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Explore
@@ -29,25 +29,10 @@ designing or fixing.
 7. Put raw evidence notes in `<personal-root>/project/knowledge/`; use
    `rs-handoff` only for a personal continuation snapshot.
 
-## Output
-
-Answer first, then use this optional note shape:
-
-```markdown
-# Explore: {question}
-
-## Short Answer
-## Evidence
-## Confidence
-## Follow-Up
-```
-
-```text
-Documentation Decision
-- Process record: none | project/knowledge/{slug}.md
-- Team docs: none
-- Reason: exploration produces evidence, not an approved durable fact
-```
+Present the answer in the form that best fits the question. Lead with the
+conclusion and support it with the minimum useful evidence; add confidence,
+gaps, notes, or follow-up only when they help. Do not use a fixed response
+template.
 
 ## Rules
 

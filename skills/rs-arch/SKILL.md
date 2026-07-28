@@ -2,7 +2,7 @@
 name: rs-arch
 description: Maintain RelayStack architecture attractor docs under docs/architecture/.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Arch
@@ -58,11 +58,6 @@ implementation. They do not describe future plans or merely suspected impact.
   or integration contract changed; touching code alone is not an architecture
   trigger.
 
-## Output
-
-```text
-Documentation Decision
-- Process record: none
-- Team docs: none | docs/architecture/{slug}.md
-- Reason: <explicit current-architecture maintenance request | check mode produced no doc>
-```
+Communicate the architecture update or consistency findings in the form most
+useful for the request. Include the affected owner path and evidence when
+relevant, without a fixed response template.

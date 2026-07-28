@@ -2,7 +2,7 @@
 name: rs-req
 description: Maintain RelayStack requirements attractor docs under docs/requirements/.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Req
@@ -57,11 +57,5 @@ task-local change.
 - A design may link this requirement's goals and acceptance criteria; do not
   duplicate them in `docs/design/`.
 
-## Output
-
-```text
-Documentation Decision
-- Process record: none
-- Team docs: none | docs/requirements/{slug}.md
-- Reason: <explicit durable capability or user-visible constraint request | no requirement fact changed>
-```
+Communicate the requirement path, capability contract, and relevant evidence in
+the form most useful for the request. Do not use a fixed response template.

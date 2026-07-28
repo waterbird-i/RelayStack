@@ -2,7 +2,7 @@
 name: rs-libdoc
 description: Write source-of-truth reference documentation for public APIs, commands, or reusable components.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Libdoc
@@ -42,11 +42,5 @@ user explicitly asks for it.
 - Do not copy an old entry and rename it.
 - Do not document private internals as public API.
 
-## Output
-
-```text
-Documentation Decision
-- Process record: none
-- Team docs: none | <one canonical reference path>
-- Reason: <explicit source-backed public reference request | no reference fact changed>
-```
+Communicate the reference path, source evidence, and relevant limitations in
+the form most useful for the reader. Do not use a fixed response template.

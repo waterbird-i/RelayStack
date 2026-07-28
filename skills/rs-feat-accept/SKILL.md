@@ -2,7 +2,7 @@
 name: rs-feat-accept
 description: Validate feature implementation against the approved team design and update applicable team owner docs when durable facts changed.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Feat Accept
@@ -49,37 +49,25 @@ feature work decides whether durable team documentation changes are required.
    - approved feature behavior or user flow -> `docs/design/`;
    - implemented structure, data flow, or integration boundary ->
      `docs/architecture/`.
-5. Make exactly one `Documentation Decision`. Give each fact one canonical
-   owner and update only the minimal owner doc paths. Link across owners instead
-   of duplicating facts.
+5. Assess documentation impact. Give each durable fact one canonical owner and
+   update only the minimal owner doc paths. Link across owners instead of
+   duplicating facts.
 6. Report remaining gaps and route unresolved defects to `rs-issue`.
 7. Append acceptance evidence, if useful, to the existing or explicitly needed
    single personal feature record instead of creating a separate acceptance
    record. A one-turn feature normally has no process record.
 
-## Output
+## Communication
 
-Required:
-
-```text
-Acceptance: pass | partial | fail
-
-Documentation Decision
-- Process record: none | project/features/{slug}.md
-- Team docs: none | docs/...
-- Reason: <durable fact, or why no team fact changed>
-
-Verification:
-- command: result
-Remaining Gaps:
-- item
-```
+Report the acceptance result and the evidence that supports it in the form that
+best fits the feature. Mention verification, remaining gaps, and documentation
+impact when relevant; do not use a fixed heading, field list, or order.
 
 ## Guardrails
 
 - Do not treat a personal feature record as the official acceptance result.
 - Do not mark work accepted without verification evidence.
-- Make exactly one documentation decision per acceptance.
+- Assign each durable fact to one canonical owner when documentation changes.
 - Do not update docs with intended behavior that the code does not implement.
 - Always report the acceptance result to the user, even when no owner doc needs
   to change.

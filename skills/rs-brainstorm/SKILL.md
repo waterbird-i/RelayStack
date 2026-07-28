@@ -2,7 +2,7 @@
 name: rs-brainstorm
 description: RelayStack discussion entry for unclear ideas. Triage to rs-feat-ff, rs-feat-design, or rs-roadmap with one optional personal record.
 version: "0.1.2"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Brainstorm
@@ -48,8 +48,8 @@ team design under `docs/design/`.
 5. Keep discussion evidence in at most one
    `<personal-root>/project/features/{slug}.md` record only when cross-round
    memory is useful. Do not create one for a one-turn clarification.
-6. Do not update team docs from brainstorming. Stable documentation is decided
-   once at the appropriate terminal stage.
+6. Do not update team docs from brainstorming. A later write-capable stage
+   assesses whether stable documentation is needed.
 
 ## Rules
 
@@ -61,19 +61,6 @@ team design under `docs/design/`.
 - Do not force a clear request through brainstorming.
 - If the idea is a broken existing behavior, route to `rs-issue`.
 
-## Output
-
-```text
-Route Recommendation
-- Detected intent: unclear proposal
-- Evidence: <request and targeted context paths>
-- Next skill: <exactly one rs-* skill>
-- Gate: <none | user confirmation | design approval>
-- Missing fact: <none | one fact>
-
-Documentation Decision
-- Process record: none | project/features/{slug}.md
-- Team docs: none
-- Reason: discussion remains personal until a later route creates an approved
-  durable fact
-```
+Present the clarified idea and routing advice in the form most useful to the
+conversation. Mention evidence, unresolved questions, personal notes, or the
+next skill only when relevant; do not follow a fixed response template.

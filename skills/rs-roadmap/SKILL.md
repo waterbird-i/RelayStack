@@ -2,7 +2,7 @@
 name: rs-roadmap
 description: Plan RelayStack work that is too large for one feature, keeping roadmap prose personal and docs/backlog team-facing.
 version: "0.1.3"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Roadmap
@@ -49,23 +49,16 @@ historical records merely to backfill the header.
 5. Write the one roadmap body to
    `<personal-root>/project/roadmaps/{slug}.md`; do not create a second roadmap,
    checklist, or feature record for the same decomposition.
-6. Make one `Documentation Decision`. Update `docs/backlog/` only when the
-   roadmap creates or changes a team-visible priority, owner, status, or next
-   step. Do not update requirements or architecture from roadmap planning.
+6. Update `docs/backlog/` only when the roadmap creates or changes a
+   team-visible priority, owner, status, or next step. Communicate that impact
+   when useful. Do not update requirements or architecture from roadmap
+   planning.
 7. Hand the first slice to `rs-feat-design`; use `rs-feat-ff` only when that
    slice independently passes the fast-path gate.
 
-## Outputs
-
-- personal roadmap: `<personal-root>/project/roadmaps/{slug}.md`
-- optional team planning summary: `docs/backlog/`
-
-```text
-Documentation Decision
-- Process record: none | project/roadmaps/{slug}.md
-- Team docs: none | docs/backlog/...
-- Reason: <team coordination fact, or why the roadmap remains personal only>
-```
+Communicate the roadmap path, first useful slice, dependencies, and any backlog
+impact in the form most useful for the work. Do not use a fixed response
+template.
 
 ## Guardrails
 

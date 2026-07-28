@@ -2,13 +2,13 @@
 name: rs
 description: RelayStack root router. Use when the user asks which rs-* skill to use, wants the system overview, or gives an open-ended request.
 version: "0.1.4"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS
 
 `rs` is the RelayStack root entry. It explains the system and routes open-ended
-requests to exactly one `rs-*` skill.
+requests to the most appropriate `rs-*` skill or set of plausible next steps.
 
 It does not implement work. It only routes.
 
@@ -33,9 +33,8 @@ It does not implement work. It only routes.
 - When stable knowledge adds durable team truth, promote it into the applicable
   team doc categories; keep raw exploration and experience in personal
   `project/knowledge/`.
-- Invoking a skill does not by itself require a `docs/` update. The first
-  write-capable terminal stage makes one Documentation Decision after evidence
-  is available. Update zero, one, or multiple owners only for distinct durable
+- Invoking a skill does not by itself require a `docs/` update. After evidence
+  is available, update zero, one, or multiple owners only for distinct durable
   facts, and never touch every owner directory merely to show that documentation
   was considered.
 - A documentation-specific skill such as `rs-req`, `rs-arch`, `rs-guide`, or
@@ -101,7 +100,7 @@ knowledge sediment. They are not a task platform or separate team journal.
 | Add a new capability | `rs-feat` |
 | Design a clear feature | `rs-feat-design` |
 | Implement an approved feature design | `rs-feat-impl` |
-| Accept a completed feature and make one documentation decision | `rs-feat-accept` |
+| Accept a completed feature and assess documentation impact | `rs-feat-accept` |
 | Tiny clear feature, direct implementation | `rs-feat-ff` |
 | Existing behavior is broken | `rs-issue` |
 | Record structured reproduction evidence when explicitly needed | `rs-issue-report` |
@@ -120,11 +119,20 @@ knowledge sediment. They are not a task platform or separate team journal.
 | Write task-oriented guide docs | `rs-guide` |
 | Write public API/reference docs | `rs-libdoc` |
 
-If two routes both seem plausible, ask one short question instead of guessing.
+If two routes both seem plausible, explain the alternatives or ask one short
+question instead of guessing.
+
+## Response Style
+
+RelayStack does not prescribe a response template. Organize each response around
+the user's request and the evidence available. Mention routing, verification,
+documentation impact, unresolved facts, or next steps only when they are useful.
+Do not add empty sections or placeholder fields for consistency.
 
 ## Rules
 
-- Recommend one next skill, not a menu.
+- Prefer one clear next skill when the evidence supports it. When several routes
+  are genuinely plausible, explain the alternatives instead of forcing one.
 - Do not create files from this root entry.
 - Do not implement code or update team owner docs from this root entry.
 - Do not route feature work into `rs-issue`, or issue work into `rs-feat`.

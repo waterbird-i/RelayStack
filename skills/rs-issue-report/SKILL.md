@@ -2,7 +2,7 @@
 name: rs-issue-report
 description: Optionally structure reproduction evidence for a RelayStack issue without forcing a multi-stage record.
 version: "0.1.3"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Issue Report
@@ -39,32 +39,10 @@ Then recommend one next step when needed:
 - simple, root cause obvious, low risk -> `rs-issue-fix`
 - unclear, risky, or multi-candidate -> `rs-issue-analyze`
 
-## Output
-
-```markdown
----
-id: {slug}
-backlinks:
-  - <related docs, records, or handoff snapshots>
----
-
-# {slug}
-
-## Report
-### Observed
-### Reproduction
-### Expected
-### Actual
-### Environment
-### Severity
-```
-
-```text
-Documentation Decision
-- Process record: none | project/issues/{slug}.md
-- Team docs: none
-- Reason: report is personal evidence; durable facts wait for the confirmed fix
-```
+Communicate the reproduction evidence in the form most useful for the issue.
+If a personal record is requested or genuinely useful, preserve the relevant
+facts in the existing issue record, but do not require a fixed frontmatter or
+response template.
 
 ## Rules
 

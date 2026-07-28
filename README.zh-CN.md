@@ -8,7 +8,7 @@
 
 [观看 RelayStack 项目介绍视频](reports/assets/relaystack-intro.mp4)
 
-RelayStack 是一套让 AI 研发过程能够**收敛、验收、交接和续写**的工作流协议。
+RelayStack 是一套 repo-local skills，也是一套让 AI 研发过程能够**收敛、验收、交接和续写**的工作流协议。
 
 它的核心逻辑是：
 
@@ -227,36 +227,16 @@ JSON 形态的 AgentRecord 契约见 `schemas/agent-record.schema.json`。
 
 ## 快速开始
 
-RelayStack 通过
-[RelayStack Marketplace](https://github.com/waterbird-i/relaystack-marketplace)
-发布。先添加一次 marketplace，再安装插件：
-
-```bash
-codex plugin marketplace add waterbird-i/relaystack-marketplace
-codex plugin add relaystack@relaystack
-```
-
-确认 Codex 已将 `relaystack@relaystack` 标记为 `installed, enabled`：
-
-```bash
-codex plugin list
-```
-
-安装后请重启 Codex 或开启新任务。插件会统一暴露完整的 `rs-*` skill 组。
-
-本地开发时，可以在 Codex 中把当前仓库作为本地插件安装。源码开发时可使用
-下面的插件校验器：
-
-```bash
-python3 scripts/validate_plugin.py
-```
-
-无法加载插件的旧环境仍可使用兼容复制器，但它安装的是单个 skill，而不是
-RelayStack 插件：
+在 RelayStack 项目根目录运行安装脚本，将 skills 复制到 Agent 宿主使用的
+skills 目录：
 
 ```bash
 python3 scripts/install_skills.py --all
 ```
+
+安装器默认写入 `$CODEX_HOME/skills` 或 `~/.codex/skills`；其他支持 `SKILL.md`
+的宿主可以通过 `--dest <path>` 指定目录。该流程复制的是各个 skill，RelayStack
+当前还不是 Codex 插件。
 
 在 Codex 里，不确定该用哪个入口时使用 `rs`；要给当前工作区生成交接快照时
 使用 `rs-handoff`。
@@ -293,7 +273,6 @@ python3 skills/rs-handoff/scripts/generate_snapshot.py \
 
 ```bash
 python3 scripts/install_skills.py --self-test
-python3 scripts/validate_plugin.py
 python3 skills/rs-handoff/scripts/generate_snapshot.py --self-test
 python3 skills/rs-handoff/scripts/manage_work_state.py --self-test
 ```

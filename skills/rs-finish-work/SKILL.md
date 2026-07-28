@@ -2,7 +2,7 @@
 name: rs-finish-work
 description: Close a RelayStack current work state after a fresh handoff snapshot and leave the next step as handoff or sediment.
 version: "0.1.1"
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 # RS Finish Work
@@ -39,16 +39,10 @@ python3 <relaystack-plugin>/skills/rs-handoff/scripts/manage_work_state.py \
 4. Record `finished_by` and `finished_at` in the live state.
 5. Leave the next step for handoff or knowledge sediment only if stable facts
    changed.
-6. Report the closed state path, the final next action, unresolved durable
-   facts, and:
-
-```text
-Documentation Decision
-- Process record: project/handoffs/current-work-state.md
-- Team docs: none
-- Reason: close the single personal live state; route any remaining durable fact
-  to its explicit owner skill instead of promoting it from handoff.
-```
+6. Communicate the closed state path, final next action, and unresolved durable
+   facts in the form most useful for completion. Do not use a fixed response
+   template; route remaining durable facts to their explicit owner skill
+   instead of promoting them from handoff.
 
 ## Guardrails
 
